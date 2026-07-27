@@ -1,0 +1,473 @@
+{
+  "auth": {
+    "loginTitle": "GMS",
+    "loginSubtitle": "Gold Management System",
+    "email": "Email Address",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "loginButton": "Login",
+    "loading": "Loading...",
+    "loginError": "Login failed. Please check your credentials.",
+    "otpTitle": "Two-Factor Authentication",
+    "otpSubtitle": "Enter the 6-digit OTP code.",
+    "otpLabel": "Verification Code",
+    "otpButton": "Verify Code",
+    "otpResend": "Resend Code",
+    "otpResendWait": "Resend code in",
+    "otpError": "Invalid or expired verification code.",
+    "forgotTitle": "Forgot Password?",
+    "forgotSubtitle": "Enter your email and we'll send you a code to reset your password.",
+    "sendOtp": "Send Code",
+    "sending": "Sending...",
+    "backToLogin": "Back to Login",
+    "forgotSuccess": "A password reset link has been sent to your email.",
+    "forgotError": "Error. Make sure the email is registered.",
+    "resetTitle": "Reset Password",
+    "resetSubtitle": "Enter the code sent to you and your new password.",
+    "newPassword": "New Password",
+    "confirmReset": "Confirm Password",
+    "saving": "Saving...",
+    "cancelReturn": "Cancel & Return",
+    "resetSuccess": "Password reset successfully. Redirecting...",
+    "resetError": "Error. Make sure the code is correct and not expired."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "inventory": "Inventory (New)",
+    "scrap": "Scrap Gold",
+    "scrapSales": "Buy Scrap",
+    "sales": "Point of Sale",
+    "invoices": "Invoices Log",
+    "scrapInvoices": "Scrap Invoices",
+    "customers": "Customers",
+    "employees": "Employees",
+    "categories": "Gold Categories",
+    "audit": "Stock Movements",
+    "owner": "Owner",
+    "employee": "Employee",
+    "logout": "Logout",
+    "title": "Gold Management System"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Store performance and inventory overview",
+    "totalItems": "Total Items",
+    "grossWeight": "Gross Weight (Total)",
+    "netWeight": "Net Weight",
+    "totalSales": "Total Sales",
+    "grams": "g",
+    "currency": "EGP",
+    "chartPlaceholder": "Sales chart placeholder...",
+    "activityPlaceholder": "Recent activity placeholder..."
+  },
+  "inventory": {
+    "title": "Inventory (New Gold)",
+    "subtitle": "Manage and track store inventory of new 18K and 21K gold",
+    "addItem": "Add New Items",
+    "bulkAdd": "Bulk Add",
+    "singleAdd": "Single Item Add",
+    "searchPlaceholder": "Search by item name or invoice number...",
+    "karat21": "21 Karat",
+    "karat18": "18 Karat",
+    "empty": "No inventory available",
+    "grams": "g",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "archiving": "Archiving...",
+    "cancel": "Cancel",
+    "close": "Close Details",
+    "previewNetWeight": "Expected Net Weight",
+    "metrics": {
+      "totalItems": "Total Items Available",
+      "totalGross": "Total Gross Weight",
+      "totalNet": "Total Net Weight"
+    },
+    "tabs": {
+      "active": "Active Inventory",
+      "archived": "Archived"
+    },
+    "fields": {
+      "title": "Collection / Item Name",
+      "category": "Category",
+      "karat": "Karat",
+      "initialCount": "Initial Count",
+      "totalGrossWeight": "Total Gross Weight"
+    },
+    "placeholders": {
+      "title": "e.g., L'azurde Rings Collection",
+      "selectCategory": "Select Category..."
+    },
+    "table": {
+      "title": "Collection/Item Name",
+      "category": "Category",
+      "karat": "Karat",
+      "currentCount": "Current Count",
+      "grossWeight": "Gross Weight (g)",
+      "netWeight": "Net Weight (g)",
+      "actions": "Actions"
+    },
+    "actions": {
+      "details": "View Details",
+      "archive": "Archive"
+    },
+    "details": {
+      "title": "Item Details",
+      "grossWeight": "Gross Weight",
+      "netWeight": "Net Weight",
+      "initialCount": "Initial Count",
+      "currentCount": "Stock Remaining",
+      "addedOn": "Added On"
+    },
+    "confirmArchive": {
+      "title": "Confirm Archive",
+      "message": "Are you sure you want to move these items to the archive? Only the owner can restore them.",
+      "confirm": "Yes, Archive Items"
+    },
+    "validation": {
+      "required": "Please fill in all required fields correctly, ensuring a valid karat and category are selected."
+    },
+    "errors": {
+      "createFailed": "An error occurred while adding the inventory."
+    }
+  },
+  "scrap": {
+    "title": "Scrap Gold",
+    "subtitle": "Manage used or scrap gold balances",
+    "sell": "Sell (Withdraw)",
+    "buy": "Buy (Add)",
+    "karat21": "21K Scrap",
+    "karat18": "18K Scrap",
+    "totalWeight": "Total Weight:",
+    "table": {
+      "category": "Category",
+      "karat": "Karat",
+      "pieces": "Approx Pieces",
+      "weight": "Total Available Weight"
+    },
+    "piecesCount": "pcs",
+    "empty": "No current balance for this karat.",
+    "grams": "g"
+  },
+  "sales": {
+    "customerData": "Customer Data",
+    "searchCustomer": "Search by name or phone...",
+    "addCustomer": "Add New Customer",
+    "invoiceSummary": "Invoice Summary",
+    "piecesCount": "Item Count",
+    "totalNetWeight": "Total Net Wt",
+    "totalDue": "Total Due",
+    "checkout": "Complete Sale & Print Invoice",
+    "barcodePlaceholder": "Enter Barcode or Item Code...",
+    "table": {
+      "item": "Item",
+      "karat": "Karat",
+      "netWeight": "Net Wt",
+      "price": "Sale Price (EGP)"
+    },
+    "empty": "Scan a barcode to add items to the invoice",
+    "underDevelopment": "Under Development",
+    "unauthorized": "You are not authorized to view this page",
+    "grams": "g",
+    "currency": "EGP"
+  },
+  "employees": {
+    "title": "Employees Management",
+    "subtitle": "Add, edit, and archive employee accounts",
+    "addEmployee": "Add New Employee",
+    "editEmployee": "Edit Employee",
+    "loading": "Loading data...",
+    "saving": "Saving...",
+    "archiving": "Archiving...",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes",
+    "empty": "No employees found in this category",
+    "passwordHint": "Leave empty if you don't want to change the password",
+    "tabs": {
+      "active": "Active Employees",
+      "archived": "Archive"
+    },
+    "fields": {
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "password": "Password",
+      "phone": "Phone Number",
+      "nationalId": "National ID",
+      "address": "Address",
+      "newPassword": "New Password"
+    },
+    "placeholders": {
+      "fullName": "e.g. Ahmed Mohamed Ali",
+      "email": "example@gold.com",
+      "password": "At least 6 characters",
+      "phone": "01012345678",
+      "nationalId": "29901011234567",
+      "address": "Cairo, Egypt",
+      "newPassword": "New password (optional)"
+    },
+    "table": {
+      "name": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "nationalId": "National ID",
+      "address": "Address",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "actions": {
+      "edit": "Edit",
+      "archive": "Archive",
+      "restore": "Restore (Activate)"
+    },
+    "confirmArchive": {
+      "title": "Confirm Archive",
+      "message": "Are you sure you want to archive this employee?",
+      "confirm": "Yes, Archive Employee"
+    },
+    "validation": {
+      "required": "Please fill in all required fields",
+      "nameRequired": "Full name is required",
+      "passwordMin": "Password must be at least 6 characters"
+    },
+    "errors": {
+      "createFailed": "Failed to add employee",
+      "updateFailed": "Failed to update employee"
+    }
+  },
+  "categories": {
+    "title": "Gold Categories",
+    "subtitle": "Manage and classify jewelry categories in the store",
+    "addCategory": "Add New Category",
+    "editCategory": "Edit Category Name",
+    "loading": "Loading categories...",
+    "saving": "Saving...",
+    "archiving": "Archiving...",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes",
+    "empty": "No categories found in this list",
+    "tabs": {
+      "active": "Active Categories",
+      "archived": "Archived Categories"
+    },
+    "fields": {
+      "name": "Category Name"
+    },
+    "placeholders": {
+      "name": "e.g. Rings, Bracelets..."
+    },
+    "table": {
+      "name": "Category Name",
+      "createdAt": "Date Added",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "actions": {
+      "edit": "Edit Name",
+      "archive": "Archive",
+      "restore": "Restore (Activate)"
+    },
+    "confirmArchive": {
+      "title": "Confirm Category Archive",
+      "message": "Are you sure you want to archive this category?",
+      "confirm": "Yes, Archive Category"
+    },
+    "validation": {
+      "nameRequired": "Category name is required"
+    },
+    "errors": {
+      "createFailed": "Failed to add category",
+      "updateFailed": "Failed to update category"
+    }
+  },
+  "audit": {
+    "title": "Stock Movements Log",
+    "subtitle": "Track all inventory additions, sales, and modifications in the store",
+    "totalLogs": "Total Movements",
+    "searchPlaceholder": "Search by Item ID...",
+    "loading": "Loading movement logs...",
+    "empty": "No movements recorded or no results found.",
+    "pagination": {
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "entries": "entries"
+    },
+    "table": {
+      "timestamp": "Timestamp",
+      "item": "Item / Collection",
+      "type": "Movement Type",
+      "countDelta": "Count Delta",
+      "grossDelta": "Gross Wt Delta (g)",
+      "netDelta": "Net Wt Delta (g)",
+      "actionBy": "Action By",
+      "reason": "Reason / Notes"
+    },
+    "types": {
+      "INVENTORY_IN": "Inventory In",
+      "SALE_OUT": "Sale Out",
+      "INVOICE_UPDATE_RETURN": "Invoice Return",
+      "INVOICE_UPDATE_OUT": "Invoice Deduction"
+    }
+  },
+  "customers": {
+    "title": "Customers Management",
+    "subtitle": "Manage customer data, contact info, and view statements",
+    "addCustomer": "Add New Customer",
+    "editCustomer": "Edit Customer Details",
+    "saveChanges": "Save Changes",
+    "searchPlaceholder": "Search by customer name or phone number...",
+    "empty": "No customers found.",
+    "pagination": {
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "entries": "customers"
+    },
+    "loading": "Loading data...",
+    "saving": "Saving...",
+    "archiving": "Archiving...",
+    "cancel": "Cancel",
+    "currency": "EGP",
+    "grams": "g",
+    "tabs": {
+      "active": "Active Customers",
+      "archived": "Archived"
+    },
+    "fields": {
+      "fullName": "Full Name",
+      "phoneNumber": "Phone Number",
+      "nationalId": "National ID",
+      "address": "Address"
+    },
+    "placeholders": {
+      "fullName": "e.g., Ahmed Mohamed Ali",
+      "phoneNumber": "e.g., 01123456789",
+      "nationalId": "National ID (Optional)",
+      "address": "e.g., Cairo, Nasr City"
+    },
+    "table": {
+      "fullName": "Customer Name",
+      "phoneNumber": "Phone Number",
+      "nationalId": "National ID",
+      "address": "Address",
+      "registeredAt": "Registered At",
+      "actions": "Actions"
+    },
+    "actions": {
+      "statement": "Statement",
+      "edit": "Edit",
+      "archive": "Archive",
+      "restore": "Restore Customer"
+    },
+    "statement": {
+      "title": "Customer Statement",
+      "totalSpent": "Total Purchases (EGP)",
+      "totalInvoices": "Total Invoices",
+      "totalGoldBought": "Total Gold Bought",
+      "recentInvoices": "Recent Invoices",
+      "invoiceTotal": "Invoice Total:",
+      "viewInvoice": "View Invoice",
+      "noInvoices": "No previous invoices for this customer"
+    },
+    "confirmArchive": {
+      "title": "Confirm Archive",
+      "message": "Are you sure you want to move this customer to the archive? Only the owner can restore them.",
+      "confirm": "Yes, Archive Customer"
+    },
+    "validation": {
+      "required": "Full name and phone number are required fields."
+    },
+    "errors": {
+      "saveFailed": "An error occurred while saving customer details.",
+      "fetchStatementFailed": "An error occurred while loading statement."
+    }
+  },
+  "sales": {
+    "builder": {
+      "title": "Point of Sale - New Invoice",
+      "customer": "Customer",
+      "searchCustomer": "Search by name or phone...",
+      "noCustomers": "No customers found",
+      "scanItem": "Add Item (Barcode or ID)",
+      "scanPlaceholder": "Scan barcode or enter item ID...",
+      "emptyCart": "Cart is empty. Add items to begin."
+    },
+    "table": {
+      "item": "Item",
+      "karat": "Karat",
+      "grossWeight": "Gross Weight",
+      "netWeight": "Net Weight",
+      "price": "Price (EGP)"
+    },
+    "summary": {
+      "title": "Invoice Summary",
+      "totalItems": "Total Items",
+      "grossWeight": "Total Gross Weight",
+      "netWeight": "Total Net Weight",
+      "finalPrice": "Final Total Price (EGP)"
+    },
+    "actions": {
+      "checkout": "Issue Invoice & Confirm Sale",
+      "submitting": "Processing...",
+      "print": "Print Invoice",
+      "newSale": "New Sale",
+      "view": "View Invoice"
+    },
+    "errors": {
+      "selectCustomer": "Please select a customer first",
+      "emptyCart": "Cannot issue an empty invoice",
+      "itemAlreadyInCart": "This item is already in the cart",
+      "itemNotFound": "Item not found"
+    },
+    "success": {
+      "title": "Sale Confirmed Successfully!",
+      "subtitle": "The invoice has been issued and inventory has been updated."
+    },
+    "invoice": {
+      "number": "Invoice Number",
+      "customer": "Customer Name",
+      "totalItems": "Total Items",
+      "totalPrice": "Paid Amount"
+    },
+    "invoices": {
+      "title": "Invoices Ledger",
+      "subtitle": "Manage, view, and track all sales invoices",
+      "searchPlaceholder": "Search by invoice number...",
+      "loading": "Loading ledger...",
+      "empty": "No invoices match the search",
+      "confirmCancel": "Are you sure you want to cancel this invoice?",
+      "transcriptTitle": "Invoice Transcript",
+      "itemsIncluded": "Included Items",
+      "tabs": {
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "table": {
+        "number": "Invoice Number",
+        "date": "Sale Date",
+        "customer": "Customer",
+        "seller": "Seller",
+        "weight": "Total Gross Wt",
+        "price": "Total Paid Price",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "actions": {
+        "view": "View Invoice",
+        "edit": "Edit Invoice",
+        "cancel": "Cancel Invoice"
+      }
+    }
+  }
+}

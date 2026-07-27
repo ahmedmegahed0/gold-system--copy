@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold: #C9A84C;
+  --color-charcoal: #1A1A1A;
+  --color-light-gray: #F8F9FA;
+  --color-theme-sales: #E63946;
+  --color-theme-inventory: #0077B6;
+  --color-theme-scrap: #2A9D8F;
+  --color-theme-customers: #E5A93B;
+  --color-theme-returns: #8338EC;
+  --color-theme-cashflow: #38B000;
+  --color-theme-categories: #F77F00;
+  --color-theme-movements: #4A4E69;
+  --font-sans: 'Cairo', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-light-gray);
+    color: var(--color-charcoal);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Make all table cells bigger and clearer */
+  table {
+    font-size: 15px;
+  }
+
+  th {
+    font-size: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  td {
+    font-size: 15px;
+  }
+
+  /* Make all inputs bigger */
+  input, select, textarea {
+    font-size: 15px !important;
+  }
+
+  /* Hide number spinners to prevent cutting off text */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+    display: none !important;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+  }
+}
