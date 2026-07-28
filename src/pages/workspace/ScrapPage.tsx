@@ -7,15 +7,11 @@ import {
   Loader2, 
   ShieldAlert, 
   Info,
-  X,
-  ChevronLeft,
-  ChevronRight
+  X
 } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
 import { ScrapGoldService } from '../../services/scrap-gold.service';
-import { CategoryService } from '../../services/category.service';
-import type { ScrapGold, BuyScrapDto, ScrapCategoryItem } from '../../common/types/scrap-gold.types';
-import type { Category } from '../../common/types/category.types';
+import type { ScrapGold, BuyScrapDto } from '../../common/types/scrap-gold.types';
 
 // Modal component scoped to this file to minimize dependencies
 const InlineModal: React.FC<{
@@ -45,25 +41,16 @@ const InlineModal: React.FC<{
 
 export const ScrapPage: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const isRtl = i18n.language.startsWith('ar');
   const { user } = useAuth();
 
   const [balances, setBalances] = useState<ScrapGold[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Pagination states for each panel
-  const [page21, setPage21] = useState(1);
-  const [page18, setPage18] = useState(1);
-  const ITEMS_PER_PAGE = 8;
 
   // Modal State
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const [buyPayload, setBuyPayload] = useState<BuyScrapDto>({
     karat: 21,
-    category: '',
-    count: 1,
     weight: 0
   });
   const [submitting, setSubmitting] = useState(false);
@@ -75,17 +62,11 @@ export const ScrapPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const [balData, catData] = await Promise.all([
-        ScrapGoldService.getScrapBalance(),
-        CategoryService.getCategories('ACTIVE')
-      ]);
+      const balData = await ScrapGoldService.getScrapBalance();
       
       // The API could return an array or object. Let's force an array to easily find 21K and 18K
       const normalizedBalances = Array.isArray(balData) ? balData : Object.values(balData || {});
       setBalances(normalizedBalances as ScrapGold[]);
-      
-      // Ensure we only map valid arrays
-      setCategories(Array.isArray(catData) ? catData : []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'حدث خطأ أثناء جلب بيانات الكسر');
     } finally {
@@ -98,20 +79,13 @@ export const ScrapPage: React.FC = () => {
   }, []);
 
   // Split balances
-  const karat21 = useMemo(() => balances.find(b => b.karat === 21) || { karat: 21, items: [] }, [balances]);
-  const karat18 = useMemo(() => balances.find(b => b.karat === 18) || { karat: 18, items: [] }, [balances]);
-
-  const calcTotalCount = (items: ScrapCategoryItem[]) => items.reduce((sum, item) => sum + (item.count || 0), 0);
-  const calcTotalWeight = (items: ScrapCategoryItem[]) => items.reduce((sum, item) => sum + (item.weight || 0), 0);
+  const karat21 = useMemo(() => balances.find(b => b.karat === 21) || { karat: 21 as const, totalWeight: 0 }, [balances]);
+  const karat18 = useMemo(() => balances.find(b => b.karat === 18) || { karat: 18 as const, totalWeight: 0 }, [balances]);
 
   const handleBuySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!buyPayload.category) {
-      alert('الرجاء اختيار التصنيف');
-      return;
-    }
-    if (buyPayload.weight <= 0 || buyPayload.count < 1) {
-      alert('الوزن والعدد يجب أن يكونا أكبر من صفر');
+    if (buyPayload.weight <= 0) {
+      alert('الوزن يجب أن يكون أكبر من صفر');
       return;
     }
 
@@ -119,7 +93,7 @@ export const ScrapPage: React.FC = () => {
     try {
       await ScrapGoldService.buyScrap(buyPayload);
       setIsBuyModalOpen(false);
-      setBuyPayload({ karat: 21, category: '', count: 1, weight: 0 });
+      setBuyPayload({ karat: 21, weight: 0 });
       fetchData(); // Refresh UI
     } catch (err: any) {
       alert(err.response?.data?.message || 'حدث خطأ أثناء حفظ عملية الشراء');
@@ -128,12 +102,9 @@ export const ScrapPage: React.FC = () => {
     }
   };
 
-  const renderKaratPanel = (data: ScrapGold | { karat: number, items: ScrapCategoryItem[] }, page: number, setPage: React.Dispatch<React.SetStateAction<number>>) => {
-    const totalCount = calcTotalCount(data.items);
-    const totalWeight = calcTotalWeight(data.items);
-    
-    const totalPages = Math.max(1, Math.ceil(data.items.length / ITEMS_PER_PAGE));
-    const currentItems = data.items.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const renderKaratPanel = (data: Partial<ScrapGold>) => {
+    const totalWeight = data.totalWeight || 0;
+    const updatedAt = data.updatedAt ? new Date(data.updatedAt) : null;
 
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-2">
@@ -147,120 +118,27 @@ export const ScrapPage: React.FC = () => {
               <span className="text-xs text-charcoal/50 font-semibold">{t('scrap.totalWeight')}</span>
               <span className="text-theme-scrap text-2xl" dir="ltr">{totalWeight.toFixed(2)}<span className="text-sm text-charcoal/50 ml-1">g</span></span>
             </div>
-            <div className="w-px h-8 bg-gray-200"></div>
-            <div className="flex flex-col items-end">
-              <span className="text-gray-500 text-xs">إجمالي القطع</span>
-              <span className="text-charcoal text-2xl" dir="ltr">{totalCount}</span>
-            </div>
           </div>
         </div>
 
-        {/* Data Table */}
+        {/* Data / Last Update */}
         <div className="flex-1 p-6">
-          {data.items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-gray-400 gap-2 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-              <Scale size={24} className="opacity-50" />
-              <p className="font-medium text-sm">لا يوجد كسر متوفر في هذا العيار حالياً.</p>
-            </div>
-          ) : (
-            <div className="overflow-hidden border border-gray-100 rounded-xl">
-              <table className={`w-full text-base ${isRtl ? 'text-right' : 'text-left'}`}>
-                <thead className="bg-gray-50/80 border-b border-gray-100 text-gray-500 font-semibold">
-                  <tr>
-                    <th className="px-4 py-3">نوع التصنيف المستعمل</th>
-                    <th className="px-4 py-3">عدد القطع الحالي</th>
-                    <th className="px-4 py-3">الوزن الإجمالي الحالي (جرام)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {currentItems.map((item, idx) => {
-                    // Handle populated object or raw string
-                    const categoryName = typeof item.category === 'object' 
-                      ? (item.category.name || '---') 
-                      : item.category;
-
-                    return (
-                      <tr key={idx} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-[#f4f7f4]'} hover:bg-gold/[0.05] transition-colors group border-b border-gray-100 last:border-0`}>
-                        <td className="px-4 py-4">
-                          <span className="inline-block bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg border border-purple-100/50 font-bold text-sm">
-                            {categoryName}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4">
-                          <span className="inline-block bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 font-bold text-sm">
-                            {item.count}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-center">
-                          <span className="inline-block bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg border border-amber-100/50 font-black text-sm" dir="ltr">
-                            {item.weight.toFixed(2)}g
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Pagination Controls */}
-        {data.items.length > 0 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/30">
-            <span className="text-sm text-gray-500 font-medium">
-              عرض <span className="font-bold text-charcoal">{((page - 1) * ITEMS_PER_PAGE) + 1}</span> إلى <span className="font-bold text-charcoal">{Math.min(page * ITEMS_PER_PAGE, data.items.length)}</span> من <span className="font-bold text-charcoal">{data.items.length}</span> أصناف
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="p-1.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-white hover:text-charcoal disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
-              >
-                {isRtl ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-              </button>
-              
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }).map((_, idx) => {
-                  const pageNumber = idx + 1;
-                  if (
-                    totalPages > 3 &&
-                    pageNumber !== 1 &&
-                    pageNumber !== totalPages &&
-                    (pageNumber < page - 1 || pageNumber > page + 1)
-                  ) {
-                    if (pageNumber === page - 2 || pageNumber === page + 2) {
-                      return <span key={idx} className="px-1 text-gray-400 text-xs">...</span>;
-                    }
-                    return null;
-                  }
-
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => setPage(pageNumber)}
-                      className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${
-                        page === pageNumber
-                          ? 'bg-theme-scrap text-white shadow-sm'
-                          : 'text-gray-500 hover:bg-white hover:text-charcoal border border-transparent hover:border-gray-200'
-                      }`}
-                    >
-                      {pageNumber}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="p-1.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-white hover:text-charcoal disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
-              >
-                {isRtl ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-              </button>
+          <div className="flex flex-col items-center justify-center h-48 text-gray-500 gap-4 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+            <Scale size={32} className="opacity-50 text-gold" />
+            <div className="text-center">
+              <p className="font-bold text-lg text-charcoal mb-1">الرصيد الإجمالي</p>
+              <p className="text-sm text-gray-500 mb-2">
+                الوزن الكلي لكسر الخزنة عيار {data.karat}
+              </p>
+              {updatedAt && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100">
+                  <Info size={14} />
+                  آخر إضافة/تعديل: <span dir="ltr">{updatedAt.toLocaleString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}</span>
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
       </div>
     );
   };
@@ -328,9 +206,9 @@ export const ScrapPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Right Panel: Karat 21 (Assuming RTL layout puts first item on right naturally) */}
-          {renderKaratPanel(karat21, page21, setPage21)}
+          {renderKaratPanel(karat21)}
           {/* Left Panel: Karat 18 */}
-          {renderKaratPanel(karat18, page18, setPage18)}
+          {renderKaratPanel(karat18)}
         </div>
       )}
 
@@ -357,36 +235,6 @@ export const ScrapPage: React.FC = () => {
             </div>
 
             <div className="col-span-2">
-              <label className="block text-sm font-bold text-charcoal mb-2">التصنيف (Category)</label>
-              <select
-                value={buyPayload.category}
-                onChange={(e) => setBuyPayload({ ...buyPayload, category: e.target.value })}
-                className="w-full py-2.5 px-4 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent font-medium"
-                required
-              >
-                <option value="">-- اختر التصنيف --</option>
-                {categories.map((cat) => (
-                  <option key={cat._id || cat.id} value={cat._id || cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-charcoal mb-2">العدد (Count)</label>
-              <input
-                type="number"
-                min="1"
-                value={buyPayload.count || ''}
-                onChange={(e) => setBuyPayload({ ...buyPayload, count: parseInt(e.target.value) || 0 })}
-                className="w-full py-2.5 px-4 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent text-center"
-                dir="ltr"
-                required
-              />
-            </div>
-
-            <div>
               <label className="block text-sm font-bold text-charcoal mb-2">الوزن الكلي بالجرام (Weight)</label>
               <input
                 type="number"

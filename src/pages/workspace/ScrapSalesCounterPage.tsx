@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  ShoppingCart, Search, AlertCircle, Loader2, UserPlus, Info, CheckCircle2, Tag, CircleDollarSign, Scale, Printer
+  ShoppingCart, Search, AlertCircle, Loader2, UserPlus, Info, CheckCircle2, CircleDollarSign, Scale, Printer
 } from 'lucide-react';
 import { useCustomers } from '../../hooks/useCustomers';
-import { CategoryService } from '../../services/category.service';
 import { ScrapInvoiceService } from '../../services/scrap-invoice.service';
 import type { Customer } from '../../common/types/customer.types';
-import type { Category } from '../../common/types/category.types';
 import type { ScrapInvoice } from '../../common/types/scrap-invoice.types';
 import { useAuth } from '../../core/context/AuthContext';
 
@@ -19,7 +17,6 @@ export const ScrapSalesCounterPage: React.FC = () => {
 
   // Data State
   const { customers } = useCustomers();
-  const [categories, setCategories] = useState<Category[]>([]);
   
   // Form State
   const [customerSearch, setCustomerSearch] = useState('');
@@ -27,37 +24,27 @@ export const ScrapSalesCounterPage: React.FC = () => {
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [categorySearch, setCategorySearch] = useState('');
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const categoryDropdownRef = useRef<HTMLDivElement>(null);
-
   const [buyPayload, setBuyPayload] = useState({
     karat: 21 as 18 | 21,
-    category: '',
-    count: 1,
     weight: 0,
     goldPriceToday: '' as number | '',
     makingChargesPerGram: '' as number | ''
   });
 
+  const [totalAmount, setTotalAmount] = useState<number | ''>('');
+  const [isManualTotal, setIsManualTotal] = useState(false);
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successInvoice, setSuccessInvoice] = useState<ScrapInvoice | null>(null);
 
-  useEffect(() => {
-    CategoryService.getCategories('ACTIVE')
-      .then(res => setCategories(Array.isArray(res) ? res : []))
-      .catch(console.error);
-  }, []);
+
 
   // Click outside listener for dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowCustomerDropdown(false);
-      }
-      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
-        setShowCategoryDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -72,10 +59,7 @@ export const ScrapSalesCounterPage: React.FC = () => {
     ).slice(0, 100);
   }, [customers, customerSearch]);
 
-  const filteredCategories = useMemo(() => {
-    if (!categorySearch) return categories;
-    return categories.filter(c => c.name.includes(categorySearch));
-  }, [categories, categorySearch]);
+
 
   const handleCustomerSelect = (customer: Customer) => {
     setSelectedCustomer(customer);
@@ -89,25 +73,39 @@ export const ScrapSalesCounterPage: React.FC = () => {
       setError('الرجاء اختيار العميل');
       return;
     }
-    if (!buyPayload.category) {
-      setError('الرجاء اختيار التصنيف');
+    if (buyPayload.weight <= 0 || buyPayload.goldPriceToday === '' || buyPayload.goldPriceToday < 0) {
+      setError('الوزن والسعر اليومي يجب أن يتم إدخالهم بشكل صحيح');
       return;
     }
-    if (buyPayload.weight <= 0 || buyPayload.count < 1 || buyPayload.goldPriceToday === '' || buyPayload.goldPriceToday < 0) {
-      setError('الوزن، العدد، والسعر اليومي يجب أن يتم إدخالهم بشكل صحيح');
+    if (!isManualTotal && (buyPayload.makingChargesPerGram === '' || buyPayload.makingChargesPerGram < 0)) {
+      setError('سعر المصنعية يجب أن يتم إدخاله بشكل صحيح');
       return;
+    }
+    if (!totalAmount || totalAmount <= 0) {
+      setError('المبلغ الكلي يجب أن يكون أكبر من صفر');
+      return;
+    }
+    // منع الإصدار لو الإجمالي اليدوي أقل من قيمة الذهب الخام
+    if (isManualTotal) {
+      const w = buyPayload.weight || 0;
+      const p = Number(buyPayload.goldPriceToday) || 0;
+      const t = Number(totalAmount) || 0;
+      const recalcMaking = w > 0 ? t / w - p : -1;
+      if (recalcMaking < 0) {
+        setError('المبلغ الكلي المدخل أقل من قيمة الذهب الخام! يرجى رفع المبلغ أو مراجعة السعر.');
+        return;
+      }
     }
 
     setSubmitting(true);
     try {
       const payload = {
         customer: selectedCustomer._id || selectedCustomer.id!,
-        category: buyPayload.category,
         karat: buyPayload.karat,
-        count: buyPayload.count,
         weight: buyPayload.weight,
         goldPriceToday: Number(buyPayload.goldPriceToday),
-        makingChargesPerGram: 0
+        makingChargesPerGram: Number(buyPayload.makingChargesPerGram),
+        ...(isManualTotal && totalAmount ? { totalPrice: Number(totalAmount) } : {})
       };
       
       const invoice = await ScrapInvoiceService.createScrapInvoice(payload);
@@ -148,10 +146,23 @@ export const ScrapSalesCounterPage: React.FC = () => {
     }
   };
 
+  // Auto-calculate total when inputs change (unless user manually edited it)
+  useEffect(() => {
+    if (!isManualTotal) {
+      const w = buyPayload.weight || 0;
+      const p = Number(buyPayload.goldPriceToday) || 0;
+      const m = Number(buyPayload.makingChargesPerGram) || 0;
+      const calc = w * (p + m);
+      setTotalAmount(calc > 0 ? parseFloat(calc.toFixed(2)) : '');
+    }
+  }, [buyPayload.weight, buyPayload.goldPriceToday, buyPayload.makingChargesPerGram, isManualTotal]);
+
   const handleResetSale = () => {
     setSuccessInvoice(null);
     setSelectedCustomer(null);
-    setBuyPayload({ karat: 21, category: '', count: 1, weight: 0, goldPriceToday: '', makingChargesPerGram: '' });
+    setBuyPayload({ karat: 21, weight: 0, goldPriceToday: '', makingChargesPerGram: '' });
+    setTotalAmount('');
+    setIsManualTotal(false);
   };
 
   // ✅ Printable Success Invoice
@@ -215,22 +226,20 @@ export const ScrapSalesCounterPage: React.FC = () => {
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-charcoal py-3 px-2 w-10">م</th>
-                <th className="border border-charcoal py-3 px-2">التصنيف</th>
                 <th className="border border-charcoal py-3 px-2 w-16">العيار</th>
-                <th className="border border-charcoal py-3 px-2 w-16">العدد</th>
                 <th className="border border-charcoal py-3 px-2 w-24">الصافي (ج)</th>
                 <th className="border border-charcoal py-3 px-2 w-28">سعر الجرام اليوم</th>
+                <th className="border border-charcoal py-3 px-2 w-24">المصنعية/جرام</th>
                 <th className="border border-charcoal py-3 px-2 w-32">السعر الكلي (ج.م)</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td className="border border-charcoal py-3 px-2">1</td>
-                <td className="border border-charcoal py-3 px-2">{typeof successInvoice.category === 'object' ? successInvoice.category.name : successInvoice.category || 'غير محدد'}</td>
                 <td className="border border-charcoal py-3 px-2" dir="ltr">{successInvoice.karat}K</td>
-                <td className="border border-charcoal py-3 px-2">{successInvoice.count}</td>
                 <td className="border border-charcoal py-3 px-2">{successInvoice.weight?.toFixed(2)}</td>
                 <td className="border border-charcoal py-3 px-2" dir="ltr">{successInvoice.goldPriceToday?.toLocaleString()}</td>
+                <td className="border border-charcoal py-3 px-2" dir="ltr">{successInvoice.makingChargesPerGram?.toLocaleString()}</td>
                 <td className="border border-charcoal py-3 px-2" dir="ltr">{successInvoice.totalPrice?.toLocaleString()}</td>
               </tr>
             </tbody>
@@ -370,61 +379,6 @@ export const ScrapSalesCounterPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-base font-bold text-gray-600 mb-2">التصنيف (Category)</label>
-                <div className="relative" ref={categoryDropdownRef}>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={buyPayload.category ? (categories.find(c => (c._id || c.id) === buyPayload.category)?.name || '') : categorySearch}
-                      onChange={(e) => {
-                        setCategorySearch(e.target.value);
-                        setBuyPayload({ ...buyPayload, category: '' });
-                        setShowCategoryDropdown(true);
-                      }}
-                      onFocus={() => setShowCategoryDropdown(true)}
-                      placeholder="-- ابحث أو اختر التصنيف --"
-                      className={`w-full py-3.5 border-2 border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-0 focus:border-gold transition-colors font-medium bg-white ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'}`}
-                    />
-                    <Tag size={18} className={`absolute top-4 text-gray-400 ${isRtl ? 'right-4' : 'left-4'}`} />
-                  </div>
-
-                  {showCategoryDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-xl shadow-xl z-20 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2">
-                      {filteredCategories.length > 0 ? (
-                        filteredCategories.map(cat => (
-                          <div
-                            key={cat._id || cat.id}
-                            onClick={() => {
-                              setBuyPayload({ ...buyPayload, category: cat._id || cat.id! });
-                              setCategorySearch('');
-                              setShowCategoryDropdown(false);
-                            }}
-                            className="p-3 hover:bg-gold/5 cursor-pointer flex flex-col border-b border-gray-50 last:border-0 transition-colors"
-                          >
-                            <span className="font-bold text-base text-charcoal">{cat.name}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="p-3 text-center text-sm text-gray-500">لا يوجد تصنيف مطابق للبحث.</div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-base font-bold text-gray-600 mb-2">عدد القطع</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={buyPayload.count || ''}
-                  onChange={(e) => setBuyPayload({ ...buyPayload, count: parseInt(e.target.value) || 0 })}
-                  className="w-full py-3.5 px-4 bg-white border-2 border-gray-100 rounded-xl text-base focus:outline-none focus:border-theme-scrap text-center font-black text-xl"
-                  dir="ltr"
-                />
-              </div>
-
-              <div>
                 <label className="block text-base font-bold text-gray-600 mb-2">الوزن المباشر بالجرام</label>
                 <input
                   type="number"
@@ -441,28 +395,128 @@ export const ScrapSalesCounterPage: React.FC = () => {
 
           <div className="pt-6 border-t border-gray-100">
             <h3 className="text-lg font-bold text-charcoal mb-4">التسعير والمبلغ الكلي</h3>
-            <div className="mb-6">
-              <label className="block text-base font-bold text-gray-600 mb-2">سعر جرام الكسر اليوم</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-base font-bold text-gray-600 mb-2">سعر جرام الكسر اليوم</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={buyPayload.goldPriceToday}
+                  onChange={(e) => setBuyPayload({ ...buyPayload, goldPriceToday: e.target.value === '' ? '' : parseFloat(e.target.value) || 0 })}
+                  className="w-full py-3.5 px-4 bg-white border-2 border-gray-100 rounded-xl text-base focus:outline-none focus:border-theme-scrap font-black text-charcoal text-xl"
+                  dir="ltr"
+                />
+              </div>
+
+              <div>
+                <label className="block text-base font-bold text-gray-600 mb-2">
+                  المصنعية للجرام
+                  {isManualTotal && (() => {
+                    const w = buyPayload.weight || 0;
+                    const p = Number(buyPayload.goldPriceToday) || 0;
+                    const t = Number(totalAmount) || 0;
+                    const recalc = w > 0 && t > 0 ? parseFloat((t / w - p).toFixed(2)) : null;
+                    return recalc !== null && recalc < 0 ? (
+                      <span className="mr-2 inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-600 rounded-lg text-xs font-black border border-red-200">
+                        ⚠️ الإجمالي أقل من سعر الذهب!
+                      </span>
+                    ) : null;
+                  })()}
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    value={(() => {
+                      if (!isManualTotal) return buyPayload.makingChargesPerGram;
+                      const w = buyPayload.weight || 0;
+                      const p = Number(buyPayload.goldPriceToday) || 0;
+                      const t = Number(totalAmount) || 0;
+                      if (w <= 0 || t <= 0) return buyPayload.makingChargesPerGram;
+                      return parseFloat((t / w - p).toFixed(2));
+                    })()}
+                    onChange={(e) => setBuyPayload({ ...buyPayload, makingChargesPerGram: e.target.value === '' ? '' : parseFloat(e.target.value) || 0 })}
+                    className={`w-full py-3.5 px-4 border-2 rounded-xl text-base focus:outline-none font-black text-xl transition-all ${
+                      isManualTotal
+                        ? 'bg-amber-50 border-amber-300 text-amber-700 focus:border-amber-400 cursor-default'
+                        : 'bg-white border-gray-100 text-charcoal focus:border-theme-scrap'
+                    }`}
+                    dir="ltr"
+                    readOnly={isManualTotal}
+                    title={isManualTotal ? 'محسوبة تلقائياً من المبلغ الكلي المعدّل' : ''}
+                  />
+
+                </div>
+              </div>
+            </div>
+
+            <label className="block text-base font-bold text-charcoal mb-2">
+              المبلغ الكلي المدفوع (ج.م)
+              {isManualTotal ? (
+                <span
+                  className="mr-2 text-xs font-bold text-amber-500 cursor-pointer hover:text-amber-600 underline underline-offset-2"
+                  onClick={() => setIsManualTotal(false)}
+                  title="انقر للرجوع للحساب التلقائي"
+                >
+                  ✏️ يدوي (فاصلت) — انقر للإعادة تلقائي
+                </span>
+              ) : (
+                <span className="mr-2 text-xs text-gray-400 font-normal">تلقائي</span>
+              )}
+            </label>
+            <div className="relative max-w-sm">
               <input
                 type="number"
                 min="0"
-                value={buyPayload.goldPriceToday}
-                onChange={(e) => setBuyPayload({ ...buyPayload, goldPriceToday: e.target.value === '' ? '' : parseFloat(e.target.value) || 0 })}
-                className="w-full py-3.5 px-4 bg-white border-2 border-gray-100 rounded-xl text-base focus:outline-none focus:border-theme-scrap font-black text-charcoal text-xl"
+                step="0.01"
+                value={totalAmount}
+                onChange={(e) => {
+                  setIsManualTotal(true);
+                  setTotalAmount(e.target.value === '' ? '' : parseFloat(e.target.value) || 0);
+                }}
+                className={`w-full py-4 border-2 rounded-xl text-4xl font-black text-gold focus:outline-none transition-colors ${
+                  isManualTotal
+                    ? 'border-amber-400 bg-amber-50 focus:border-amber-500'
+                    : 'border-gray-200 bg-gray-50 focus:border-theme-scrap'
+                } ${isRtl ? 'pr-14 pl-4' : 'pl-14 pr-4'}`}
                 dir="ltr"
+                placeholder="0"
               />
+              <CircleDollarSign size={28} className={`absolute top-5 text-gold pointer-events-none ${isRtl ? 'right-4' : 'left-4'}`} />
             </div>
 
-            <label className="block text-base font-bold text-charcoal mb-2">المبلغ الكلي المدفوع (ج.م) - <span className="text-gray-400 font-normal">تلقائي</span></label>
-            <div className="relative max-w-sm">
-              <div
-                className={`w-full py-4 border-2 border-gray-200 rounded-xl text-4xl font-black bg-gray-50 text-gold flex items-center ${isRtl ? 'pr-14 pl-4' : 'pl-14 pr-4'}`}
-                dir="ltr"
-              >
-                {(buyPayload.weight * (Number(buyPayload.goldPriceToday) || 0)).toLocaleString()}
-              </div>
-              <CircleDollarSign size={28} className={`absolute top-5 text-gold ${isRtl ? 'right-4' : 'left-4'}`} />
-            </div>
+            {/* Live recalculation summary when manual mode */}
+            {isManualTotal && (() => {
+              const w = buyPayload.weight || 0;
+              const p = Number(buyPayload.goldPriceToday) || 0;
+              const t = Number(totalAmount) || 0;
+              const recalcMaking = w > 0 && t > 0 ? parseFloat((t / w - p).toFixed(2)) : null;
+              if (recalcMaking === null) return null;
+              if (recalcMaking < 0) {
+                return (
+                  <div className="mt-3 max-w-sm p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600 text-sm font-bold">
+                    ⚠️ المبلغ الكلي أقل من قيمة الذهب الخام! لا يمكن إصدار الفاتورة.
+                  </div>
+                );
+              }
+              return (
+                <div className="mt-3 max-w-sm p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-2">
+                  <p className="text-xs font-black text-amber-700 mb-2">📊 ملخص الحسبة بعد الفصال:</p>
+                  <div className="flex justify-between text-sm font-bold text-charcoal">
+                    <span className="text-gray-500">سعر الجرام اليوم:</span>
+                    <span dir="ltr">{p.toLocaleString()} ج.م</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-bold text-charcoal">
+                    <span className="text-gray-500">المصنعية الجديدة/جرام:</span>
+                    <span dir="ltr" className="text-amber-600">{recalcMaking.toLocaleString()} ج.م</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-bold text-charcoal border-t border-amber-200 pt-2 mt-1">
+                    <span className="text-gray-500">الإجمالي المعدّل:</span>
+                    <span dir="ltr" className="text-gold font-black">{t.toLocaleString()} ج.م</span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
         </div>

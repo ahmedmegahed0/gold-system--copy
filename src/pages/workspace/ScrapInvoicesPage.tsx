@@ -17,7 +17,6 @@ import {
   Ban
 } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
-import { useCategories } from '../../hooks/useCategories';
 import { ScrapInvoiceService } from '../../services/scrap-invoice.service';
 import type { ScrapInvoice } from '../../common/types/scrap-invoice.types';
 
@@ -62,20 +61,13 @@ const EditScrapInvoiceModal: React.FC<{
   invoice: ScrapInvoice | null;
   onSuccess: () => void;
 }> = ({ isOpen, onClose, invoice, onSuccess }) => {
-  const { categories } = useCategories();
-  const activeCategories = categories.filter((c) => !c.isArchived && c.status !== 'ARCHIVED');
-
   const [formData, setFormData] = useState<{
     karat: 18 | 21;
-    category: string;
-    count: number;
     weight: number;
     goldPriceToday: number;
     makingChargesPerGram: number;
   }>({
     karat: 21,
-    category: '',
-    count: 0,
     weight: 0,
     goldPriceToday: 0,
     makingChargesPerGram: 0,
@@ -88,8 +80,6 @@ const EditScrapInvoiceModal: React.FC<{
     if (invoice) {
       setFormData({
         karat: invoice.karat,
-        category: (invoice.category && typeof invoice.category === 'object') ? (invoice.category._id || invoice.category.id || '') : (typeof invoice.category === 'string' ? invoice.category : ''),
-        count: invoice.count,
         weight: invoice.weight,
         goldPriceToday: invoice.goldPriceToday || 0,
         makingChargesPerGram: 0,
@@ -106,7 +96,6 @@ const EditScrapInvoiceModal: React.FC<{
     try {
       const payload = {
         ...formData,
-        count: Number(formData.count) || 0,
         weight: Number(formData.weight) || 0,
         goldPriceToday: Number(formData.goldPriceToday) || 0,
         makingChargesPerGram: 0,
@@ -133,19 +122,6 @@ const EditScrapInvoiceModal: React.FC<{
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">التصنيف</label>
-            <select
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal font-bold"
-            >
-              <option value="" disabled>اختر التصنيف</option>
-              {activeCategories.map((cat) => (
-                <option key={cat._id || cat.id} value={cat._id || cat.id}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
             <label className="block text-sm font-bold text-charcoal mb-2">العيار</label>
             <select
               value={formData.karat}
@@ -159,16 +135,6 @@ const EditScrapInvoiceModal: React.FC<{
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">العدد</label>
-            <input
-              type="number"
-              min="0"
-              value={formData.count ?? ''}
-              onChange={(e) => setFormData({ ...formData, count: e.target.value as any })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal font-bold"
-            />
-          </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">الوزن</label>
             <div className="relative">
@@ -360,9 +326,7 @@ export const ScrapInvoicesPage: React.FC = () => {
                   <th className="px-6 py-4 font-semibold">رقم الفاتورة</th>
                   <th className="px-6 py-4 font-semibold">تاريخ البيع</th>
                   <th className="px-6 py-4 font-semibold">العميل المشتري</th>
-                  <th className="px-6 py-4 font-semibold">التصنيف</th>
                   <th className="px-6 py-4 font-semibold text-center">العيار</th>
-                  <th className="px-6 py-4 font-semibold text-center">العدد</th>
                   <th className="px-6 py-4 font-semibold text-center">الوزن الصافي الكلي (ج)</th>
                   <th className="px-6 py-4 font-semibold">المبلغ المستلم</th>
                   <th className="px-6 py-4 font-semibold">المسؤول</th>
@@ -394,19 +358,9 @@ export const ScrapInvoicesPage: React.FC = () => {
                         <span className="font-bold text-sm">{(inv.customer && typeof inv.customer === 'object') ? inv.customer.fullName : '---'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-block bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg border border-purple-100/50 font-bold text-sm">
-                        {(inv.category && typeof inv.category === 'object') ? inv.category.name : (typeof inv.category === 'string' ? inv.category : '---')}
-                      </span>
-                    </td>
                     <td className="px-6 py-4 text-center">
                       <span className="inline-block bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm font-black border border-gray-200" dir="ltr">
                         {inv.karat}K
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="inline-block bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg font-bold text-sm border border-slate-200">
-                        {inv.count}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -582,22 +536,16 @@ export const ScrapInvoicesPage: React.FC = () => {
                 تفاصيل الكسر
               </h4>
               <div className="border border-gray-100 rounded-xl overflow-hidden">
-                <div className="bg-gray-50/80 px-4 py-2 border-b border-gray-100 flex justify-between text-xs font-bold text-gray-500">
-                  <span>التصنيف</span>
+                <div className="bg-gray-50/80 px-4 py-2 border-b border-gray-100 flex justify-end text-xs font-bold text-gray-500">
                   <div className="flex gap-8">
                     <span>العيار</span>
-                    <span>العدد</span>
                     <span>الوزن الصافي الكلي (ج)</span>
                   </div>
                 </div>
                 <div className="divide-y divide-gray-50">
-                  <div className="px-4 py-3 flex justify-between items-center">
-                    <span className="text-sm font-bold text-charcoal">
-                      {(viewingInvoice.category && typeof viewingInvoice.category === 'object') ? viewingInvoice.category.name : (typeof viewingInvoice.category === 'string' ? viewingInvoice.category : '---')}
-                    </span>
+                  <div className="px-4 py-3 flex justify-end items-center">
                     <div className="flex gap-8 text-sm font-semibold">
                       <span className="w-16 text-center text-charcoal" dir="ltr">{viewingInvoice.karat}K</span>
-                      <span className="w-16 text-center text-charcoal">{viewingInvoice.count}</span>
                       <span className="w-16 text-center text-gold" dir="ltr">{viewingInvoice.weight?.toFixed(2)}</span>
                     </div>
                   </div>

@@ -69,8 +69,14 @@ export const SalesCounterPage: React.FC = () => {
     goldPriceToday: number;
     makingChargesPerGram: number;
     soldGrossWeight: number;
+    manualItemTotal?: number; // يدوي لكل قطعة
+    isManualItem?: boolean;
   };
   const [cart, setCart] = useState<CartItem[]>([]);
+
+  // Global manual total override
+  const [manualTotalAmount, setManualTotalAmount] = useState<number | ''>('');
+  const [isManualTotal, setIsManualTotal] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successInvoice, setSuccessInvoice] = useState<Invoice | null>(null);
@@ -153,37 +159,36 @@ export const SalesCounterPage: React.FC = () => {
 
   const updateItemGoldPrice = (cartItemId: string, price: number) => {
     setCart((prev) =>
-      prev.map((c) => (c.cartItemId === cartItemId ? { ...c, goldPriceToday: price } : c))
+      prev.map((c) => (c.cartItemId === cartItemId ? { ...c, goldPriceToday: price, isManualItem: false, manualItemTotal: undefined } : c))
     );
   };
 
   const updateItemMakingCharge = (cartItemId: string, charge: number) => {
     setCart((prev) =>
-      prev.map((c) => (c.cartItemId === cartItemId ? { ...c, makingChargesPerGram: charge } : c))
+      prev.map((c) => (c.cartItemId === cartItemId ? { ...c, makingChargesPerGram: charge, isManualItem: false, manualItemTotal: undefined } : c))
     );
   };
 
   const toggleItemTag = (cartItemId: string) => {
     setCart((prev) =>
-      prev.map((c) => (c.cartItemId === cartItemId ? { ...c, hasTag: !c.hasTag } : c))
+      prev.map((c) => (c.cartItemId === cartItemId ? { ...c, hasTag: !c.hasTag, isManualItem: false, manualItemTotal: undefined } : c))
     );
   };
 
   const updateItemTagWeight = (cartItemId: string, weight: number) => {
     setCart((prev) =>
-      prev.map((c) => (c.cartItemId === cartItemId ? { ...c, selectedTagWeight: weight, hasTag: true } : c))
+      prev.map((c) => (c.cartItemId === cartItemId ? { ...c, selectedTagWeight: weight, hasTag: true, isManualItem: false, manualItemTotal: undefined } : c))
     );
   };
 
   const updateItemWeight = (cartItemId: string, weight: number) => {
     setCart((prev) =>
-      prev.map((c) => (c.cartItemId === cartItemId ? { ...c, soldGrossWeight: weight } : c))
+      prev.map((c) => (c.cartItemId === cartItemId ? { ...c, soldGrossWeight: weight, isManualItem: false, manualItemTotal: undefined } : c))
     );
   };
 
   // ─── Computations ───
   const totalItems = cart.length;
-  // Weight calculations based on soldGrossWeight which can be modified by user
   const combinedGrossWeight = cart.reduce((sum, c) => sum + (c.soldGrossWeight || 0), 0);
   const combinedNetWeight = cart.reduce(
     (sum, c) => {
@@ -192,11 +197,20 @@ export const SalesCounterPage: React.FC = () => {
     },
     0
   );
-  const totalPrice = cart.reduce((sum, c) => {
+  const calcItemTotal = (c: CartItem) => {
+    if (c.isManualItem && c.manualItemTotal !== undefined) return c.manualItemTotal;
     const tagW = c.selectedTagWeight ?? (c.item.tagDetails && c.item.tagDetails.length > 0 ? c.item.tagDetails[0].weight : 0.06);
     const net = c.hasTag ? Math.max(0, (c.soldGrossWeight || 0) - tagW) : (c.soldGrossWeight || 0);
-    return sum + net * ((c.goldPriceToday || 0) + (c.makingChargesPerGram || 0));
-  }, 0);
+    return net * ((c.goldPriceToday || 0) + (c.makingChargesPerGram || 0));
+  };
+  const autoTotalPrice = cart.reduce((sum, c) => sum + calcItemTotal(c), 0);
+
+  // Sync global manual total when cart changes (unless user manually set it)
+  useEffect(() => {
+    if (!isManualTotal) {
+      setManualTotalAmount(autoTotalPrice > 0 ? parseFloat(autoTotalPrice.toFixed(2)) : '');
+    }
+  }, [autoTotalPrice, isManualTotal]);
 
   // ─── Submission ───
   const handleCheckout = async () => {
@@ -211,25 +225,38 @@ export const SalesCounterPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const payload = {
+      const payload: any = {
         customer: selectedCustomer._id || selectedCustomer.id || '',
-        items: cart.map((c) => ({
-          inventoryItem: c.item._id || c.item.id || '',
-          soldGrossWeight: c.soldGrossWeight || 0,
-          hasTag: c.hasTag,
-          tagWeight: c.selectedTagWeight,
-          goldPriceToday: c.goldPriceToday || 0,
-          makingChargesPerGram: c.makingChargesPerGram || 0,
-        })),
+        items: cart.map((c) => {
+          const tagW = c.selectedTagWeight ?? (c.item.tagDetails && c.item.tagDetails.length > 0 ? c.item.tagDetails[0].weight : 0.06);
+          const net = c.hasTag ? Math.max(0, (c.soldGrossWeight || 0) - tagW) : (c.soldGrossWeight || 0);
+          const item: any = {
+            inventoryItem: c.item._id || c.item.id || '',
+            soldGrossWeight: c.soldGrossWeight || 0,
+            hasTag: c.hasTag,
+            tagWeight: c.selectedTagWeight,
+            goldPriceToday: c.goldPriceToday || 0,
+            makingChargesPerGram: c.makingChargesPerGram || 0,
+          };
+          // لو المستخدم عدّل إجمالي القطعة يدوياً
+          if (c.isManualItem && c.manualItemTotal !== undefined) {
+            const recalcMaking = net > 0 ? c.manualItemTotal / net - (c.goldPriceToday || 0) : 0;
+            if (recalcMaking < 0) throw new Error(`إجمالي القطعة "${c.item.title}" أقل من قيمة الذهب الخام!`);
+            item.itemTotalPrice = c.manualItemTotal;
+          }
+          return item;
+        }),
       };
+      // لو المستخدم عدّل الإجمالي الكلي يدوياً
+      if (isManualTotal && manualTotalAmount !== '' && Number(manualTotalAmount) > 0) {
+        payload.totalPrice = Number(manualTotalAmount);
+      }
 
       const invoice = await createSale(payload);
       setSuccessInvoice(invoice);
-      
-      // Refresh inventory behind the scenes
       fetchInventory();
-    } catch {
-      // Error is handled in hook
+    } catch (err: any) {
+      alert(err?.message || 'حدث خطأ أثناء إصدار الفاتورة');
     } finally {
       setIsSubmitting(false);
     }
@@ -240,6 +267,8 @@ export const SalesCounterPage: React.FC = () => {
     setCart([]);
     setSelectedCustomer(null);
     setBarcodeInput('');
+    setManualTotalAmount('');
+    setIsManualTotal(false);
   };
 
   // ─── Printable Invoice Preview Modal ───
@@ -477,8 +506,8 @@ export const SalesCounterPage: React.FC = () => {
           {/* Cart Table */}
           <div className="border border-gray-100 rounded-xl overflow-hidden">
             <div 
-              className="bg-charcoal px-4 py-5 grid gap-4 text-lg font-bold text-white text-center items-center rounded-t-xl"
-              style={{ gridTemplateColumns: "2fr 0.8fr 1.2fr 0.8fr 1fr 1.6fr 1.2fr 1.5fr 0.5fr" }}
+              className="bg-charcoal px-5 py-6 grid gap-3 text-xl font-bold text-white text-center items-center rounded-t-xl"
+              style={{ gridTemplateColumns: "2.5fr 0.9fr 1.4fr 0.9fr 1.1fr 1.8fr 1.4fr 0.6fr" }}
             >
               <div className="text-right">الصنف</div>
               <div>العيار</div>
@@ -487,15 +516,14 @@ export const SalesCounterPage: React.FC = () => {
               <div>الصافي</div>
               <div>سعر الجرام اليوم</div>
               <div>المصنعية/ج</div>
-              <div>الإجمالي</div>
               <div></div>
             </div>
             
-            <div className="divide-y divide-gray-50 max-h-[400px] overflow-y-auto">
+            <div className="divide-y divide-gray-50 max-h-[560px] overflow-y-auto">
               {cart.length === 0 ? (
-                <div className="p-8 text-center text-gray-400 flex flex-col items-center justify-center">
-                  <ShoppingCart size={32} className="mb-3 opacity-20" />
-                  <span className="text-sm font-medium">{t('sales.builder.emptyCart')}</span>
+                <div className="p-10 text-center text-gray-400 flex flex-col items-center justify-center">
+                  <ShoppingCart size={40} className="mb-3 opacity-20" />
+                  <span className="text-base font-medium">{t('sales.builder.emptyCart')}</span>
                 </div>
               ) : (
                 cart.map((cartItem, idx) => {
@@ -507,15 +535,15 @@ export const SalesCounterPage: React.FC = () => {
                   return (
                     <div 
                       key={cartItem.cartItemId} 
-                      className={`px-4 py-6 grid gap-4 items-center transition-colors text-center border-b border-gray-100 last:border-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f8faf8]'} hover:bg-theme-sales/5`}
-                      style={{ gridTemplateColumns: "2fr 0.8fr 1.2fr 0.8fr 1fr 1.6fr 1.2fr 1.5fr 0.5fr" }}
+                      className={`px-5 py-7 grid gap-3 items-center transition-colors text-center border-b border-gray-100 last:border-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f8faf8]'} hover:bg-theme-sales/5`}
+                      style={{ gridTemplateColumns: "2.5fr 0.9fr 1.4fr 0.9fr 1.1fr 1.8fr 1.4fr 0.6fr" }}
                     >
                       <div className="flex flex-col text-right overflow-hidden">
-                        <span className="text-xl font-black text-theme-sales truncate" title={item.title}>{item.title}</span>
+                        <span className="text-2xl font-black text-theme-sales truncate" title={item.title}>{item.title}</span>
                         <span className="text-sm font-bold text-gray-400 mt-1" dir="ltr">ID: {(item._id || item.id)?.substring(0,8)}</span>
                       </div>
                       <div>
-                        <span className="inline-block px-4 py-2 bg-purple-50 text-purple-700 border border-purple-200 rounded-xl text-lg font-black whitespace-nowrap shadow-sm" dir="ltr">{item.karat}K</span>
+                        <span className="inline-block px-4 py-2.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-xl text-xl font-black whitespace-nowrap shadow-sm" dir="ltr">{item.karat}K</span>
                       </div>
                       <div className="flex justify-center">
                         <input
@@ -524,7 +552,7 @@ export const SalesCounterPage: React.FC = () => {
                           step="0.01"
                           value={cartItem.soldGrossWeight === 0 ? '' : cartItem.soldGrossWeight}
                           onChange={(e) => updateItemWeight(cartItem.cartItemId, parseFloat(e.target.value) || 0)}
-                          className="w-full max-w-[120px] py-3 px-1 border-2 border-indigo-200 rounded-xl text-lg font-black text-center text-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 bg-indigo-50 shadow-inner"
+                          className="w-full py-4 px-1 border-2 border-indigo-200 rounded-xl text-xl font-black text-center text-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 bg-indigo-50 shadow-inner"
                           dir="ltr"
                         />
                       </div>
@@ -558,7 +586,7 @@ export const SalesCounterPage: React.FC = () => {
                         )}
                       </div>
                       <div className="flex flex-col items-center">
-                        <span className="inline-block px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xl font-black shadow-sm">{unitNet.toFixed(2)}</span>
+                        <span className="inline-block px-4 py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-2xl font-black shadow-sm">{unitNet.toFixed(2)}</span>
                         {cartItem.hasTag && <span className="text-xs font-bold text-rose-500 mt-1">-{tagW}g خصم</span>}
                       </div>
                       <div>
@@ -567,24 +595,40 @@ export const SalesCounterPage: React.FC = () => {
                           min="0"
                           value={cartItem.goldPriceToday || ''}
                           onChange={(e) => updateItemGoldPrice(cartItem.cartItemId, parseFloat(e.target.value) || 0)}
-                          className="w-full py-3 px-1 border-2 border-amber-200 rounded-xl text-lg font-black text-center text-amber-700 focus:outline-none focus:ring-4 focus:ring-amber-100 focus:border-amber-500 bg-amber-50 shadow-inner"
+                          className="w-full py-4 px-1 border-2 border-amber-200 rounded-xl text-xl font-black text-center text-amber-700 focus:outline-none focus:ring-4 focus:ring-amber-100 focus:border-amber-500 bg-amber-50 shadow-inner"
                           placeholder="سعر الجرام"
                           dir="ltr"
                         />
                       </div>
                       <div>
+                        {/* المصنعية: تتحسب تلقائياً لو عدّل الإجمالي (قطعة أو كلي) */}
                         <input
                           type="number"
                           min="0"
-                          value={cartItem.makingChargesPerGram || ''}
+                          value={(() => {
+                            if (cartItem.isManualItem && cartItem.manualItemTotal !== undefined && unitNet > 0) {
+                              return parseFloat((cartItem.manualItemTotal / unitNet - (cartItem.goldPriceToday || 0)).toFixed(2));
+                            }
+                            if (isManualTotal && manualTotalAmount !== '' && autoTotalPrice > 0 && unitNet > 0) {
+                              const ratio = Number(manualTotalAmount) / autoTotalPrice;
+                              const autoItem = unitNet * ((cartItem.goldPriceToday || 0) + (cartItem.makingChargesPerGram || 0));
+                              const newItemTotal = autoItem * ratio;
+                              const newMaking = newItemTotal / unitNet - (cartItem.goldPriceToday || 0);
+                              return parseFloat(newMaking.toFixed(2));
+                            }
+                            return cartItem.makingChargesPerGram || '';
+                          })()}
                           onChange={(e) => updateItemMakingCharge(cartItem.cartItemId, parseFloat(e.target.value) || 0)}
-                          className="w-full py-3 px-1 border-2 border-teal-200 rounded-xl text-lg font-black text-center text-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-100 focus:border-teal-500 bg-teal-50 shadow-inner"
+                          readOnly={cartItem.isManualItem || isManualTotal}
+                          className={`w-full py-4 px-1 border-2 rounded-xl text-xl font-black text-center focus:outline-none focus:ring-4 shadow-inner ${
+                            (cartItem.isManualItem || isManualTotal)
+                              ? 'border-amber-300 bg-amber-50 text-amber-700 focus:ring-amber-100 focus:border-amber-400 cursor-default'
+                              : 'border-teal-200 bg-teal-50 text-teal-700 focus:ring-teal-100 focus:border-teal-500'
+                          }`}
                           placeholder="مصنعية"
                           dir="ltr"
+                          title={(cartItem.isManualItem || isManualTotal) ? 'محسوبة من الإجمالي المعدّل' : ''}
                         />
-                      </div>
-                      <div className="text-2xl font-black text-blue-700 bg-blue-50 py-3 rounded-xl border border-blue-200 shadow-sm">
-                        {(unitNet * ((cartItem.goldPriceToday || 0) + (cartItem.makingChargesPerGram || 0))).toLocaleString()}
                       </div>
                       <div className="flex justify-center">
                         <button
@@ -614,54 +658,88 @@ export const SalesCounterPage: React.FC = () => {
       {/* ─── RIGHT PANEL: Summary Frame ─── */}
       <div className="w-full lg:w-96 flex flex-col gap-6">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-6">
-          <h3 className="text-lg font-bold text-charcoal mb-6 flex items-center gap-2">
-            <DollarSign size={18} className="text-gold" />
+          <h3 className="text-xl font-bold text-charcoal mb-6 flex items-center gap-2">
+            <DollarSign size={20} className="text-gold" />
             {t('sales.summary.title')}
           </h3>
 
-          <div className="space-y-4 mb-8">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-base font-semibold text-gray-500 flex items-center gap-2">
-                <Tag size={16} />
+          <div className="space-y-4 mb-6">
+            <div className="flex items-center justify-between p-5 bg-gray-50 rounded-xl border border-gray-100">
+              <span className="text-lg font-semibold text-gray-500 flex items-center gap-2">
+                <Tag size={18} />
                 {t('sales.summary.totalItems')}
               </span>
-              <span className="text-xl font-black text-charcoal">{totalItems}</span>
+              <span className="text-4xl font-black text-charcoal">{totalItems}</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-base font-semibold text-gray-500 flex items-center gap-2">
-                <Scale size={16} />
+            <div className="flex items-center justify-between p-5 bg-gray-50 rounded-xl border border-gray-100">
+              <span className="text-lg font-semibold text-gray-500 flex items-center gap-2">
+                <Scale size={18} />
                 {t('sales.summary.grossWeight')}
               </span>
-              <span className="text-xl font-black text-charcoal flex items-baseline gap-1" dir="ltr">
-                {combinedGrossWeight.toFixed(2)} <span className="text-sm text-gray-400">g</span>
+              <span className="text-3xl font-black text-charcoal flex items-baseline gap-1" dir="ltr">
+                {combinedGrossWeight.toFixed(2)} <span className="text-base text-gray-400">g</span>
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-gold/5 rounded-xl border border-gold/20">
-              <span className="text-base font-bold text-gold flex items-center gap-2">
-                <Scale size={16} />
+            <div className="flex items-center justify-between p-5 bg-gold/5 rounded-xl border border-gold/20">
+              <span className="text-lg font-bold text-gold flex items-center gap-2">
+                <Scale size={18} />
                 {t('sales.summary.netWeight')}
               </span>
-              <span className="text-xl font-black text-gold flex items-baseline gap-1" dir="ltr">
-                {combinedNetWeight.toFixed(2)} <span className="text-sm opacity-70">g</span>
+              <span className="text-3xl font-black text-gold flex items-baseline gap-1" dir="ltr">
+                {combinedNetWeight.toFixed(2)} <span className="text-base opacity-70">g</span>
               </span>
             </div>
           </div>
 
-          <div className="border-t border-gray-100 pt-6 mb-8">
-            <span className="block text-base font-bold text-gray-500 mb-2">{t('sales.summary.finalPrice')}</span>
-            <div className="text-5xl font-black text-charcoal flex items-end justify-center gap-2 bg-gray-50 py-5 rounded-xl border border-gray-100" dir="ltr">
-              {totalPrice.toLocaleString()} <span className="text-2xl text-gold">{t('customers.currency')}</span>
+          {/* الإجمالي الكلي مع دعم التعديل اليدوي */}
+          <div className="border-t border-gray-100 pt-5 mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-lg font-bold text-gray-500">{t('sales.summary.finalPrice')}</span>
+              {isManualTotal ? (
+                <span
+                  className="text-xs font-bold text-amber-500 cursor-pointer hover:text-amber-700 underline underline-offset-2"
+                  onClick={() => setIsManualTotal(false)}
+                >✏️ يدوي (فاصلت) — إعادة تلقائي</span>
+              ) : (
+                <span className="text-xs text-gray-400 font-normal">تلقائي</span>
+              )}
             </div>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={isManualTotal ? manualTotalAmount : (autoTotalPrice > 0 ? parseFloat(autoTotalPrice.toFixed(2)) : '')}
+                onChange={(e) => {
+                  setIsManualTotal(true);
+                  setManualTotalAmount(e.target.value === '' ? '' : parseFloat(e.target.value) || 0);
+                }}
+                className={`w-full text-5xl font-black text-center py-6 rounded-xl border-2 focus:outline-none transition-colors ${
+                  isManualTotal
+                    ? 'border-amber-400 bg-amber-50 text-amber-700 focus:border-amber-500'
+                    : 'border-gray-100 bg-gray-50 text-charcoal focus:border-gold'
+                }`}
+                dir="ltr"
+                placeholder="0"
+              />
+              <span className="absolute bottom-6 left-4 text-2xl text-gold font-black pointer-events-none">{t('customers.currency')}</span>
+            </div>
+            {isManualTotal && autoTotalPrice > 0 && Number(manualTotalAmount) > 0 && (
+              <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-700 flex justify-between">
+                <span>الإجمالي الأصلي: {parseFloat(autoTotalPrice.toFixed(2)).toLocaleString()} ج.م</span>
+                <span>الفرق: {(Number(manualTotalAmount) - autoTotalPrice).toLocaleString()} ج.م</span>
+              </div>
+            )}
           </div>
 
           <button
             onClick={handleCheckout}
             disabled={isSubmitting || cart.length === 0 || !selectedCustomer}
-            className="w-full py-4 bg-theme-sales hover:bg-theme-sales/90 text-white font-bold rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:hover:shadow-sm disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
+            className="w-full py-5 bg-theme-sales hover:bg-theme-sales/90 text-white font-bold rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:hover:shadow-sm disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xl"
           >
-            {isSubmitting ? <Loader2 size={24} className="animate-spin" /> : <CheckCircle2 size={24} />}
+            {isSubmitting ? <Loader2 size={26} className="animate-spin" /> : <CheckCircle2 size={26} />}
             {isSubmitting ? t('sales.actions.submitting') : t('sales.actions.checkout')}
           </button>
         </div>
