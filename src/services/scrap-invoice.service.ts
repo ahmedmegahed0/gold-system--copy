@@ -1,5 +1,5 @@
 import apiClient from '../core/apiClient';
-import type { CreateScrapInvoiceDto, UpdateScrapInvoiceDto, ScrapInvoice } from '../common/types/scrap-invoice.types';
+import type { CreateScrapInvoiceDto, UpdateScrapInvoiceDto, ScrapInvoice, ScrapInvoiceFilters } from '../common/types/scrap-invoice.types';
 
 export const ScrapInvoiceService = {
   createScrapInvoice: async (data: CreateScrapInvoiceDto): Promise<ScrapInvoice> => {
@@ -7,8 +7,8 @@ export const ScrapInvoiceService = {
     return response.data?.data || response.data;
   },
 
-  getScrapInvoices: async (): Promise<ScrapInvoice[]> => {
-    const params: any = { limit: 1000000 };
+  getScrapInvoices: async (filters?: ScrapInvoiceFilters): Promise<ScrapInvoice[]> => {
+    const params: any = { ...filters, limit: 1000000 };
     const response = await apiClient.get<any>('/scrap-invoices', { params });
     const result = response.data?.data || response.data;
     return Array.isArray(result) ? result : [];

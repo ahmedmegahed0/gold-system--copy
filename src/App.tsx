@@ -11,6 +11,7 @@ import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { InventoryPage } from './pages/workspace/InventoryPage';
 import { ScrapPage } from './pages/workspace/ScrapPage';
+import { BullionInventoryPage } from './pages/workspace/BullionInventoryPage';
 import { ScrapSalesCounterPage } from './pages/workspace/ScrapSalesCounterPage';
 import { ScrapInvoicesPage } from './pages/workspace/ScrapInvoicesPage';
 import { SalesCounterPage } from './pages/workspace/SalesCounterPage';
@@ -21,9 +22,12 @@ import { LedgerPage } from './pages/workspace/LedgerPage';
 import { PurchasesLedgerPage } from './pages/workspace/PurchasesLedgerPage';
 import { ExpensesPage } from './pages/workspace/ExpensesPage';
 import { NotificationsPage } from './pages/workspace/NotificationsPage';
+import { BullionSalesCounterPage } from './pages/workspace/BullionSalesCounterPage';
+import { BullionInvoicesPage } from './pages/workspace/BullionInvoicesPage';
 import { CustomersPage } from './pages/workspace/CustomersPage';
 import { InvoicesPage } from './pages/workspace/InvoicesPage';
 import { ProfitLedgerPage } from './pages/workspace/ProfitLedgerPage';
+import { IncomesPage } from './pages/workspace/IncomesPage';
 
 const App: React.FC = () => {
   return (
@@ -49,15 +53,19 @@ const App: React.FC = () => {
               <Route path="scrap-sales" element={<ScrapSalesCounterPage />} />
               <Route path="customers" element={<CustomersPage />} />
               <Route path="expenses" element={<ExpensesPage />} />
+              <Route path="incomes" element={<IncomesPage />} />
               <Route path="invoices" element={<InvoicesPage />} />
               <Route path="scrap-invoices" element={<ScrapInvoicesPage />} />
+              <Route path="bullion-sales" element={<BullionSalesCounterPage />} />
+              <Route path="bullion-invoices" element={<BullionInvoicesPage />} />
+              <Route path="inventory" element={<InventoryPage />} />
+              <Route path="bullion-inventory" element={<BullionInventoryPage />} />
+              <Route path="scrap" element={<ScrapPage />} />
 
               {/* Owner Only Routes */}
               <Route element={<RoleGuard allowedRole="OWNER" />}>
-                {/* Inventory & Categories are protected by role */}
-                <Route path="inventory" element={<InventoryPage />} />
+                {/* Categories are protected by role */}
                 <Route path="categories" element={<CategoriesPage />} />
-                <Route path="scrap" element={<ScrapPage />} />
                 <Route path="employees" element={<EmployeesPage />} />
                 <Route path="audit" element={<AuditPage />} />
                 <Route path="ledger" element={<LedgerPage />} />

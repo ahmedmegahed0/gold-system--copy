@@ -1,6 +1,6 @@
 {
   "auth": {
-    "loginTitle": "GMS",
+    "loginTitle": "duo dev",
     "loginSubtitle": "نظام إدارة الذهب",
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
@@ -313,7 +313,12 @@
       "INVENTORY_IN": "إدخال مخزن",
       "SALE_OUT": "عملية بيع",
       "INVOICE_UPDATE_RETURN": "مرتجع تعديل",
-      "INVOICE_UPDATE_OUT": "خصم تعديل"
+      "INVOICE_UPDATE_OUT": "خصم تعديل",
+      "BULLION_IN": "إدخال سبايك",
+      "BULLION_SALE_OUT": "بيع سبيكة",
+      "BULLION_UPDATE_RETURN": "مرتجع سبيكة (تعديل)",
+      "BULLION_UPDATE_OUT": "خصم سبيكة (تعديل)",
+      "BULLION_CANCEL_RETURN": "مرتجع سبيكة (إلغاء)"
     }
   },
   "customers": {

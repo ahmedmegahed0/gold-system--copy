@@ -37,6 +37,9 @@ export const AuditPage: React.FC = () => {
     switch (type) {
       case 'INVENTORY_IN':
       case 'INVOICE_UPDATE_RETURN':
+      case 'BULLION_IN':
+      case 'BULLION_UPDATE_RETURN':
+      case 'BULLION_CANCEL_RETURN':
         return {
           label: t(`audit.types.${type}`),
           className: 'bg-emerald-50 text-emerald-600 border-emerald-100',
@@ -45,6 +48,8 @@ export const AuditPage: React.FC = () => {
         };
       case 'SALE_OUT':
       case 'INVOICE_UPDATE_OUT':
+      case 'BULLION_SALE_OUT':
+      case 'BULLION_UPDATE_OUT':
         return {
           label: t(`audit.types.${type}`),
           className: 'bg-slate-100 text-slate-600 border-slate-200',
@@ -174,6 +179,8 @@ export const AuditPage: React.FC = () => {
                     } else if (log.type === 'INVOICE_UPDATE_OUT' || log.type === 'INVOICE_UPDATE_RETURN' || (log.reason && log.reason.includes('فاتورة'))) {
                       const invMatch = log.reason?.match(/رقم\s*([a-zA-Z0-9-]+)/);
                       itemTitle = invMatch && invMatch[1] ? `تعديل فاتورة (#${invMatch[1]})` : 'صنف من فاتورة معدلة';
+                    } else if (log.type.startsWith('BULLION')) {
+                      itemTitle = 'سبيكة/جنيه ذهب';
                     } else if (log.reason && log.reason.includes('كسر')) {
                       itemTitle = 'ذهب كسر';
                     } else {

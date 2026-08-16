@@ -1,7 +1,7 @@
 export interface PurchasesQueryDto {
   startDate?: string;
   endDate?: string;
-  preset?: 'TODAY' | 'LAST_3_DAYS' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+  preset?: 'TODAY' | 'YESTERDAY' | 'WEEKLY' | 'MONTHLY';
 }
 
 export interface OutflowsBreakdown {

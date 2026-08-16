@@ -4,25 +4,30 @@ import type { InventoryItem } from './inventory.types';
 
 export interface InvoiceItemDto {
   inventoryItem: string;
+  soldCount: number;
   soldGrossWeight: number;
   hasTag: boolean;
   tagWeight?: number;
   goldPriceToday: number;
   makingChargesPerGram: number;
+  itemTotalPrice?: number;
 }
 
 export interface CreateInvoiceDto {
   customer: string;
   items: InvoiceItemDto[];
+  totalPrice?: number;
 }
 
 export interface UpdateInvoiceDto {
   customer?: string;
   items?: InvoiceItemDto[];
+  totalPrice?: number;
 }
 
 export interface InvoiceItemDetails {
   inventoryItem: InventoryItem | string;
+  soldCount: number;
   soldGrossWeight: number;
   soldNetWeight: number;
   hasTag: boolean;
@@ -38,8 +43,8 @@ export interface Invoice {
   customer: Customer | string;
   soldBy: Employee | string;
   items: InvoiceItemDetails[];
-  totalGrossWeight: number;
-  totalNetWeight: number;
+  totalInvoiceGrossWeight: number;
+  totalInvoiceNetWeight: number;
   totalPrice: number;
   status: 'COMPLETED' | 'CANCELLED';
   createdAt: string;
@@ -49,4 +54,6 @@ export interface Invoice {
 export interface InvoiceFilters {
   status?: 'COMPLETED' | 'CANCELLED';
   invoiceNumber?: string;
+  customerName?: string;
+  customerPhone?: string;
 }

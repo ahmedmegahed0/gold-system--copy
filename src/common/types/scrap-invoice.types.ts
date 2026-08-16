@@ -23,3 +23,10 @@ export interface ScrapInvoice {
   actionBy: string | { _id?: string; id?: string; fullName: string; role?: string };
   createdAt: string;
 }
+
+export interface ScrapInvoiceFilters {
+  status?: 'COMPLETED' | 'CANCELLED';
+  invoiceNumber?: string;
+  customerName?: string;
+  customerPhone?: string;
+}

@@ -94,13 +94,12 @@ export const PurchasesLedgerPage: React.FC = () => {
 
           {/* Presets */}
           <div className="flex flex-wrap gap-2">
-            {(['TODAY', 'LAST_3_DAYS', 'WEEKLY', 'MONTHLY', 'YEARLY'] as const).map((presetKey) => {
+            {(['TODAY', 'YESTERDAY', 'WEEKLY', 'MONTHLY'] as const).map((presetKey) => {
               const labels: Record<string, string> = {
                 TODAY: 'اليوم',
-                LAST_3_DAYS: 'آخر 3 أيام',
+                YESTERDAY: 'أمس',
                 WEEKLY: 'أسبوعي',
                 MONTHLY: 'شهري',
-                YEARLY: 'سنوي',
               };
               const isActive = query.preset === presetKey;
               return (
@@ -265,7 +264,7 @@ export const PurchasesLedgerPage: React.FC = () => {
 
           {/* Print Footer */}
           <div className="hidden print:block text-center mt-12 text-sm text-gray-400 border-t border-gray-200 pt-4">
-            نظام إدارة الذهب GMS - تم استخراج التقرير في {new Date().toLocaleString('ar-EG')}
+            نظام إدارة مجوهرات أبو كبشة - تم استخراج التقرير في {new Date().toLocaleString('ar-EG')}
           </div>
         </div>
       )}

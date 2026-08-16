@@ -5,13 +5,12 @@ import {
   Scale, 
   AlertCircle, 
   Loader2, 
-  ShieldAlert, 
   Info,
-  X
+  X,
+  Edit2
 } from 'lucide-react';
-import { useAuth } from '../../core/context/AuthContext';
 import { ScrapGoldService } from '../../services/scrap-gold.service';
-import type { ScrapGold, BuyScrapDto } from '../../common/types/scrap-gold.types';
+import type { ScrapGold, BuyScrapDto, UpdateScrapDto } from '../../common/types/scrap-gold.types';
 
 // Modal component scoped to this file to minimize dependencies
 const InlineModal: React.FC<{
@@ -41,7 +40,6 @@ const InlineModal: React.FC<{
 
 export const ScrapPage: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
 
   const [balances, setBalances] = useState<ScrapGold[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +52,13 @@ export const ScrapPage: React.FC = () => {
     weight: 0
   });
   const [submitting, setSubmitting] = useState(false);
+
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [updatePayload, setUpdatePayload] = useState<UpdateScrapDto>({
+    karat: 21,
+    newWeight: 0
+  });
+  const [updating, setUpdating] = useState(false);
 
   // Security Check is now rendered below all hooks
 
@@ -102,6 +107,26 @@ export const ScrapPage: React.FC = () => {
     }
   };
 
+  const handleUpdateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (updatePayload.newWeight < 0) {
+      alert('الوزن لا يمكن أن يكون بالسالب');
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      await ScrapGoldService.updateScrapBalance(updatePayload);
+      setIsUpdateModalOpen(false);
+      setUpdatePayload({ karat: 21, newWeight: 0 });
+      fetchData(); // Refresh UI
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'حدث خطأ أثناء تعديل الوزن');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const renderKaratPanel = (data: Partial<ScrapGold>) => {
     const totalWeight = data.totalWeight || 0;
     const updatedAt = data.updatedAt ? new Date(data.updatedAt) : null;
@@ -118,6 +143,16 @@ export const ScrapPage: React.FC = () => {
               <span className="text-xs text-charcoal/50 font-semibold">{t('scrap.totalWeight')}</span>
               <span className="text-theme-scrap text-2xl" dir="ltr">{totalWeight.toFixed(2)}<span className="text-sm text-charcoal/50 ml-1">g</span></span>
             </div>
+            <button
+              onClick={() => {
+                setUpdatePayload({ karat: data.karat as 18 | 21, newWeight: totalWeight });
+                setIsUpdateModalOpen(true);
+              }}
+              className="p-2 bg-white text-gray-400 hover:text-theme-scrap hover:bg-theme-scrap/10 rounded-lg transition-colors border border-gray-100 shadow-sm"
+              title="تعديل رصيد كسر المخزن"
+            >
+              <Edit2 size={18} />
+            </button>
           </div>
         </div>
 
@@ -142,18 +177,6 @@ export const ScrapPage: React.FC = () => {
       </div>
     );
   };
-
-  if (user?.role !== 'OWNER') {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-center p-10 animate-in fade-in">
-        <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-6">
-          <ShieldAlert size={40} />
-        </div>
-        <h2 className="text-3xl font-black text-charcoal mb-4">صلاحيات غير كافية</h2>
-        <p className="text-gray-500 max-w-md">عذراً، هذه الصفحة مخصصة لمدير النظام (Owner) فقط. لا يمكنك عرض أو تعديل بيانات كسر الخزنة.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -260,6 +283,69 @@ export const ScrapPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsBuyModalOpen(false)}
+              className="px-6 py-3 border border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition-colors"
+            >
+              إلغاء
+            </button>
+          </div>
+        </form>
+      </InlineModal>
+
+      {/* Inline Modal for UpdateScrapDto */}
+      <InlineModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        title="تعديل وتسوية رصيد الكسر (جرد مباشر)"
+      >
+        <form onSubmit={handleUpdateSubmit} className="space-y-5">
+          <div className="bg-blue-50 text-blue-800 p-4 rounded-xl border border-blue-100 flex items-start gap-3 text-sm">
+            <Info size={20} className="shrink-0 mt-0.5 text-blue-600" />
+            <p className="leading-relaxed">
+              هذه العملية ستقوم <strong>بتعديل الرصيد الحالي بشكل مباشر</strong> ليتطابق مع الوزن المُدخل أدناه، وسيتم تسجيل فارق الوزن كحركة تسوية. استخدمها فقط في حالة تصحيح الجرد.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <label className="block text-sm font-bold text-charcoal mb-2">العيار (Karat)</label>
+              <div className="flex gap-4">
+                <label className={`flex-1 flex items-center justify-center py-3 border-2 rounded-xl cursor-pointer transition-colors font-bold text-lg ${updatePayload.karat === 21 ? 'border-gold bg-gold/5 text-gold' : 'border-gray-100 text-gray-400 hover:border-gray-200'}`}>
+                  <input type="radio" name="karatUpdate" className="hidden" checked={updatePayload.karat === 21} onChange={() => setUpdatePayload({...updatePayload, karat: 21})} />
+                  21K
+                </label>
+                <label className={`flex-1 flex items-center justify-center py-3 border-2 rounded-xl cursor-pointer transition-colors font-bold text-lg ${updatePayload.karat === 18 ? 'border-gold bg-gold/5 text-gold' : 'border-gray-100 text-gray-400 hover:border-gray-200'}`}>
+                  <input type="radio" name="karatUpdate" className="hidden" checked={updatePayload.karat === 18} onChange={() => setUpdatePayload({...updatePayload, karat: 18})} />
+                  18K
+                </label>
+              </div>
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-bold text-charcoal mb-2">الوزن الكلي الجديد بالجرام (New Total Weight)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={updatePayload.newWeight === 0 && updatePayload.newWeight.toString() !== '0' ? '' : updatePayload.newWeight}
+                onChange={(e) => setUpdatePayload({ ...updatePayload, newWeight: parseFloat(e.target.value) || 0 })}
+                className="w-full py-2.5 px-4 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent font-bold text-gold text-center"
+                dir="ltr"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="pt-4 flex gap-3">
+            <button
+              type="submit"
+              disabled={updating}
+              className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center gap-2"
+            >
+              {updating ? <Loader2 size={18} className="animate-spin" /> : 'تحديث الرصيد'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsUpdateModalOpen(false)}
               className="px-6 py-3 border border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition-colors"
             >
               إلغاء

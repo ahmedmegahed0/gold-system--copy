@@ -55,3 +55,13 @@
     appearance: textfield !important;
   }
 }
+
+@media print {
+  @page {
+    margin: 0mm;
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

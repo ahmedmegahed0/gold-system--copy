@@ -1,25 +1,34 @@
-export interface LedgerQueryDto {
-  startDate?: string;
-  endDate?: string;
-  preset?: 'TODAY' | 'LAST_3_DAYS' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+export interface GoldWeights {
+  karat24: number;
+  karat21: number;
+  karat18: number;
 }
 
-export interface GoldReportSummary {
-  totalCash: number;
-  karat21_Gram: number;
-  karat18_Gram: number;
+export interface Financials {
+  newGoldSalesCash: number;
+  bullionGoldSalesCash: number;
+  scrapGoldSalesCash: number;
+  extraIncomesCash: number;
+  expensesOutflow: number;
+  totalInflow: number;
+  netCashflow: number;
+}
+
+export interface LedgerPeriodData {
+  financials: Financials;
+  goldWeights: {
+    newGoldSalesGrams: GoldWeights;
+    scrapGoldPurchasesGrams: GoldWeights;
+  };
 }
 
 export interface LedgerReportResponse {
   success: boolean;
   message: string;
   data: {
-    reportPeriod: {
-      startDate: string;
-      endDate: string;
-    };
-    newGoldSales: GoldReportSummary;
-    scrapGoldSales: GoldReportSummary;
-    totalDailyCashflow: number;
+    today: LedgerPeriodData;
+    yesterday: LedgerPeriodData;
+    lastWeek?: LedgerPeriodData;
+    exactlyOneWeekAgo?: LedgerPeriodData;
   };
 }

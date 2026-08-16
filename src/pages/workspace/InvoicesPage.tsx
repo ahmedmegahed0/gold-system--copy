@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
 import { useTranslation } from 'react-i18next';
 import {
   FileText,
@@ -11,12 +12,12 @@ import {
   Eye,
   X,
   User,
-  Tag,
   Save,
   Edit2,
   ChevronLeft,
   ChevronRight,
-  Trash2
+  Trash2,
+  Printer
 } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
 import { useSales } from '../../hooks/useSales';
@@ -30,16 +31,17 @@ const ModalOverlay: React.FC<{
   onClose: () => void;
   title: string;
   children: React.ReactNode;
-}> = ({ isOpen, onClose, title, children }) => {
+  printFriendly?: boolean;
+}> = ({ isOpen, onClose, title, children, printFriendly = false }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${printFriendly ? 'print:static print:inset-auto print:z-auto print:flex-none print:bg-white' : ''}`}>
       <div
-        className="absolute inset-0 bg-charcoal/50 backdrop-blur-sm transition-opacity"
+        className={`absolute inset-0 bg-charcoal/50 backdrop-blur-sm transition-opacity ${printFriendly ? 'print:hidden' : ''}`}
         onClick={onClose}
       />
-      <div className="relative w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 shrink-0">
+      <div className={`relative w-full ${printFriendly ? 'max-w-4xl bg-gray-50/50' : 'max-w-2xl bg-white'} mx-4 rounded-2xl shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 max-h-[90vh] flex flex-col ${printFriendly ? 'print:max-w-none print:w-full print:mx-0 print:border-none print:shadow-none print:rounded-none print:max-h-none print:block print:p-8 print:bg-white' : ''}`}>
+        <div className={`flex items-center justify-between px-8 py-6 border-b border-gray-100 shrink-0 bg-white rounded-t-2xl ${printFriendly ? 'print:hidden' : ''}`}>
           <h2 className="text-xl font-bold text-charcoal">{title}</h2>
           <button
             onClick={onClose}
@@ -48,7 +50,7 @@ const ModalOverlay: React.FC<{
             <X size={20} />
           </button>
         </div>
-        <div className="p-8 overflow-y-auto">{children}</div>
+        <div className={`p-8 overflow-y-auto ${printFriendly ? 'print:overflow-visible print:p-0' : ''}`}>{children}</div>
       </div>
     </div>
   );
@@ -71,6 +73,8 @@ const EditInvoiceModal: React.FC<{
     tagWeight?: number;
     goldPriceToday: number;
     makingChargesPerGram: number;
+    soldCount: number;
+    itemTotalPrice?: number;
   }[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -86,6 +90,8 @@ const EditInvoiceModal: React.FC<{
           tagWeight: item.hasTag ? parseFloat((item.soldGrossWeight - item.soldNetWeight).toFixed(3)) : undefined,
           goldPriceToday: item.goldPriceToday || 0,
           makingChargesPerGram: item.makingChargesPerGram || 0,
+          soldCount: item.soldCount || 1,
+          itemTotalPrice: item.itemTotalPrice,
         }))
       );
       setError('');
@@ -115,7 +121,8 @@ const EditInvoiceModal: React.FC<{
           hasTag: i.hasTag,
           tagWeight: i.tagWeight,
           goldPriceToday: i.goldPriceToday,
-          makingChargesPerGram: i.makingChargesPerGram
+          makingChargesPerGram: i.makingChargesPerGram,
+          soldCount: i.soldCount,
         })),
       });
       onClose();
@@ -163,7 +170,19 @@ const EditInvoiceModal: React.FC<{
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1">العدد</label>
+                    <input
+                      type="number"
+                      step="1"
+                      min="1"
+                      value={item.soldCount === 0 ? '' : item.soldCount}
+                      onChange={(e) => updateItemField(idx, 'soldCount', parseInt(e.target.value) || 1)}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold font-bold text-center"
+                      dir="ltr"
+                    />
+                  </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 mb-1">الوزن المباشر</label>
                     <input
@@ -235,6 +254,8 @@ export const InvoicesPage: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState<'COMPLETED' | 'CANCELLED'>('COMPLETED');
   const [searchTerm, setSearchTerm] = useState('');
+  const [customerNameFilter, setCustomerNameFilter] = useState('');
+  const [customerPhoneFilter, setCustomerPhoneFilter] = useState('');
   const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [cancelConfirmInvoice, setCancelConfirmInvoice] = useState<Invoice | null>(null);
@@ -244,8 +265,8 @@ export const InvoicesPage: React.FC = () => {
   const ITEMS_PER_PAGE = 8;
 
   useEffect(() => {
-    fetchInvoices({ status: activeTab });
-  }, [fetchInvoices, activeTab]);
+    fetchInvoices({ status: activeTab, customerName: customerNameFilter || undefined, customerPhone: customerPhoneFilter || undefined });
+  }, [fetchInvoices, activeTab, customerNameFilter, customerPhoneFilter]);
 
   const filteredInvoices = useMemo(() => {
     if (!searchTerm) return invoices;
@@ -268,8 +289,9 @@ export const InvoicesPage: React.FC = () => {
   }, [filteredInvoices, currentPage]);
 
   return (
-    <div className="space-y-6">
-      {/* ─── Header ─── */}
+    <div className="space-y-6 relative">
+      <div className={viewingInvoice ? 'print:hidden' : ''}>
+        {/* ─── Header ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-charcoal flex items-center gap-3">
@@ -314,17 +336,43 @@ export const InvoicesPage: React.FC = () => {
             </button>
           </div>
 
-          <div className="relative w-full sm:w-80">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={t('sales.invoices.searchPlaceholder')}
-              className={`w-full py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold bg-white transition-all ${
-                isRtl ? 'pl-4 pr-10' : 'pr-4 pl-10'
-              }`}
-            />
-            <Search size={16} className={`absolute top-2.5 text-gray-400 ${isRtl ? 'right-3' : 'left-3'}`} />
+          <div className="flex gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:w-48">
+              <input
+                type="text"
+                value={customerNameFilter}
+                onChange={(e) => setCustomerNameFilter(e.target.value)}
+                placeholder="البحث باسم العميل"
+                className={`w-full py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold bg-white transition-all ${
+                  isRtl ? 'pl-4 pr-10' : 'pr-4 pl-10'
+                }`}
+              />
+              <Search size={16} className={`absolute top-2.5 text-gray-400 ${isRtl ? 'right-3' : 'left-3'}`} />
+            </div>
+            <div className="relative w-full sm:w-48">
+              <input
+                type="text"
+                value={customerPhoneFilter}
+                onChange={(e) => setCustomerPhoneFilter(e.target.value)}
+                placeholder="البحث برقم الهاتف"
+                className={`w-full py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold bg-white transition-all ${
+                  isRtl ? 'pl-4 pr-10' : 'pr-4 pl-10'
+                }`}
+              />
+              <Search size={16} className={`absolute top-2.5 text-gray-400 ${isRtl ? 'right-3' : 'left-3'}`} />
+            </div>
+            <div className="relative w-full sm:w-48">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={t('sales.invoices.searchPlaceholder')}
+                className={`w-full py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold bg-white transition-all ${
+                  isRtl ? 'pl-4 pr-10' : 'pr-4 pl-10'
+                }`}
+              />
+              <Search size={16} className={`absolute top-2.5 text-gray-400 ${isRtl ? 'right-3' : 'left-3'}`} />
+            </div>
           </div>
         </div>
 
@@ -351,6 +399,7 @@ export const InvoicesPage: React.FC = () => {
                   <th className="px-6 py-4 font-semibold">{t('sales.invoices.table.customer')}</th>
                   <th className="px-6 py-4 font-semibold">{t('sales.invoices.table.seller')}</th>
                   <th className="px-6 py-4 font-semibold">{t('sales.invoices.table.weight')}</th>
+                  <th className="px-6 py-4 font-semibold">المصنعية</th>
                   <th className="px-6 py-4 font-semibold">{t('sales.invoices.table.price')}</th>
                   <th className="px-6 py-4 font-semibold">{t('sales.invoices.table.status')}</th>
                   <th className="px-6 py-4 font-semibold text-center">{t('sales.invoices.table.actions')}</th>
@@ -358,13 +407,17 @@ export const InvoicesPage: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {currentInvoices.map((inv, index) => {
-                  const computedGrossWeight = inv.totalGrossWeight || inv.items?.reduce((sum, item) => sum + (item.soldGrossWeight || 0), 0) || 0;
+                  const computedGrossWeight = inv.totalInvoiceGrossWeight || inv.items?.reduce((sum, item) => sum + (item.soldGrossWeight || 0), 0) || 0;
                   return (
                   <tr key={inv._id || inv.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-[#f4f7f4]'} hover:bg-gold/[0.05] transition-colors group border-b border-gray-100 last:border-0`}>
                     <td className="px-6 py-4">
-                      <span className="font-black text-charcoal bg-gray-50 px-3 py-1.5 rounded text-base whitespace-nowrap inline-block" dir="ltr">
+                      <button 
+                        onClick={() => setViewingInvoice(inv)}
+                        className="font-black text-charcoal bg-gray-50 px-3 py-1.5 rounded text-base whitespace-nowrap inline-block cursor-pointer hover:bg-gray-200 hover:text-gold transition-colors" 
+                        dir="ltr"
+                      >
                         #{inv.invoiceNumber || (inv._id || inv.id)?.substring(0,8)}
-                      </span>
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 text-gray-500 text-sm font-semibold" dir="ltr">
@@ -386,6 +439,11 @@ export const InvoicesPage: React.FC = () => {
                     <td className="px-6 py-4">
                       <span className="inline-block bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg border border-amber-100/50 font-bold text-sm" dir="ltr">
                         {computedGrossWeight.toFixed(2)}g
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-block bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg border border-purple-100/50 font-bold text-sm" dir="ltr">
+                        {(((inv as any).totalMakingCharges) || inv.items?.reduce((s,i)=>s+(((i as any).totalMakingCharge) || (i.makingChargesPerGram*i.soldNetWeight)||0),0) || 0).toLocaleString()} ج.م
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -481,150 +539,131 @@ export const InvoicesPage: React.FC = () => {
           </div>
         )}
       </div>
+      </div>
 
       {/* ─── Transcript Modal ─── */}
       <ModalOverlay
         isOpen={!!viewingInvoice}
         onClose={() => setViewingInvoice(null)}
         title={t('sales.invoices.transcriptTitle')}
+        printFriendly={true}
       >
-        {viewingInvoice && (
-          <div className="space-y-6">
-            {/* Header Details */}
-            <div className="flex justify-between items-start pb-6 border-b border-gray-100">
-              <div>
-                <span className="text-xs font-bold text-gray-400 block mb-1">{t('sales.invoices.table.number')}</span>
-                <span className="text-2xl font-black text-charcoal" dir="ltr">#{viewingInvoice.invoiceNumber || (viewingInvoice._id || viewingInvoice.id)?.substring(0,8)}</span>
-                <div className="flex items-center gap-1.5 text-gray-500 text-sm font-medium mt-2" dir="ltr">
-                  <Calendar size={14} />
-                  {new Date(viewingInvoice.createdAt).toLocaleString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-xs font-bold text-gray-400 block mb-1">{t('sales.invoices.table.status')}</span>
-                {viewingInvoice.status === 'COMPLETED' ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-base font-bold">
-                    <CheckCircle2 size={18} />
-                    {t('sales.invoices.status.completed')}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-theme-returns/10 text-theme-returns rounded-lg text-base font-bold">
-                    <XCircle size={18} />
-                    {t('sales.invoices.status.cancelled')}
-                  </span>
-                )}
-              </div>
-            </div>
+        {viewingInvoice && (() => {
+          const customerName = (viewingInvoice.customer && typeof viewingInvoice.customer === 'object') ? viewingInvoice.customer.fullName : '---';
+          const invoiceNumber = viewingInvoice.invoiceNumber || viewingInvoice._id?.substring(0,8) || viewingInvoice.id?.substring(0,8);
+          const dateStr = new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
+          const sellerName = (viewingInvoice.soldBy && typeof viewingInvoice.soldBy === 'object') ? viewingInvoice.soldBy.fullName : '---';
 
-            {/* Parties */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <span className="text-xs font-bold text-gray-400 block mb-2">{t('sales.invoices.table.customer')}</span>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400">
-                    <User size={18} />
-                  </div>
-                  <div>
-                    <span className="block font-bold text-charcoal">{(viewingInvoice.customer && typeof viewingInvoice.customer === 'object') ? viewingInvoice.customer.fullName : '---'}</span>
-                    <span className="block text-xs text-gray-500" dir="ltr">{(viewingInvoice.customer && typeof viewingInvoice.customer === 'object') ? viewingInvoice.customer.phoneNumber : ''}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <span className="text-xs font-bold text-gray-400 block mb-2">{t('sales.invoices.table.seller')}</span>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400">
-                    <User size={18} />
-                  </div>
-                  <div>
-                    <span className="block font-bold text-charcoal">{(viewingInvoice.soldBy && typeof viewingInvoice.soldBy === 'object') ? viewingInvoice.soldBy.fullName : '---'}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          return (
+            <div className="flex flex-col items-center justify-center p-6 print:p-0">
+              
+              {/* Actions (Hidden on Print) */}
+              <div className="flex justify-between items-center w-full max-w-3xl mb-6 print:hidden gap-4">
+                <div className="flex gap-3">
+                  {viewingInvoice.status === 'COMPLETED' && (user?.role === 'OWNER' || (viewingInvoice.soldBy && typeof viewingInvoice.soldBy === 'object' ? (viewingInvoice.soldBy._id === user?.id || (viewingInvoice.soldBy as any).id === user?.id) : viewingInvoice.soldBy === user?.id)) && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setCancelConfirmInvoice(viewingInvoice);
+                        }}
+                        className="px-6 py-2.5 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 font-bold rounded-xl transition-colors flex items-center gap-2 shadow-sm"
+                      >
+                        <XCircle size={18} />
+                        إلغاء واسترجاع
+                      </button>
 
-            {/* Items Table */}
-            <div>
-              <h4 className="text-sm font-bold text-charcoal mb-3 flex items-center gap-2">
-                <Tag size={16} className="text-gold" />
-                {t('sales.invoices.itemsIncluded')}
-              </h4>
-              <div className="border border-gray-100 rounded-xl overflow-hidden mt-4">
-                <div className="bg-gray-50/80 px-4 py-3 border-b border-gray-100 flex justify-between text-xs font-bold text-gray-500">
-                  <span className="w-1/3">{t('sales.table.item')}</span>
-                  <div className="flex gap-4 w-2/3 justify-end text-center">
-                    <span className="w-16">المباشر</span>
-                    <span className="w-16">الصافي</span>
-                    <span className="w-20">سعر/ج</span>
-                    <span className="w-20">إجمالي</span>
+                      <button
+                        onClick={() => {
+                          setViewingInvoice(null);
+                          setEditingInvoice(viewingInvoice);
+                        }}
+                        className="px-6 py-2.5 bg-white border border-gray-200 text-charcoal hover:bg-gray-50 font-bold rounded-xl transition-colors flex items-center gap-2 shadow-sm"
+                      >
+                        <Edit2 size={18} />
+                        تعديل
+                      </button>
+                    </>
+                  )}
+                </div>
+                
+                <button
+                  onClick={() => window.print()}
+                  className="px-6 py-2.5 bg-charcoal text-white hover:bg-black font-bold rounded-xl transition-colors flex items-center gap-2 shadow-sm"
+                >
+                  <Printer size={18} />
+                  طباعة
+                </button>
+              </div>
+
+              {/* The Printable A4 Sheet */}
+              <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-charcoal print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm]" dir="rtl">
+                
+                {/* Header */}
+                <InvoicePrintHeader title={`فاتورة مبيعات ذهب ${viewingInvoice.status === 'COMPLETED' ? '' : '(ملغاة)'}`} />
+
+                {/* Customer Box */}
+                <div className="border-2 border-blue-600 rounded-xl p-4 text-center mb-8 bg-blue-50/30">
+                  <span className="text-2xl font-black text-blue-800">العميل: {customerName}</span>
+                </div>
+
+                {/* Invoice Info Details */}
+                <div className="flex justify-between items-start mb-8 text-sm font-bold border-b border-gray-200 pb-8">
+                  <div className="space-y-3">
+                    <div className="flex gap-2"><span className="text-gray-500 w-32">اسم الموظف المسؤول:</span> <span>{sellerName}</span></div>
+                    <div className="flex gap-2"><span className="text-gray-500 w-32">طريقة الدفع:</span> <span>آجل / نقداً</span></div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">رقم الفاتورة:</span> <span dir="ltr">#{invoiceNumber}</span></div>
+                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">التاريخ والوقت:</span> <span>{dateStr}</span></div>
                   </div>
                 </div>
-                <div className="divide-y divide-gray-50 max-h-[300px] overflow-y-auto">
-                  {viewingInvoice.items?.map((item: any, idx: number) => (
-                    <div key={idx} className="px-4 py-3 flex justify-between items-center hover:bg-gold/[0.02] transition-colors">
-                      <div className="flex flex-col w-1/3">
-                        <span className="text-sm font-bold text-charcoal">{(item.inventoryItem && typeof item.inventoryItem === 'object') ? item.inventoryItem.title : '---'}</span>
-                        <span className="text-xs text-gray-400 flex gap-2" dir="ltr">
-                          <span>{((item.inventoryItem && typeof item.inventoryItem === 'object') ? (item.inventoryItem._id || item.inventoryItem.id) : '')?.substring(0,8)}</span>
-                          {item.hasTag === false && <span className="bg-red-50 text-red-600 px-1 rounded text-[10px]">بدون تيكت</span>}
-                        </span>
-                      </div>
-                      <div className="flex gap-4 w-2/3 justify-end text-sm font-semibold">
-                        <span className="w-16 text-center text-charcoal" dir="ltr">{item.soldGrossWeight?.toFixed(2)}</span>
-                        <span className="w-16 text-center text-gold" dir="ltr">{item.soldNetWeight?.toFixed(2)}</span>
-                        <span className="w-20 text-center text-charcoal" dir="ltr">{item.goldPriceToday?.toLocaleString()}</span>
-                        <span className="w-20 text-center font-black text-gold" dir="ltr">{item.itemTotalPrice?.toLocaleString()}</span>
-                      </div>
+
+                {/* Table */}
+                <table className="w-full mb-8 border-collapse border border-charcoal text-center text-sm font-bold">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border border-charcoal py-3 px-2 w-10">م</th>
+                      <th className="border border-charcoal py-3 px-2">اسم الصنف</th>
+                      <th className="border border-charcoal py-3 px-2 w-16">العيار</th>
+                      <th className="border border-charcoal py-3 px-2 w-16">العدد</th>
+                      <th className="border border-charcoal py-3 px-2 w-24">الصافي (ج)</th>
+                      <th className="border border-charcoal py-3 px-2 w-28">سعر الجرام اليوم</th>
+                      <th className="border border-charcoal py-3 px-2 w-32">السعر الكلي (ج.م)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {viewingInvoice.items?.map((item: any, idx: number) => {
+                      const title = (item.inventoryItem && typeof item.inventoryItem === 'object') ? item.inventoryItem.title : '---';
+                      const karat = (item.inventoryItem && typeof item.inventoryItem === 'object') ? item.inventoryItem.karat : '---';
+                      return (
+                        <tr key={idx}>
+                          <td className="border border-charcoal py-3 px-2">{idx + 1}</td>
+                          <td className="border border-charcoal py-3 px-2">{title} {item.hasTag === false ? '(بدون تيكت)' : ''}</td>
+                          <td className="border border-charcoal py-3 px-2" dir="ltr">{karat}K</td>
+                          <td className="border border-charcoal py-3 px-2">{item.soldCount || 1}</td>
+                          <td className="border border-charcoal py-3 px-2">{item.soldNetWeight?.toFixed(2)}</td>
+                          <td className="border border-charcoal py-3 px-2" dir="ltr">{item.goldPriceToday?.toLocaleString()}</td>
+                          <td className="border border-charcoal py-3 px-2" dir="ltr">{item.itemTotalPrice?.toLocaleString()}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+
+                {/* Total */}
+                <div className="flex justify-end mt-8">
+                  <div className="border-2 border-charcoal rounded-xl p-4 w-64 bg-gray-50">
+                    <div className="flex justify-between items-center text-lg font-black">
+                      <span>الإجمالي الكلي:</span>
+                      <span dir="ltr">{viewingInvoice.totalPrice?.toLocaleString()}</span>
                     </div>
-                  ))}
+                  </div>
                 </div>
+
               </div>
             </div>
-
-            {/* Totals */}
-            <div className="bg-gold/5 p-6 rounded-xl border border-gold/20 flex items-center justify-between">
-              <div>
-                <span className="block text-sm font-bold text-gold/80 mb-1">{t('sales.invoices.table.weight')}</span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black text-gold" dir="ltr">{(viewingInvoice.totalGrossWeight || viewingInvoice.items?.reduce((sum: number, item: any) => sum + (item.soldGrossWeight || 0), 0) || 0).toFixed(2)}g</span>
-                  <span className="text-base font-semibold text-gold/60" dir="ltr">({(viewingInvoice.totalNetWeight || viewingInvoice.items?.reduce((sum: number, item: any) => sum + Math.max(0, (item.soldGrossWeight || 0) - 0.06), 0) || 0).toFixed(2)}g net)</span>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="block text-sm font-bold text-charcoal mb-1">{t('sales.invoice.totalPrice')}</span>
-                <span className="text-4xl font-black text-charcoal" dir="ltr">
-                  {viewingInvoice.totalPrice?.toLocaleString()} <span className="text-xl text-gray-400">{t('customers.currency')}</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Actions */}
-            {viewingInvoice.status === 'COMPLETED' && (user?.role === 'OWNER' || (viewingInvoice.soldBy && typeof viewingInvoice.soldBy === 'object' ? (viewingInvoice.soldBy._id === user?.id || (viewingInvoice.soldBy as any).id === user?.id) : viewingInvoice.soldBy === user?.id)) && (
-              <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                <button
-                  onClick={() => {
-                    setCancelConfirmInvoice(viewingInvoice);
-                  }}
-                  className="px-6 py-3 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 font-bold rounded-xl transition-colors flex items-center gap-2 shadow-sm"
-                >
-                  <XCircle size={18} />
-                  إلغاء واسترجاع الفاتورة
-                </button>
-
-                <button
-                  onClick={() => {
-                    setViewingInvoice(null);
-                    setEditingInvoice(viewingInvoice);
-                  }}
-                  className="px-6 py-3 bg-white border border-gray-200 text-charcoal hover:bg-gray-50 font-bold rounded-xl transition-colors flex items-center gap-2 shadow-sm"
-                >
-                  <Edit2 size={18} />
-                  {t('sales.invoices.actions.edit')}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+          );
+        })()}
       </ModalOverlay>
 
       {/* ─── Edit Invoice Modal ─── */}

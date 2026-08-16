@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
 import { useTranslation } from 'react-i18next';
 import {
   ShoppingCart,
@@ -69,6 +70,7 @@ export const SalesCounterPage: React.FC = () => {
     goldPriceToday: number;
     makingChargesPerGram: number;
     soldGrossWeight: number;
+    soldCount: number;
     manualItemTotal?: number; // يدوي لكل قطعة
     isManualItem?: boolean;
   };
@@ -130,6 +132,7 @@ export const SalesCounterPage: React.FC = () => {
         goldPriceToday: 0,
         makingChargesPerGram: 0,
         soldGrossWeight: initialGrossWeight,
+        soldCount: 1,
       },
     ]);
     setBarcodeInput('');
@@ -187,20 +190,28 @@ export const SalesCounterPage: React.FC = () => {
     );
   };
 
+  const updateItemCount = (cartItemId: string, count: number | '') => {
+    setCart((prev) =>
+      prev.map((c) => (c.cartItemId === cartItemId ? { ...c, soldCount: count === '' ? ('' as any) : count, isManualItem: false, manualItemTotal: undefined } : c))
+    );
+  };
+
   // ─── Computations ───
-  const totalItems = cart.length;
   const combinedGrossWeight = cart.reduce((sum, c) => sum + (c.soldGrossWeight || 0), 0);
   const combinedNetWeight = cart.reduce(
     (sum, c) => {
       const tagW = c.selectedTagWeight ?? (c.item.tagDetails && c.item.tagDetails.length > 0 ? c.item.tagDetails[0].weight : 0.06);
-      return sum + (c.hasTag ? Math.max(0, (c.soldGrossWeight || 0) - tagW) : (c.soldGrossWeight || 0));
+      const count = (c.soldCount && typeof c.soldCount === 'number') ? c.soldCount : 1;
+      return sum + (c.hasTag ? Math.max(0, (c.soldGrossWeight || 0) - (tagW * count)) : (c.soldGrossWeight || 0));
     },
     0
   );
+
   const calcItemTotal = (c: CartItem) => {
     if (c.isManualItem && c.manualItemTotal !== undefined) return c.manualItemTotal;
     const tagW = c.selectedTagWeight ?? (c.item.tagDetails && c.item.tagDetails.length > 0 ? c.item.tagDetails[0].weight : 0.06);
-    const net = c.hasTag ? Math.max(0, (c.soldGrossWeight || 0) - tagW) : (c.soldGrossWeight || 0);
+    const count = (c.soldCount && typeof c.soldCount === 'number') ? c.soldCount : 1;
+    const net = c.hasTag ? Math.max(0, (c.soldGrossWeight || 0) - (tagW * count)) : (c.soldGrossWeight || 0);
     return net * ((c.goldPriceToday || 0) + (c.makingChargesPerGram || 0));
   };
   const autoTotalPrice = cart.reduce((sum, c) => sum + calcItemTotal(c), 0);
@@ -229,9 +240,11 @@ export const SalesCounterPage: React.FC = () => {
         customer: selectedCustomer._id || selectedCustomer.id || '',
         items: cart.map((c) => {
           const tagW = c.selectedTagWeight ?? (c.item.tagDetails && c.item.tagDetails.length > 0 ? c.item.tagDetails[0].weight : 0.06);
-          const net = c.hasTag ? Math.max(0, (c.soldGrossWeight || 0) - tagW) : (c.soldGrossWeight || 0);
+          const count = (c.soldCount && typeof c.soldCount === 'number') ? c.soldCount : 1;
+          const netWeight = c.hasTag ? Math.max(0, (c.soldGrossWeight || 0) - (tagW * count)) : (c.soldGrossWeight || 0);
           const item: any = {
             inventoryItem: c.item._id || c.item.id || '',
+            soldCount: c.soldCount || 1,
             soldGrossWeight: c.soldGrossWeight || 0,
             hasTag: c.hasTag,
             tagWeight: c.selectedTagWeight,
@@ -240,7 +253,7 @@ export const SalesCounterPage: React.FC = () => {
           };
           // لو المستخدم عدّل إجمالي القطعة يدوياً
           if (c.isManualItem && c.manualItemTotal !== undefined) {
-            const recalcMaking = net > 0 ? c.manualItemTotal / net - (c.goldPriceToday || 0) : 0;
+            const recalcMaking = netWeight > 0 ? c.manualItemTotal / netWeight - (c.goldPriceToday || 0) : 0;
             if (recalcMaking < 0) throw new Error(`إجمالي القطعة "${c.item.title}" أقل من قيمة الذهب الخام!`);
             item.itemTotalPrice = c.manualItemTotal;
           }
@@ -303,13 +316,10 @@ export const SalesCounterPage: React.FC = () => {
         </div>
 
         {/* The Printable A4 Sheet */}
-        <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-charcoal print:shadow-none print:border-none print:p-0 mx-auto" dir="rtl">
+        <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-charcoal print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm]" dir="rtl">
           
           {/* Header */}
-          <div className="text-center mb-8 border-b-2 border-charcoal pb-6">
-            <h1 className="text-3xl font-black mb-3">فاتورة مبيعات ذهب - نظام GMS</h1>
-
-          </div>
+          <InvoicePrintHeader title="فاتورة مبيعات ذهب" />
 
           {/* Customer Box */}
           <div className="border-2 border-blue-600 rounded-xl p-4 text-center mb-8 bg-blue-50/30">
@@ -335,6 +345,7 @@ export const SalesCounterPage: React.FC = () => {
                 <th className="border border-charcoal py-3 px-2 w-10">م</th>
                 <th className="border border-charcoal py-3 px-2">اسم الصنف</th>
                 <th className="border border-charcoal py-3 px-2 w-16">العيار</th>
+                <th className="border border-charcoal py-3 px-2 w-16">العدد</th>
                 <th className="border border-charcoal py-3 px-2 w-24">الصافي (ج)</th>
                 <th className="border border-charcoal py-3 px-2 w-28">سعر الجرام اليوم</th>
                 <th className="border border-charcoal py-3 px-2 w-32">السعر الكلي (ج.م)</th>
@@ -344,14 +355,16 @@ export const SalesCounterPage: React.FC = () => {
               {cart.map((cartItem, idx) => {
                 const item = cartItem.item;
                 const tagW = cartItem.selectedTagWeight ?? (item.tagDetails && item.tagDetails.length > 0 ? item.tagDetails[0].weight : 0.06);
-                const unitNet = cartItem.hasTag ? Math.max(0, cartItem.soldGrossWeight - tagW) : cartItem.soldGrossWeight;
-                const itemTotal = unitNet * ((cartItem.goldPriceToday || 0) + (cartItem.makingChargesPerGram || 0));
+                const count = (cartItem.soldCount && typeof cartItem.soldCount === 'number') ? cartItem.soldCount : 1;
+                const netWeight = cartItem.hasTag ? Math.max(0, (cartItem.soldGrossWeight || 0) - (tagW * count)) : (cartItem.soldGrossWeight || 0);
+                const itemTotal = netWeight * ((cartItem.goldPriceToday || 0) + (cartItem.makingChargesPerGram || 0));
                 return (
                   <tr key={cartItem.cartItemId}>
                     <td className="border border-charcoal py-3 px-2">{idx + 1}</td>
                     <td className="border border-charcoal py-3 px-2">{item.title}</td>
                     <td className="border border-charcoal py-3 px-2" dir="ltr">{item.karat}K</td>
-                    <td className="border border-charcoal py-3 px-2">{unitNet.toFixed(2)}</td>
+                    <td className="border border-charcoal py-3 px-2">{cartItem.soldCount || 1}</td>
+                    <td className="border border-charcoal py-3 px-2">{netWeight.toFixed(2)}</td>
                     <td className="border border-charcoal py-3 px-2" dir="ltr">{cartItem.goldPriceToday?.toLocaleString()}</td>
                     <td className="border border-charcoal py-3 px-2" dir="ltr">{itemTotal.toLocaleString()}</td>
                   </tr>
@@ -507,10 +520,11 @@ export const SalesCounterPage: React.FC = () => {
           <div className="border border-gray-100 rounded-xl overflow-hidden">
             <div 
               className="bg-charcoal px-5 py-6 grid gap-3 text-xl font-bold text-white text-center items-center rounded-t-xl"
-              style={{ gridTemplateColumns: "2.5fr 0.9fr 1.4fr 0.9fr 1.1fr 1.8fr 1.4fr 0.6fr" }}
+              style={{ gridTemplateColumns: "2.5fr 0.9fr 0.9fr 1.4fr 0.9fr 1.1fr 1.8fr 1.4fr 0.6fr" }}
             >
               <div className="text-right">الصنف</div>
               <div>العيار</div>
+              <div>العدد</div>
               <div>الوزن المباشر</div>
               <div>تيكت؟</div>
               <div>الصافي</div>
@@ -529,14 +543,15 @@ export const SalesCounterPage: React.FC = () => {
                 cart.map((cartItem, idx) => {
                   const item = cartItem.item;
                   const tagW = cartItem.selectedTagWeight ?? (item.tagDetails && item.tagDetails.length > 0 ? item.tagDetails[0].weight : 0.06);
+                  const count = (cartItem.soldCount && typeof cartItem.soldCount === 'number') ? cartItem.soldCount : 1;
                   const unitGross = cartItem.soldGrossWeight;
-                  const unitNet = cartItem.hasTag ? Math.max(0, unitGross - tagW) : unitGross;
+                  const unitNet = cartItem.hasTag ? Math.max(0, unitGross - (tagW * count)) : unitGross;
 
                   return (
                     <div 
                       key={cartItem.cartItemId} 
                       className={`px-5 py-7 grid gap-3 items-center transition-colors text-center border-b border-gray-100 last:border-0 ${idx % 2 === 0 ? 'bg-white' : 'bg-[#f8faf8]'} hover:bg-theme-sales/5`}
-                      style={{ gridTemplateColumns: "2.5fr 0.9fr 1.4fr 0.9fr 1.1fr 1.8fr 1.4fr 0.6fr" }}
+                      style={{ gridTemplateColumns: "2.5fr 0.9fr 0.9fr 1.4fr 0.9fr 1.1fr 1.8fr 1.4fr 0.6fr" }}
                     >
                       <div className="flex flex-col text-right overflow-hidden">
                         <span className="text-2xl font-black text-theme-sales truncate" title={item.title}>{item.title}</span>
@@ -544,6 +559,20 @@ export const SalesCounterPage: React.FC = () => {
                       </div>
                       <div>
                         <span className="inline-block px-4 py-2.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-xl text-xl font-black whitespace-nowrap shadow-sm" dir="ltr">{item.karat}K</span>
+                      </div>
+                      <div className="flex justify-center">
+                        <input
+                          type="number"
+                          min="1"
+                          step="1"
+                          value={cartItem.soldCount === ('' as any) ? '' : (cartItem.soldCount || '')}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            updateItemCount(cartItem.cartItemId, val === '' ? '' : parseInt(val));
+                          }}
+                          className="w-full py-4 px-1 border-2 border-indigo-200 rounded-xl text-xl font-black text-center text-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 bg-indigo-50 shadow-inner"
+                          dir="ltr"
+                        />
                       </div>
                       <div className="flex justify-center">
                         <input
@@ -587,7 +616,7 @@ export const SalesCounterPage: React.FC = () => {
                       </div>
                       <div className="flex flex-col items-center">
                         <span className="inline-block px-4 py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-2xl font-black shadow-sm">{unitNet.toFixed(2)}</span>
-                        {cartItem.hasTag && <span className="text-xs font-bold text-rose-500 mt-1">-{tagW}g خصم</span>}
+                        {cartItem.hasTag && <span className="text-xs font-bold text-rose-500 mt-1">-{(tagW * count).toFixed(2)}g خصم</span>}
                       </div>
                       <div>
                         <input
@@ -669,7 +698,7 @@ export const SalesCounterPage: React.FC = () => {
                 <Tag size={18} />
                 {t('sales.summary.totalItems')}
               </span>
-              <span className="text-4xl font-black text-charcoal">{totalItems}</span>
+              <span className="text-4xl font-black text-charcoal">{cart.reduce((sum, c) => sum + (c.soldCount || 1), 0)}</span>
             </div>
 
             <div className="flex items-center justify-between p-5 bg-gray-50 rounded-xl border border-gray-100">

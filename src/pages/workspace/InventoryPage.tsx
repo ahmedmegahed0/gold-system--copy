@@ -18,8 +18,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
-  PlusSquare
+  PlusSquare,
 } from 'lucide-react';
+import { SearchableSelect } from '../../components/common/SearchableSelect';
 import { useAuth } from '../../core/context/AuthContext';
 import { useInventory } from '../../hooks/useInventory';
 import { useCategories } from '../../hooks/useCategories';
@@ -198,18 +199,12 @@ const InventoryFormModal: React.FC<{
               {t('inventory.fields.category')}
               <span className="text-red-400 text-xs">*</span>
             </label>
-            <select
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal"
-            >
-              <option value="" disabled>{t('inventory.placeholders.selectCategory')}</option>
-              {activeCategories.map((cat) => (
-                <option key={cat._id || cat.id} value={cat._id || cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+            <SearchableSelect
+              options={activeCategories.map(cat => ({ value: cat._id || cat.id!, label: cat.name }))}
+              value={typeof formData.category === 'object' ? (formData.category as any)._id || (formData.category as any).id : formData.category}
+              onChange={(val) => setFormData({ ...formData, category: val })}
+              placeholder={t('inventory.placeholders.selectCategory')}
+            />
           </div>
 
           {/* Karat */}
@@ -219,11 +214,11 @@ const InventoryFormModal: React.FC<{
               {t('inventory.fields.karat')}
             </label>
             <div className="flex gap-2">
-              {[21, 18].map((k) => (
+              {[24, 21, 18].map((k) => (
                 <button
                   key={k}
                   type="button"
-                  onClick={() => setFormData({ ...formData, karat: k as 18 | 21 })}
+                  onClick={() => setFormData({ ...formData, karat: k as 18 | 21 | 24 })}
                   className={`flex-1 py-3 border rounded-xl font-bold transition-all ${
                     formData.karat === k
                       ? 'border-gold bg-gold/10 text-gold'
@@ -806,7 +801,7 @@ export const InventoryPage: React.FC = () => {
   const [currentCompanyPage, setCurrentCompanyPage] = useState(1);
   const COMPANY_ITEMS_PER_PAGE = 3;
 
-  const handleKaratChange = (karat: 18 | 21) => setFilters({ ...filters, karat });
+  const handleKaratChange = (karat: 18 | 21 | 24) => setFilters({ ...filters, karat });
   const handleStatusChange = (status: 'ACTIVE' | 'ARCHIVED') => setFilters({ ...filters, status });
 
   const isArchiveView = filters.status === 'ARCHIVED';
@@ -882,6 +877,16 @@ export const InventoryPage: React.FC = () => {
     return inventory.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [inventory, currentPage]);
 
+  if (!isOwner) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <AlertCircle size={48} className="text-red-500 mb-4" />
+        <h2 className="text-2xl font-bold text-charcoal mb-2">عذراً، غير مصرح لك</h2>
+        <p className="text-gray-500">هذه الصفحة مخصصة للمالك فقط.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* ─── Header ─── */}
@@ -898,7 +903,7 @@ export const InventoryPage: React.FC = () => {
           </p>
         </div>
 
-        {isOwner && !isArchiveView && (
+        {!isArchiveView && (
           <button
             onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-2 px-6 py-3 bg-theme-inventory hover:bg-theme-inventory/90 text-white font-bold rounded-xl transition-all shadow-sm hover:shadow-md"
@@ -1056,10 +1061,10 @@ export const InventoryPage: React.FC = () => {
           <div className="flex items-center gap-4">
             {/* Karat Toggle */}
             <div className="flex p-1 bg-gray-100/80 rounded-lg">
-              {[21, 18].map((k) => (
+              {[24, 21, 18].map((k) => (
                 <button
                   key={k}
-                  onClick={() => handleKaratChange(k as 18 | 21)}
+                  onClick={() => handleKaratChange(k as 18 | 21 | 24)}
                   className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
                     filters.karat === k ? 'bg-white text-gold shadow-sm' : 'text-gray-500 hover:text-charcoal'
                   }`}
@@ -1069,31 +1074,27 @@ export const InventoryPage: React.FC = () => {
               ))}
             </div>
 
-            {/* Status Toggle (Owner Only) */}
-            {isOwner && (
-              <div className="h-6 w-px bg-gray-200 mx-2 hidden sm:block"></div>
-            )}
+            {/* Status Toggle */}
+            <div className="h-6 w-px bg-gray-200 mx-2 hidden sm:block"></div>
             
-            {isOwner && (
-              <div className="flex gap-4">
-                <button
-                  onClick={() => handleStatusChange('ACTIVE')}
-                  className={`text-sm font-bold transition-colors ${
-                    !isArchiveView ? 'text-charcoal' : 'text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  {t('inventory.tabs.active')}
-                </button>
-                <button
-                  onClick={() => handleStatusChange('ARCHIVED')}
-                  className={`text-sm font-bold transition-colors ${
-                    isArchiveView ? 'text-charcoal' : 'text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  {t('inventory.tabs.archived')}
-                </button>
-              </div>
-            )}
+            <div className="flex gap-4">
+              <button
+                onClick={() => handleStatusChange('ACTIVE')}
+                className={`text-sm font-bold transition-colors ${
+                  !isArchiveView ? 'text-charcoal' : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                {t('inventory.tabs.active')}
+              </button>
+              <button
+                onClick={() => handleStatusChange('ARCHIVED')}
+                className={`text-sm font-bold transition-colors ${
+                  isArchiveView ? 'text-charcoal' : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                {t('inventory.tabs.archived')}
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -1138,16 +1139,12 @@ export const InventoryPage: React.FC = () => {
                   <th className="px-6 py-4 font-semibold text-center">{t('inventory.table.karat')}</th>
                   <th className="px-6 py-4 font-semibold text-center">{t('inventory.table.currentCount')}</th>
                   
-                  {/* Owner Only Weight Columns */}
-                  {isOwner && (
-                    <>
-                      <th className="px-6 py-4 font-semibold text-center">القطع بتيكت</th>
-                      <th className="px-6 py-4 font-semibold text-center">{t('inventory.table.grossWeight')}</th>
-                      <th className="px-6 py-4 font-semibold text-center text-red-400">خصم التيكت</th>
-                      <th className="px-6 py-4 font-semibold text-center">{t('inventory.table.netWeight')}</th>
-                      <th className="px-6 py-4 font-semibold text-center">{t('inventory.table.actions')}</th>
-                    </>
-                  )}
+                  {/* Weight Columns & Actions */}
+                  <th className="px-6 py-4 font-semibold text-center">القطع بتيكت</th>
+                  <th className="px-6 py-4 font-semibold text-center">{t('inventory.table.grossWeight')}</th>
+                  <th className="px-6 py-4 font-semibold text-center text-red-400">خصم التيكت</th>
+                  <th className="px-6 py-4 font-semibold text-center">{t('inventory.table.netWeight')}</th>
+                  <th className="px-6 py-4 font-semibold text-center">{t('inventory.table.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -1191,71 +1188,67 @@ export const InventoryPage: React.FC = () => {
                         </div>
                       </td>
 
-                      {isOwner && (
-                        <>
-                          <td className="px-6 py-4 text-center">
-                            <div className="flex flex-col items-center">
-                              <span className="font-bold text-charcoal">{tagsCount}</span>
-                              {tagsCount > 0 && (
-                                <span className="text-xs text-gray-400 mt-0.5" dir="ltr">(-{tagDeduction.toFixed(2)}g)</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <div className="inline-flex items-baseline bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg border border-amber-100/50" dir="ltr">
-                              <span className="font-bold text-sm">{item.totalGrossWeight.toFixed(2)}g</span>
-                              <span className="text-amber-700/60 text-xs font-bold mx-1">/ {(item.initialGrossWeight ?? item.totalGrossWeight).toFixed(2)}g</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <span className="inline-block bg-red-50 text-red-600 px-3 py-1.5 rounded-lg border border-red-100/50 font-bold text-sm" dir="ltr">
-                              {tagDeduction.toFixed(2)}g
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <div className="inline-flex items-baseline bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-100/50" dir="ltr">
-                              <span className="font-black text-sm">{item.totalNetWeight.toFixed(2)}g</span>
-                              <span className="text-emerald-700/60 text-xs font-bold mx-1">/ {Math.max(0, (item.initialGrossWeight ?? item.totalGrossWeight) - tagDeduction).toFixed(2)}g</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button 
-                                onClick={() => setViewingItem(item)}
-                                className="p-1.5 text-gray-400 hover:text-gold hover:bg-gold/10 rounded-lg transition-colors"
-                                title={t('inventory.actions.details')}
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex flex-col items-center">
+                          <span className="font-bold text-charcoal">{tagsCount}</span>
+                          {tagsCount > 0 && (
+                            <span className="text-xs text-gray-400 mt-0.5" dir="ltr">(-{tagDeduction.toFixed(2)}g)</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="inline-flex items-baseline bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg border border-amber-100/50" dir="ltr">
+                          <span className="font-bold text-sm">{item.totalGrossWeight.toFixed(2)}g</span>
+                          <span className="text-amber-700/60 text-xs font-bold mx-1">/ {(item.initialGrossWeight ?? item.totalGrossWeight).toFixed(2)}g</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="inline-block bg-red-50 text-red-600 px-3 py-1.5 rounded-lg border border-red-100/50 font-bold text-sm" dir="ltr">
+                          {tagDeduction.toFixed(2)}g
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="inline-flex items-baseline bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-100/50" dir="ltr">
+                          <span className="font-black text-sm">{item.totalNetWeight.toFixed(2)}g</span>
+                          <span className="text-emerald-700/60 text-xs font-bold mx-1">/ {Math.max(0, (item.initialGrossWeight ?? item.totalGrossWeight) - tagDeduction).toFixed(2)}g</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button 
+                            onClick={() => setViewingItem(item)}
+                            className="p-1.5 text-gray-400 hover:text-gold hover:bg-gold/10 rounded-lg transition-colors"
+                            title={t('inventory.actions.details')}
+                          >
+                            <FileText size={16} />
+                          </button>
+                          {!isArchiveView && (
+                            <>
+                              <button
+                                onClick={() => setRestockingItem(item)}
+                                className="p-1.5 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+                                title="تزويد الكمية"
                               >
-                                <FileText size={16} />
+                                <PlusSquare size={16} />
                               </button>
-                              {!isArchiveView && (
-                                <>
-                                  <button
-                                    onClick={() => setRestockingItem(item)}
-                                    className="p-1.5 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"
-                                    title="تزويد الكمية"
-                                  >
-                                    <PlusSquare size={16} />
-                                  </button>
-                                  <button
-                                    onClick={() => setEditingItem(item)}
-                                    className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                                    title="تعديل"
-                                  >
-                                    <Edit2 size={16} />
-                                  </button>
-                                  <button
-                                    onClick={() => setArchivingItem(item)}
-                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                    title={t('inventory.actions.archive')}
-                                  >
-                                    <Archive size={16} />
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </td>
-                        </>
-                      )}
+                              <button
+                                onClick={() => setEditingItem(item)}
+                                className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="تعديل"
+                              >
+                                <Edit2 size={16} />
+                              </button>
+                              <button
+                                onClick={() => setArchivingItem(item)}
+                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                title={t('inventory.actions.archive')}
+                              >
+                                <Archive size={16} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}

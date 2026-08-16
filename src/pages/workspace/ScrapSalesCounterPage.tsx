@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
 import { useTranslation } from 'react-i18next';
 import { 
   ShoppingCart, Search, AlertCircle, Loader2, UserPlus, Info, CheckCircle2, CircleDollarSign, Scale, Printer
@@ -200,10 +201,7 @@ export const ScrapSalesCounterPage: React.FC = () => {
         <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-charcoal print:shadow-none print:border-none print:p-0 mx-auto" dir="rtl">
           
           {/* Header */}
-          <div className="text-center mb-8 border-b-2 border-charcoal pb-6">
-            <h1 className="text-3xl font-black mb-3">فاتورة شراء كسر - نظام GMS</h1>
-
-          </div>
+          <InvoicePrintHeader title="فاتورة شراء كسر" />
 
           {/* Customer Box */}
           <div className="border-2 border-blue-600 rounded-xl p-4 text-center mb-8 bg-blue-50/30">

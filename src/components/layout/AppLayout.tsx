@@ -17,9 +17,9 @@ import {
   Activity,
   FileSpreadsheet,
   Receipt,
-  LineChart,
   Menu,
-  X
+  X,
+  Banknote
 } from 'lucide-react';
 import { useLiveNotifications } from '../../hooks/useLiveNotifications';
 import { useNotificationsStore } from '../../store/notifications.store';
@@ -31,6 +31,7 @@ const THEME_COLORS: Record<string, { bg: string; text: string; activeBg: string 
   '/sales':         { bg: 'bg-theme-sales/10',      text: 'text-theme-sales',      activeBg: 'bg-theme-sales/10' },
   '/scrap-sales':   { bg: 'bg-theme-scrap/10',      text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
   '/inventory':     { bg: 'bg-theme-inventory/10',  text: 'text-theme-inventory',  activeBg: 'bg-theme-inventory/10' },
+  '/bullion-inventory': { bg: 'bg-theme-inventory/10',  text: 'text-theme-inventory',  activeBg: 'bg-theme-inventory/10' },
   '/categories':    { bg: 'bg-theme-categories/10', text: 'text-theme-categories', activeBg: 'bg-theme-categories/10' },
   '/scrap':         { bg: 'bg-theme-scrap/10',      text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
   '/invoices':      { bg: 'bg-theme-sales/10',      text: 'text-theme-sales',      activeBg: 'bg-theme-sales/10' },
@@ -42,6 +43,7 @@ const THEME_COLORS: Record<string, { bg: string; text: string; activeBg: string 
   '/purchases-ledger': { bg: 'bg-gold/10',          text: 'text-gold',             activeBg: 'bg-gold/10' },
   '/profits-ledger':   { bg: 'bg-purple-50',        text: 'text-purple-600',       activeBg: 'bg-purple-50' },
   '/expenses':      { bg: 'bg-amber-50',            text: 'text-amber-600',        activeBg: 'bg-amber-50' },
+  '/incomes':       { bg: 'bg-emerald-500/10',      text: 'text-emerald-600',      activeBg: 'bg-emerald-500/10' },
   '/notifications': { bg: 'bg-gold/10',             text: 'text-gold',             activeBg: 'bg-gold/10' },
 };
 
@@ -104,7 +106,7 @@ export const AppLayout: React.FC = () => {
       <aside className={`fixed inset-y-0 ${isRtl ? 'right-0' : 'left-0'} z-50 w-64 bg-white flex flex-col shadow-2xl md:shadow-sm transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 print:hidden ${isRtl ? 'border-l border-gray-100' : 'border-r border-gray-100'} ${isMobileMenuOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}`}>
         <div className="p-6 border-b border-gray-100 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-charcoal">GMS</h1>
+            <h1 className="text-2xl font-bold text-charcoal">duo dev</h1>
             <p className="text-sm text-gold font-medium">{t('nav.title')}</p>
           </div>
           <button 
@@ -126,6 +128,8 @@ export const AppLayout: React.FC = () => {
               </div>
               <NavItem to="/sales" icon={ShoppingCart} label={t('nav.sales')} />
               <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
+              <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
+              <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
 
               {/* ── Inventory (Blue) ── */}
               <div className="pt-4 pb-1">
@@ -134,6 +138,7 @@ export const AppLayout: React.FC = () => {
                 </span>
               </div>
               <NavItem to="/inventory" icon={Box} label={t('nav.inventory')} />
+              <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
               <NavItem to="/categories" icon={Tags} label={t('nav.categories')} />
 
               {/* ── Scrap Gold (Emerald Green) ── */}
@@ -160,6 +165,7 @@ export const AppLayout: React.FC = () => {
                 </span>
               </div>
               <NavItem to="/purchases-ledger" icon={FileSpreadsheet} label="دفتر المشتريات والخوارج" />
+              <NavItem to="/incomes" icon={Banknote} label="الدخل والإيرادات" />
               <NavItem to="/expenses" icon={Receipt} label="المصاريف النثرية" />
 
               {/* ── System & Audit (Iron Gray) ── */}
@@ -171,16 +177,21 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/employees" icon={UserCog} label={t('nav.employees')} />
               <NavItem to="/audit" icon={History} label={t('nav.audit')} />
               <NavItem to="/ledger" icon={Activity} label="الخزنة وجرد الأرصدة" />
-              <NavItem to="/profits-ledger" icon={LineChart} label="صافي الأرباح الاستراتيجية" />
               <NavItem to="/notifications" icon={Bell} label="مركز التنبيهات" />
             </>
           ) : (
             <>
               <NavItem to="/sales" icon={ShoppingCart} label={t('nav.sales')} />
               <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
+              <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
+              <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
+              <NavItem to="/inventory" icon={Box} label={t('nav.inventory')} />
+              <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
+              <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
               <NavItem to="/scrap-sales" icon={ShoppingCart} label={t('nav.scrapSales')} />
               <NavItem to="/scrap-invoices" icon={FileText} label={t('nav.scrapInvoices')} />
               <NavItem to="/customers" icon={Users} label={t('nav.customers')} />
+              <NavItem to="/incomes" icon={Banknote} label="الدخل والإيرادات" />
               <NavItem to="/expenses" icon={Receipt} label="المصاريف النثرية" />
             </>
           )}

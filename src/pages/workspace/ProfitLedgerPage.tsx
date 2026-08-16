@@ -292,7 +292,7 @@ export const ProfitLedgerPage: React.FC = () => {
 
           {/* Print Footer */}
           <div className="hidden print:block text-center mt-12 text-sm text-gray-400 border-t border-gray-200 pt-4">
-            نظام إدارة الذهب GMS - تم استخراج التقرير في {new Date().toLocaleString('ar-EG')}
+            نظام إدارة مجوهرات أبو كبشة - تم استخراج التقرير في {new Date().toLocaleString('ar-EG')}
           </div>
         </div>
       )}

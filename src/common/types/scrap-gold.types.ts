@@ -3,6 +3,11 @@ export interface BuyScrapDto {
   weight: number;
 }
 
+export interface UpdateScrapDto {
+  karat: 18 | 21;
+  newWeight: number;
+}
+
 export interface ScrapGold {
   _id?: string;
   id?: string;

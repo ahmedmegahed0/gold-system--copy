@@ -7,7 +7,7 @@ export interface CreateInventoryDto {
   title: string;
   companyName?: string;
   category: string; // The backend usually expects an ID string for refs
-  karat: 18 | 21;
+  karat: 18 | 21 | 24;
   initialCount: number;
   totalGrossWeight: number;
   tagDetails?: TagDetailDto[];
@@ -27,7 +27,7 @@ export interface InventoryItem {
   title: string;
   companyName?: string;
   category: { _id?: string; id?: string; name: string } | string;
-  karat: 18 | 21;
+  karat: 18 | 21 | 24;
   initialCount: number;
   currentCount: number;
   initialGrossWeight: number;
@@ -41,6 +41,6 @@ export interface InventoryItem {
 
 export interface InventoryFilters {
   status?: 'ACTIVE' | 'ARCHIVED';
-  karat?: 18 | 21;
+  karat?: 18 | 21 | 24;
   companyName?: string;
 }
