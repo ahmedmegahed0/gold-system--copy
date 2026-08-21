@@ -89,21 +89,27 @@ export const LedgerPage: React.FC = () => {
               <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
                 <TrendingUp size={24} />
               </div>
-              <h3 className="text-xl font-black text-charcoal">مبيعات الذهب الجديد والسبايك</h3>
+              <h3 className="text-xl font-black text-charcoal">مبيعات المشغولات، السبايك، والباركود</h3>
             </div>
             
             <div className="flex-1 flex flex-col gap-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <span className="block text-sm font-bold text-gray-400 mb-1">نقدي المشغولات</span>
-                  <div className="text-3xl font-black text-charcoal" dir="ltr">
-                    {data.financials.newGoldSalesCash.toLocaleString()} <span className="text-base text-blue-600">ج.م</span>
+                  <span className="block text-xs font-bold text-gray-400 mb-1">نقدي المشغولات</span>
+                  <div className="text-2xl lg:text-3xl font-black text-charcoal" dir="ltr">
+                    {(data.financials.newGoldSalesCash || 0).toLocaleString()} <span className="text-sm text-blue-600">ج.م</span>
                   </div>
                 </div>
                 <div>
-                  <span className="block text-sm font-bold text-gray-400 mb-1">نقدي السبايك والجنيهات</span>
-                  <div className="text-3xl font-black text-charcoal" dir="ltr">
-                    {(data.financials.bullionGoldSalesCash || 0).toLocaleString()} <span className="text-base text-blue-600">ج.م</span>
+                  <span className="block text-xs font-bold text-gray-400 mb-1">نقدي السبايك</span>
+                  <div className="text-2xl lg:text-3xl font-black text-charcoal" dir="ltr">
+                    {(data.financials.bullionGoldSalesCash || 0).toLocaleString()} <span className="text-sm text-blue-600">ج.م</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="block text-xs font-bold text-gray-400 mb-1">نقدي الباركود</span>
+                  <div className="text-2xl lg:text-3xl font-black text-charcoal" dir="ltr">
+                    {(data.financials.barcodeGoldSalesCash || 0).toLocaleString()} <span className="text-sm text-blue-600">ج.م</span>
                   </div>
                 </div>
               </div>

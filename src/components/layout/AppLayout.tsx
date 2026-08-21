@@ -19,7 +19,8 @@ import {
   Receipt,
   Menu,
   X,
-  Banknote
+  Banknote,
+  Barcode
 } from 'lucide-react';
 import { useLiveNotifications } from '../../hooks/useLiveNotifications';
 import { useNotificationsStore } from '../../store/notifications.store';
@@ -45,6 +46,9 @@ const THEME_COLORS: Record<string, { bg: string; text: string; activeBg: string 
   '/expenses':      { bg: 'bg-amber-50',            text: 'text-amber-600',        activeBg: 'bg-amber-50' },
   '/incomes':       { bg: 'bg-emerald-500/10',      text: 'text-emerald-600',      activeBg: 'bg-emerald-500/10' },
   '/notifications': { bg: 'bg-gold/10',             text: 'text-gold',             activeBg: 'bg-gold/10' },
+  '/barcode-sales':   { bg: 'bg-indigo-50', text: 'text-indigo-600', activeBg: 'bg-indigo-50' },
+  '/barcode-invoices':{ bg: 'bg-indigo-50', text: 'text-indigo-600', activeBg: 'bg-indigo-50' },
+  '/barcode-inventory':{ bg: 'bg-indigo-50', text: 'text-indigo-600', activeBg: 'bg-indigo-50' },
 };
 
 const NavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => {
@@ -130,6 +134,8 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
               <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
               <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
+              <NavItem to="/barcode-sales" icon={Barcode} label="بيع قطع بالباركود" />
+              <NavItem to="/barcode-invoices" icon={FileText} label="فواتير الباركود" />
 
               {/* ── Inventory (Blue) ── */}
               <div className="pt-4 pb-1">
@@ -139,6 +145,7 @@ export const AppLayout: React.FC = () => {
               </div>
               <NavItem to="/inventory" icon={Box} label={t('nav.inventory')} />
               <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
+              <NavItem to="/barcode-inventory" icon={Barcode} label="مخزن الباركود" />
               <NavItem to="/categories" icon={Tags} label={t('nav.categories')} />
 
               {/* ── Scrap Gold (Emerald Green) ── */}
@@ -185,8 +192,11 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
               <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
               <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
+              <NavItem to="/barcode-sales" icon={Barcode} label="بيع قطع بالباركود" />
+              <NavItem to="/barcode-invoices" icon={FileText} label="فواتير الباركود" />
               <NavItem to="/inventory" icon={Box} label={t('nav.inventory')} />
               <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
+              <NavItem to="/barcode-inventory" icon={Barcode} label="مخزن الباركود" />
               <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
               <NavItem to="/scrap-sales" icon={ShoppingCart} label={t('nav.scrapSales')} />
               <NavItem to="/scrap-invoices" icon={FileText} label={t('nav.scrapInvoices')} />

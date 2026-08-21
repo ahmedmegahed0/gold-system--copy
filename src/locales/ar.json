@@ -314,6 +314,7 @@
       "SALE_OUT": "عملية بيع",
       "INVOICE_UPDATE_RETURN": "مرتجع تعديل",
       "INVOICE_UPDATE_OUT": "خصم تعديل",
+      "INVOICE_CANCEL_RETURN": "مرتجع (إلغاء فاتورة)",
       "BULLION_IN": "إدخال سبايك",
       "BULLION_SALE_OUT": "بيع سبيكة",
       "BULLION_UPDATE_RETURN": "مرتجع سبيكة (تعديل)",

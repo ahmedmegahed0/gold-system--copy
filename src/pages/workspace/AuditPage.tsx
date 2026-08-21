@@ -37,6 +37,7 @@ export const AuditPage: React.FC = () => {
     switch (type) {
       case 'INVENTORY_IN':
       case 'INVOICE_UPDATE_RETURN':
+      case 'INVOICE_CANCEL_RETURN':
       case 'BULLION_IN':
       case 'BULLION_UPDATE_RETURN':
       case 'BULLION_CANCEL_RETURN':

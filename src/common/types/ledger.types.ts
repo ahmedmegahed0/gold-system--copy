@@ -4,8 +4,8 @@ export interface GoldWeights {
   karat18: number;
 }
 
-export interface Financials {
   newGoldSalesCash: number;
+  barcodeGoldSalesCash: number;
   bullionGoldSalesCash: number;
   scrapGoldSalesCash: number;
   extraIncomesCash: number;
