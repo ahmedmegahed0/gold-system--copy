@@ -13,8 +13,7 @@ import {
   User,
   Printer,
   ChevronLeft,
-  ChevronRight,
-  Barcode
+  ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
 import { useBarcodeSales } from '../../hooks/useBarcodeSales';

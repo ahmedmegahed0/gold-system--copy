@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { BarcodeSalesService } from '../services/barcode-sales.service';
 import type { BarcodeInvoice, CreateBarcodeInvoiceDto } from '../common/types/barcode.types';
 

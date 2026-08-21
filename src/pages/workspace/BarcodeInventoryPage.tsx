@@ -93,7 +93,7 @@ const PrintTagModal: React.FC<{ isOpen: boolean; onClose: () => void; barcode: s
   )
 }
 
-const BarcodeFormModal: React.FC<{ isOpen: boolean; onClose: () => void; onSubmit: (data: any) => Promise<void>; initialData?: BarcodeInventoryItem | null }> = ({ isOpen, onClose, onSubmit, initialData }) => {
+const BarcodeFormModal: React.FC<{ isOpen: boolean; onClose: () => void; onSubmit: (data: any) => Promise<any>; initialData?: BarcodeInventoryItem | null }> = ({ isOpen, onClose, onSubmit, initialData }) => {
   const isEditing = !!initialData;
   const [formData, setFormData] = useState<CreateBarcodeItemDto>({
     title: '',
