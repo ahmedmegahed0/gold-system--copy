@@ -295,7 +295,9 @@ export function BarcodeInventoryPage() {
                   <tr key={item._id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 font-mono text-sm text-[#C9A84C]">{item.barcode}</td>
                     <td className="px-6 py-4 font-medium text-[#1A1A1A]">{item.title}</td>
-                    <td className="px-6 py-4 text-gray-600">{item.category}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {typeof item.category === 'object' ? (item.category as any)?.name : item.category}
+                    </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#C9A84C]/10 text-[#C9A84C]">
                         {item.karat}
