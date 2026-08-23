@@ -284,13 +284,13 @@ export function BarcodeInventoryPage() {
             <tbody className="divide-y divide-gray-50">
               {isLoading ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center text-gray-400">
+                  <td colSpan={10} className="px-6 py-12 text-center text-gray-400">
                     جاري تحميل البيانات...
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center text-gray-400">
+                  <td colSpan={10} className="px-6 py-12 text-center text-gray-400">
                     لا توجد قطع مطابقة للبحث
                   </td>
                 </tr>

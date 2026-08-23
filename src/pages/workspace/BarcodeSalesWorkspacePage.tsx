@@ -88,6 +88,9 @@ function CashierTab() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [manualTotalAmount, setManualTotalAmount] = useState<number | ''>('');
+  const [isManualTotal, setIsManualTotal] = useState(false);
+
   // Focus scanner initially
   useEffect(() => {
     scanInputRef.current?.focus();
@@ -143,7 +146,13 @@ function CashierTab() {
   };
 
   const totalWeight = cart.reduce((sum, item) => sum + item.netWeight, 0);
-  const grandTotal = cart.reduce((sum, item) => sum + item.itemTotal, 0);
+  const autoGrandTotal = cart.reduce((sum, item) => sum + item.itemTotal, 0);
+
+  useEffect(() => {
+    if (!isManualTotal) {
+      setManualTotalAmount(autoGrandTotal > 0 ? parseFloat(autoGrandTotal.toFixed(2)) : '');
+    }
+  }, [autoGrandTotal, isManualTotal]);
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
@@ -151,11 +160,20 @@ function CashierTab() {
 
     try {
       const payload: BarcodeCheckoutDto = {
-        items: cart.map(c => ({
-          barcode: c.barcode,
-          goldPricePerGram: (c as any).goldPricePerGram || 0,
-          makingChargePerGram: c.makingChargePerGram || 0,
-        }))
+        items: cart.map(c => {
+          let finalMakingCharge = c.makingChargePerGram || 0;
+          if (isManualTotal && manualTotalAmount !== '' && autoGrandTotal > 0 && c.netWeight > 0) {
+             const ratio = Number(manualTotalAmount) / autoGrandTotal;
+             const newItemTotal = c.itemTotal * ratio;
+             const gp = (c as any).goldPricePerGram || 0;
+             finalMakingCharge = (newItemTotal / c.netWeight) - gp;
+          }
+          return {
+            barcode: c.barcode,
+            goldPricePerGram: (c as any).goldPricePerGram || 0,
+            makingChargePerGram: parseFloat(finalMakingCharge.toFixed(2)),
+          };
+        })
       };
 
       if (customerMode === 'SELECT' && selectedCustomerId) {
@@ -177,6 +195,8 @@ function CashierTab() {
       setNewCustomerName('');
       setNewCustomerPhone('');
       setCustomerMode('SELECT');
+      setIsManualTotal(false);
+      setManualTotalAmount('');
       scanInputRef.current?.focus();
     } catch (err: any) {
       alert(err.response?.data?.message || 'خطأ في إتمام البيع');
@@ -402,9 +422,44 @@ function CashierTab() {
             <span className="font-bold text-[#C9A84C] text-lg">{totalWeight.toFixed(2)}g</span>
           </div>
           <hr className="border-gray-700 my-4" />
-          <div className="flex justify-between items-center text-xl font-bold">
-            <span>المبلغ المطلوب</span>
-            <span className="text-[#C9A84C] text-2xl">{grandTotal.toLocaleString('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ج.م</span>
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between items-center text-xl font-bold">
+              <span>المبلغ المطلوب</span>
+              {isManualTotal ? (
+                <span
+                  className="text-xs font-bold text-amber-500 cursor-pointer hover:text-amber-700 underline underline-offset-2"
+                  onClick={() => setIsManualTotal(false)}
+                >✏️ يدوي (عودة للتلقائي)</span>
+              ) : (
+                <span className="text-xs text-gray-400 font-normal">تلقائي</span>
+              )}
+            </div>
+            <div className="relative mt-2">
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={isManualTotal ? manualTotalAmount : (autoGrandTotal > 0 ? parseFloat(autoGrandTotal.toFixed(2)) : '')}
+                onChange={(e) => {
+                  setIsManualTotal(true);
+                  setManualTotalAmount(e.target.value === '' ? '' : parseFloat(e.target.value) || 0);
+                }}
+                className={`w-full text-3xl font-black text-center py-4 rounded-xl border-2 focus:outline-none transition-colors ${
+                  isManualTotal
+                    ? 'border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C] focus:border-[#D4AF37]'
+                    : 'border-transparent bg-transparent text-[#C9A84C] focus:border-transparent'
+                }`}
+                dir="ltr"
+                placeholder="0"
+              />
+              <span className="absolute bottom-4 left-4 text-xl text-[#C9A84C] font-black pointer-events-none">ج.م</span>
+            </div>
+            {isManualTotal && autoGrandTotal > 0 && Number(manualTotalAmount) > 0 && (
+              <div className="mt-2 p-2 bg-[#C9A84C]/10 border border-[#C9A84C]/30 rounded-lg text-xs font-bold text-[#C9A84C] flex justify-between">
+                <span>الأصلي: {parseFloat(autoGrandTotal.toFixed(2)).toLocaleString()} ج.م</span>
+                <span dir="ltr">{(Number(manualTotalAmount) - autoGrandTotal).toLocaleString()} ج.م (فرق)</span>
+              </div>
+            )}
           </div>
         </div>
 
