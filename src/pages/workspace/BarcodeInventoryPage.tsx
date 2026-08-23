@@ -6,6 +6,7 @@ import {
 import { useAuth } from '../../core/context/AuthContext';
 import { useBarcodeInventory } from '../../hooks/useBarcodeInventory';
 import { useCategories } from '../../hooks/useCategories';
+import { useInventory } from '../../hooks/useInventory';
 import type { 
   CreateBarcodeItemDto, 
   BarcodeItem 
@@ -36,6 +37,7 @@ const OutlineButton = ({ children, onClick, className = '', icon: Icon }: any) =
 export function BarcodeInventoryPage() {
   const { user } = useAuth();
   const isOwner = user?.role === 'OWNER';
+  const { categories } = useCategories();
 
   const {
     items,
@@ -298,7 +300,7 @@ export function BarcodeInventoryPage() {
                     <td className="px-6 py-4 font-mono text-sm text-[#C9A84C]">{item.barcode}</td>
                     <td className="px-6 py-4 font-medium text-[#1A1A1A]">{item.title}</td>
                     <td className="px-6 py-4 text-gray-600">
-                      {typeof item.category === 'object' ? (item.category as any)?.name : item.category}
+                      {typeof item.category === 'object' ? (item.category as any)?.name : categories.find(c => c._id === item.category)?.name || item.category}
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#C9A84C]/10 text-[#C9A84C]">
@@ -413,6 +415,7 @@ export function BarcodeInventoryPage() {
 // --- ITEM FORM MODAL COMPONENT ---
 function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
   const { categories } = useCategories();
+  const { inventory } = useInventory({ status: 'ACTIVE' });
   
   const [formData, setFormData] = useState<Partial<CreateBarcodeItemDto>>(
     initialData || {
@@ -423,6 +426,7 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
       tagWeight: 0,
       makingChargePerGram: 0,
       category: '',
+      inventoryId: '',
       companyName: '',
     }
   );
@@ -435,7 +439,18 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
     e.preventDefault();
     setLoading(true);
     try {
-      await onSubmit(formData);
+      const submitData = {
+        ...formData,
+        grossWeight: Number(formData.grossWeight) || 0,
+        tagWeight: formData.tagWeight ? Number(formData.tagWeight) : undefined,
+        makingChargePerGram: Number(formData.makingChargePerGram) || 0,
+        karat: Number(formData.karat) || 21,
+      };
+      // If inventoryId is empty string, remove it so it's not sent
+      if (!submitData.inventoryId) {
+        delete submitData.inventoryId;
+      }
+      await onSubmit(submitData);
     } catch (error) {
       alert('حدث خطأ أثناء حفظ البيانات');
     } finally {
@@ -444,10 +459,12 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
+    // For numbers, we keep the string value in state so the user can type "." safely.
+    // The cast to number happens in handleSubmit.
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'number' ? parseFloat(value) || 0 : value
+      [name]: value
     }));
   };
 
@@ -520,6 +537,23 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
                 <option value={18}>عيار 18</option>
                 <option value={21}>عيار 21</option>
                 <option value={24}>عيار 24</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">المخزون العام (اختياري)</label>
+              <select
+                name="inventoryId"
+                value={formData.inventoryId || ''}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent transition-all outline-none"
+              >
+                <option value="">-- بدون ربط بالمخزون --</option>
+                {inventory.map((inv) => (
+                  <option key={inv._id} value={inv._id}>
+                    {inv.title} (عيار {inv.karat} - {inv.companyName})
+                  </option>
+                ))}
               </select>
             </div>
 
