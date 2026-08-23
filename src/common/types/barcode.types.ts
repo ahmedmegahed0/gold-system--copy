@@ -37,6 +37,8 @@ export interface BarcodeSaleItemDto {
 export interface CreateBarcodeInvoiceDto {
   items: BarcodeSaleItemDto[];
   customerId?: string;
+  customerName?: string;
+  phoneNumber?: string;
 }
 
 export interface BarcodeInvoiceItem {

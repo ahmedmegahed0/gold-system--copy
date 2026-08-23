@@ -124,7 +124,7 @@ const BarcodeFormModal: React.FC<{ isOpen: boolean; onClose: () => void; onSubmi
           title: '',
           karat: 21,
           grossWeight: '' as any,
-          tagWeight: 0.06 as any,
+          tagWeight: '' as any,
           makingChargePerGram: '' as any,
           companyName: '',
           barcode: '',
@@ -146,8 +146,10 @@ const BarcodeFormModal: React.FC<{ isOpen: boolean; onClose: () => void; onSubmi
       await onSubmit({
         ...formData,
         grossWeight: Number(formData.grossWeight),
-        tagWeight: Number(formData.tagWeight || 0),
+        tagWeight: (formData.tagWeight as any) === '' || formData.tagWeight === undefined ? undefined : Number(formData.tagWeight),
         makingChargePerGram: Number(formData.makingChargePerGram),
+        barcode: formData.barcode?.trim() || undefined,
+        companyName: formData.companyName?.trim() || undefined,
       });
       onClose();
     } catch (err: any) {
@@ -191,8 +193,8 @@ const BarcodeFormModal: React.FC<{ isOpen: boolean; onClose: () => void; onSubmi
             <input type="number" step="0.01" value={formData.grossWeight} onChange={e => setFormData({...formData, grossWeight: e.target.value as any})} className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none" dir="ltr" />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-charcoal mb-2">وزن التيكت (جم)</label>
-            <input type="number" step="0.01" value={formData.tagWeight} onChange={e => setFormData({...formData, tagWeight: e.target.value as any})} className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none" dir="ltr" />
+            <label className="block text-sm font-semibold text-charcoal mb-2">وزن التيكت (جم) (اختياري)</label>
+            <input type="number" step="0.01" value={formData.tagWeight ?? ''} onChange={e => setFormData({...formData, tagWeight: e.target.value as any})} className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none" dir="ltr" placeholder="الافتراضي 0.06" />
           </div>
           <div className="col-span-2">
             <label className="block text-sm font-semibold text-charcoal mb-2">مصنعية الجرام (ج.م) <span className="text-red-400">*</span></label>

@@ -30,6 +30,7 @@ export const BarcodeSalesCounterPage: React.FC = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [customerSearch, setCustomerSearch] = useState('');
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const [customerPhone, setCustomerPhone] = useState('');
 
   const [barcodeInput, setBarcodeInput] = useState('');
   const [isScanning, setIsScanning] = useState(false);
@@ -58,6 +59,10 @@ export const BarcodeSalesCounterPage: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successInvoice, setSuccessInvoice] = useState<BarcodeInvoice | null>(null);
+
+  // Global manual total override
+  const [manualTotalAmount, setManualTotalAmount] = useState<number | ''>('');
+  const [isManualTotal, setIsManualTotal] = useState(false);
 
   // ─── Data Fetching ───
   useEffect(() => {
@@ -127,7 +132,14 @@ export const BarcodeSalesCounterPage: React.FC = () => {
   const calcItemTotal = (c: CartItem) => {
     return c.item.netWeight * ((c.goldPriceToday || 0) + (c.makingChargePerGram || 0));
   };
-  const totalPrice = cart.reduce((sum, c) => sum + calcItemTotal(c), 0);
+  const autoTotalPrice = cart.reduce((sum, c) => sum + calcItemTotal(c), 0);
+
+  // Sync global manual total when cart changes
+  useEffect(() => {
+    if (!isManualTotal) {
+      setManualTotalAmount(autoTotalPrice > 0 ? parseFloat(autoTotalPrice.toFixed(2)) : '');
+    }
+  }, [autoTotalPrice, isManualTotal]);
 
   // ─── Submission ───
   const handleCheckout = async () => {
@@ -139,14 +151,30 @@ export const BarcodeSalesCounterPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       const payload: any = {
-        items: cart.map((c) => ({
-          barcode: c.item.barcode,
-          goldPricePerGram: c.goldPriceToday || 0,
-          makingChargePerGram: c.makingChargePerGram || 0,
-        })),
+        items: cart.map((c) => {
+          let finalMakingCharge = c.makingChargePerGram || 0;
+          if (isManualTotal && manualTotalAmount !== '' && autoTotalPrice > 0 && c.item.netWeight > 0) {
+            const ratio = Number(manualTotalAmount) / autoTotalPrice;
+            const autoItem = c.item.netWeight * ((c.goldPriceToday || 0) + (c.makingChargePerGram || 0));
+            const newItemTotal = autoItem * ratio;
+            finalMakingCharge = (newItemTotal / c.item.netWeight) - (c.goldPriceToday || 0);
+          }
+          return {
+            barcode: c.item.barcode,
+            goldPricePerGram: c.goldPriceToday || 0,
+            makingChargePerGram: finalMakingCharge,
+          };
+        }),
       };
       if (selectedCustomer) {
         payload.customerId = selectedCustomer._id || selectedCustomer.id;
+      } else {
+        if (customerSearch.trim()) {
+          payload.customerName = customerSearch.trim();
+        }
+        if (customerPhone.trim()) {
+          payload.phoneNumber = customerPhone.trim();
+        }
       }
 
       const invoice = await checkout(payload);
@@ -162,8 +190,12 @@ export const BarcodeSalesCounterPage: React.FC = () => {
     setSuccessInvoice(null);
     setCart([]);
     setSelectedCustomer(null);
+    setCustomerSearch('');
+    setCustomerPhone('');
     setBarcodeInput('');
     setScanError('');
+    setManualTotalAmount('');
+    setIsManualTotal(false);
   };
 
   // ─── Printable Invoice Preview Modal ───
@@ -275,30 +307,42 @@ export const BarcodeSalesCounterPage: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <div className="relative" ref={customerDropdownRef}>
-                  <Search size={16} className={`absolute top-3.5 text-gray-400 right-4`} />
+                <div className="flex flex-col gap-2">
+                  <div className="relative" ref={customerDropdownRef}>
+                    <Search size={16} className={`absolute top-3.5 text-gray-400 right-4`} />
+                    <input
+                      type="text"
+                      value={customerSearch}
+                      onChange={(e) => { setCustomerSearch(e.target.value); setShowCustomerDropdown(true); }}
+                      onFocus={() => setShowCustomerDropdown(true)}
+                      placeholder="ابحث عن عميل أو اكتب اسماً جديداً..."
+                      className="w-full py-3 pr-10 pl-4 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition-all bg-gray-50/50 focus:bg-white"
+                    />
+                    {showCustomerDropdown && (
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-xl shadow-lg z-20 overflow-hidden">
+                        {filteredCustomers.length > 0 ? (
+                          filteredCustomers.map(c => (
+                            <div key={c._id || c.id} onClick={() => handleCustomerSelect(c)} className="p-3 hover:bg-gray-50 cursor-pointer flex flex-col border-b border-gray-50 last:border-0">
+                              <span className="font-bold text-sm text-charcoal">{c.fullName}</span>
+                              <span className="text-xs text-gray-500" dir="ltr">{c.phoneNumber}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-4 text-center text-sm text-gray-500">
+                            {customerSearch.trim() ? 'سيتم إنشاء عميل جديد بهذا الاسم' : 'لا يوجد عملاء'}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <input
                     type="text"
-                    value={customerSearch}
-                    onChange={(e) => { setCustomerSearch(e.target.value); setShowCustomerDropdown(true); }}
-                    onFocus={() => setShowCustomerDropdown(true)}
-                    placeholder="ابحث عن عميل..."
-                    className="w-full py-3 pr-10 pl-4 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition-all bg-gray-50/50 focus:bg-white"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="رقم الهاتف (اختياري للعميل الجديد)"
+                    className="w-full py-2.5 px-4 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition-all bg-gray-50/50 focus:bg-white"
+                    dir="ltr"
                   />
-                  {showCustomerDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-xl shadow-lg z-20 overflow-hidden">
-                      {filteredCustomers.length > 0 ? (
-                        filteredCustomers.map(c => (
-                          <div key={c._id || c.id} onClick={() => handleCustomerSelect(c)} className="p-3 hover:bg-gray-50 cursor-pointer flex flex-col border-b border-gray-50 last:border-0">
-                            <span className="font-bold text-sm text-charcoal">{c.fullName}</span>
-                            <span className="text-xs text-gray-500" dir="ltr">{c.phoneNumber}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="p-4 text-center text-sm text-gray-400">لا يوجد عملاء</div>
-                      )}
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -369,11 +413,26 @@ export const BarcodeSalesCounterPage: React.FC = () => {
                         <input
                           type="number"
                           min="0"
-                          value={cartItem.makingChargePerGram || ''}
+                          value={(() => {
+                            if (isManualTotal && manualTotalAmount !== '' && autoTotalPrice > 0 && item.netWeight > 0) {
+                              const ratio = Number(manualTotalAmount) / autoTotalPrice;
+                              const autoItem = item.netWeight * ((cartItem.goldPriceToday || 0) + (cartItem.makingChargePerGram || 0));
+                              const newItemTotal = autoItem * ratio;
+                              const newMaking = newItemTotal / item.netWeight - (cartItem.goldPriceToday || 0);
+                              return parseFloat(newMaking.toFixed(2));
+                            }
+                            return cartItem.makingChargePerGram || '';
+                          })()}
                           onChange={(e) => updateItemMakingCharge(cartItem.cartItemId, parseFloat(e.target.value) || 0)}
-                          className="w-full py-3 px-1 border-2 border-teal-200 rounded-xl text-lg font-black text-center text-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-teal-50 shadow-inner"
+                          readOnly={isManualTotal}
+                          className={`w-full py-3 px-1 border-2 rounded-xl text-lg font-black text-center focus:outline-none focus:ring-2 shadow-inner ${
+                            isManualTotal
+                              ? 'border-amber-300 bg-amber-50 text-amber-700 focus:ring-amber-500 cursor-default'
+                              : 'border-teal-200 bg-teal-50 text-teal-700 focus:ring-teal-500'
+                          }`}
                           placeholder="المصنعية"
                           dir="ltr"
+                          title={isManualTotal ? 'محسوبة من الإجمالي المعدّل' : ''}
                         />
                       </div>
                       <div className="flex justify-center">
@@ -423,13 +482,41 @@ export const BarcodeSalesCounterPage: React.FC = () => {
           <div className="border-t border-gray-100 pt-5 mb-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-lg font-bold text-gray-500">الإجمالي النهائي للذهب</span>
+              {isManualTotal ? (
+                <span
+                  className="text-xs font-bold text-amber-500 cursor-pointer hover:text-amber-700 underline underline-offset-2"
+                  onClick={() => setIsManualTotal(false)}
+                >✏️ يدوي (فاصلت) — إعادة تلقائي</span>
+              ) : (
+                <span className="text-xs text-gray-400 font-normal">تلقائي</span>
+              )}
             </div>
             <div className="relative">
-              <div className="w-full text-5xl font-black text-center py-6 rounded-xl border-2 border-indigo-100 bg-indigo-50 text-indigo-800" dir="ltr">
-                {totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </div>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={isManualTotal ? manualTotalAmount : (autoTotalPrice > 0 ? parseFloat(autoTotalPrice.toFixed(2)) : '')}
+                onChange={(e) => {
+                  setIsManualTotal(true);
+                  setManualTotalAmount(e.target.value === '' ? '' : parseFloat(e.target.value) || 0);
+                }}
+                className={`w-full text-5xl font-black text-center py-6 rounded-xl border-2 focus:outline-none transition-colors ${
+                  isManualTotal
+                    ? 'border-amber-400 bg-amber-50 text-amber-700 focus:border-amber-500'
+                    : 'border-indigo-100 bg-indigo-50 text-indigo-800 focus:border-indigo-500'
+                }`}
+                dir="ltr"
+                placeholder="0"
+              />
               <span className="absolute bottom-6 left-4 text-2xl text-indigo-600 font-black pointer-events-none">ج.م</span>
             </div>
+            {isManualTotal && autoTotalPrice > 0 && Number(manualTotalAmount) > 0 && (
+              <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-700 flex justify-between">
+                <span>الإجمالي الأصلي: {parseFloat(autoTotalPrice.toFixed(2)).toLocaleString()} ج.م</span>
+                <span>الفرق: {(Number(manualTotalAmount) - autoTotalPrice).toLocaleString()} ج.م</span>
+              </div>
+            )}
           </div>
           <button
             onClick={handleCheckout}
