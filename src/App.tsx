@@ -11,6 +11,7 @@ import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { InventoryPage } from './pages/workspace/InventoryPage';
 import { ScrapPage } from './pages/workspace/ScrapPage';
+import { ScrapPurchasesPage } from './pages/workspace/ScrapPurchasesPage';
 import { BullionInventoryPage } from './pages/workspace/BullionInventoryPage';
 import { ScrapSalesCounterPage } from './pages/workspace/ScrapSalesCounterPage';
 import { ScrapInvoicesPage } from './pages/workspace/ScrapInvoicesPage';
@@ -65,6 +66,7 @@ const App: React.FC = () => {
               <Route path="bullion-inventory" element={<BullionInventoryPage />} />
               <Route path="barcode-inventory" element={<BarcodeInventoryPage />} />
               <Route path="scrap" element={<ScrapPage />} />
+              <Route path="scrap-purchases" element={<ScrapPurchasesPage />} />
 
               {/* Owner Only Routes */}
               <Route element={<RoleGuard allowedRole="OWNER" />}>

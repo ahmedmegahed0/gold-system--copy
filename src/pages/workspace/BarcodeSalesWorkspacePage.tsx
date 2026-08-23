@@ -129,16 +129,26 @@ function CashierTab() {
     setCart(prev => prev.filter(c => c.barcode !== barcode));
   };
 
-  const updateCartItem = (barcode: string, field: 'goldPricePerGram' | 'makingChargePerGram', value: number) => {
+  const updateCartItem = (barcode: string, field: 'goldPricePerGram' | 'makingChargePerGram' | 'itemTotal', value: number) => {
     setCart(prev => prev.map(c => {
       if (c.barcode === barcode) {
         const updatedItem = { ...c, [field]: value };
-        // Recalculate itemTotal
-        const gp = field === 'goldPricePerGram' ? value : (c as any).goldPricePerGram || 0;
-        const mp = field === 'makingChargePerGram' ? value : c.makingChargePerGram || 0;
-        updatedItem.itemTotal = (c.netWeight * gp) + (c.netWeight * mp);
-        // Also mutate the object to store goldPricePerGram temporarily
-        (updatedItem as any).goldPricePerGram = gp;
+        
+        if (field === 'itemTotal') {
+          // User edited the item total directly
+          // Recalculate making charge: makingCharge = (total / weight) - goldPrice
+          const gp = (c as any).goldPricePerGram || 0;
+          updatedItem.makingChargePerGram = parseFloat(((value / c.netWeight) - gp).toFixed(2));
+          updatedItem.itemTotal = value;
+          (updatedItem as any).goldPricePerGram = gp;
+        } else {
+          // User edited gold price or making charge
+          const gp = field === 'goldPricePerGram' ? value : (c as any).goldPricePerGram || 0;
+          const mp = field === 'makingChargePerGram' ? value : c.makingChargePerGram || 0;
+          updatedItem.itemTotal = parseFloat(((c.netWeight * gp) + (c.netWeight * mp)).toFixed(2));
+          (updatedItem as any).goldPricePerGram = gp;
+        }
+        
         return updatedItem;
       }
       return c;
@@ -337,7 +347,16 @@ function CashierTab() {
                         onChange={(e) => updateCartItem(item.barcode, 'makingChargePerGram', parseFloat(e.target.value) || 0)}
                       />
                     </td>
-                    <td className="px-4 py-3 font-bold text-[#1A1A1A]">{item.itemTotal.toFixed(2)}</td>
+                    <td className="px-4 py-3 font-bold text-[#1A1A1A]">
+                      <input 
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className="w-28 p-1.5 border border-gray-200 rounded-lg text-center font-bold text-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C] outline-none"
+                        value={item.itemTotal || ''}
+                        onChange={(e) => updateCartItem(item.barcode, 'itemTotal', parseFloat(e.target.value) || 0)}
+                      />
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <button onClick={() => removeFromCart(item.barcode)} className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded">
                         <Trash2 size={16} />

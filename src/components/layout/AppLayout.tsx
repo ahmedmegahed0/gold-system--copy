@@ -35,6 +35,7 @@ const THEME_COLORS: Record<string, { bg: string; text: string; activeBg: string 
   '/bullion-inventory': { bg: 'bg-theme-inventory/10',  text: 'text-theme-inventory',  activeBg: 'bg-theme-inventory/10' },
   '/categories':    { bg: 'bg-theme-categories/10', text: 'text-theme-categories', activeBg: 'bg-theme-categories/10' },
   '/scrap':         { bg: 'bg-theme-scrap/10',      text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
+  '/scrap-purchases':{ bg: 'bg-theme-scrap/10',     text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
   '/invoices':      { bg: 'bg-theme-sales/10',      text: 'text-theme-sales',      activeBg: 'bg-theme-sales/10' },
   '/scrap-invoices':{ bg: 'bg-theme-scrap/10',      text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
   '/customers':     { bg: 'bg-theme-customers/10',  text: 'text-theme-customers',  activeBg: 'bg-theme-customers/10' },
@@ -155,6 +156,7 @@ export const AppLayout: React.FC = () => {
                 </span>
               </div>
               <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
+              <NavItem to="/scrap-purchases" icon={Receipt} label="دفتر المشتريات" />
               <NavItem to="/scrap-sales" icon={ShoppingCart} label={t('nav.scrapSales')} />
               <NavItem to="/scrap-invoices" icon={FileText} label={t('nav.scrapInvoices')} />
 
@@ -198,6 +200,7 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
               <NavItem to="/barcode-inventory" icon={Barcode} label="مخزن الباركود" />
               <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
+              <NavItem to="/scrap-purchases" icon={Receipt} label="دفتر المشتريات" />
               <NavItem to="/scrap-sales" icon={ShoppingCart} label={t('nav.scrapSales')} />
               <NavItem to="/scrap-invoices" icon={FileText} label={t('nav.scrapInvoices')} />
               <NavItem to="/customers" icon={Users} label={t('nav.customers')} />
