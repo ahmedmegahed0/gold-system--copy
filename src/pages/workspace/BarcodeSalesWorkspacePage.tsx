@@ -107,12 +107,12 @@ function CashierTab() {
     try {
       setScanError(null);
       const item = await scanItem(scanInput.trim());
-      if (item.status !== 'IN_STOCK') {
+      if (item.status !== 'AVAILABLE') {
         setScanError('القطعة مباعة أو غير متاحة');
       } else {
         // Calculate initial total
         // Note: For gold, we typically ask for gold price per gram, but here we can just add it and let them set prices
-        const itemTotal = (item.netWeight * 0) + ((item.makingChargesPerGram || 0) * item.netWeight);
+        const itemTotal = (item.netWeight * 0) + ((item.makingChargePerGram || 0) * item.netWeight);
         setCart(prev => [...prev, { ...item, itemTotal }]);
       }
     } catch (err) {
@@ -126,13 +126,13 @@ function CashierTab() {
     setCart(prev => prev.filter(c => c.barcode !== barcode));
   };
 
-  const updateCartItem = (barcode: string, field: 'goldPricePerGram' | 'makingChargesPerGram', value: number) => {
+  const updateCartItem = (barcode: string, field: 'goldPricePerGram' | 'makingChargePerGram', value: number) => {
     setCart(prev => prev.map(c => {
       if (c.barcode === barcode) {
         const updatedItem = { ...c, [field]: value };
         // Recalculate itemTotal
         const gp = field === 'goldPricePerGram' ? value : (c as any).goldPricePerGram || 0;
-        const mp = field === 'makingChargesPerGram' ? value : c.makingChargesPerGram || 0;
+        const mp = field === 'makingChargePerGram' ? value : c.makingChargePerGram || 0;
         updatedItem.itemTotal = (c.netWeight * gp) + (c.netWeight * mp);
         // Also mutate the object to store goldPricePerGram temporarily
         (updatedItem as any).goldPricePerGram = gp;
@@ -154,7 +154,7 @@ function CashierTab() {
         items: cart.map(c => ({
           barcode: c.barcode,
           goldPricePerGram: (c as any).goldPricePerGram || 0,
-          makingChargePerGram: c.makingChargesPerGram || 0,
+          makingChargePerGram: c.makingChargePerGram || 0,
         }))
       };
 
@@ -313,8 +313,8 @@ function CashierTab() {
                         type="number"
                         min="0"
                         className="w-24 p-1 border rounded text-center"
-                        value={item.makingChargesPerGram || ''}
-                        onChange={(e) => updateCartItem(item.barcode, 'makingChargesPerGram', parseFloat(e.target.value) || 0)}
+                        value={item.makingChargePerGram || ''}
+                        onChange={(e) => updateCartItem(item.barcode, 'makingChargePerGram', parseFloat(e.target.value) || 0)}
                       />
                     </td>
                     <td className="px-4 py-3 font-bold text-[#1A1A1A]">{item.itemTotal.toFixed(2)}</td>

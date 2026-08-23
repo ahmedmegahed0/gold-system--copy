@@ -1,20 +1,24 @@
 export interface CreateBarcodeItemDto {
-  barcode: string;
+  barcode?: string;
   title: string;
   karat: 18 | 21 | 24;
   grossWeight: number;
-  netWeight: number;
-  makingChargesPerGram?: number;
-  category: string;
-  invoiceRef?: string;
+  tagWeight?: number;
+  makingChargePerGram: number;
+  category?: string;
+  inventoryId?: string;
   companyName?: string;
 }
 
 export type UpdateBarcodeItemDto = Partial<CreateBarcodeItemDto>;
 
-export type BarcodeItem = CreateBarcodeItemDto & {
+export interface BarcodeItem extends Omit<CreateBarcodeItemDto, 'barcode'> {
   _id: string;
-  status: 'IN_STOCK' | 'SOLD' | 'ARCHIVED';
+  barcode: string;
+  netWeight: number;
+  tagWeight: number;
+  status: 'AVAILABLE' | 'SOLD' | 'RESERVED';
+  inventoryRef?: any;
   createdAt: string;
   updatedAt: string;
-};
+}

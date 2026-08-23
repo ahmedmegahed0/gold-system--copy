@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
 import { useBarcodeInventory } from '../../hooks/useBarcodeInventory';
+import { useCategories } from '../../hooks/useCategories';
 import type { 
   CreateBarcodeItemDto, 
   BarcodeItem 
@@ -241,7 +242,7 @@ export function BarcodeInventoryPage() {
                   : 'text-gray-500 hover:text-gray-900'
               }`}
             >
-              المتاحة بالمخزن (IN_STOCK)
+              المتاحة بالمخزن (AVAILABLE)
             </button>
             {isOwner && (
               <button
@@ -271,6 +272,7 @@ export function BarcodeInventoryPage() {
                 <th className="px-6 py-4">التصنيف</th>
                 <th className="px-6 py-4">العيار</th>
                 <th className="px-6 py-4">الوزن القائم</th>
+                <th className="px-6 py-4">وزن التاج</th>
                 <th className="px-6 py-4">الوزن الصافي</th>
                 <th className="px-6 py-4">المصنعية/جرام</th>
                 <th className="px-6 py-4">الشركة</th>
@@ -304,8 +306,9 @@ export function BarcodeInventoryPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-gray-600">{item.grossWeight}g</td>
+                    <td className="px-6 py-4 text-gray-600">{item.tagWeight}g</td>
                     <td className="px-6 py-4 text-gray-600">{item.netWeight}g</td>
-                    <td className="px-6 py-4 text-gray-600">{item.makingChargesPerGram || 0}</td>
+                    <td className="px-6 py-4 text-gray-600">{item.makingChargePerGram || 0}</td>
                     <td className="px-6 py-4 text-gray-600">{item.companyName || '-'}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
@@ -409,17 +412,18 @@ export function BarcodeInventoryPage() {
 
 // --- ITEM FORM MODAL COMPONENT ---
 function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
+  const { categories } = useCategories();
+  
   const [formData, setFormData] = useState<Partial<CreateBarcodeItemDto>>(
     initialData || {
       barcode: '',
       title: '',
       karat: 21,
       grossWeight: 0,
-      netWeight: 0,
-      makingChargesPerGram: 0,
+      tagWeight: 0,
+      makingChargePerGram: 0,
       category: '',
       companyName: '',
-      invoiceRef: '',
     }
   );
 
@@ -489,15 +493,20 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">التصنيف *</label>
-              <input
-                type="text"
+              <select
                 name="category"
                 required
-                value={formData.category}
+                value={formData.category || ''}
                 onChange={handleChange}
-                placeholder="مثال: غوايش، خواتم..."
                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent transition-all outline-none"
-              />
+              >
+                <option value="" disabled>اختر التصنيف...</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">
@@ -528,13 +537,12 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">الوزن الصافي (جرام) *</label>
+              <label className="text-sm font-medium text-gray-700">وزن التاج (جرام)</label>
               <input
                 type="number"
                 step="0.01"
-                name="netWeight"
-                required
-                value={formData.netWeight || ''}
+                name="tagWeight"
+                value={formData.tagWeight || ''}
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent transition-all outline-none"
               />
@@ -545,8 +553,8 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
               <input
                 type="number"
                 step="0.01"
-                name="makingChargesPerGram"
-                value={formData.makingChargesPerGram || ''}
+                name="makingChargePerGram"
+                value={formData.makingChargePerGram || ''}
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent transition-all outline-none"
               />
