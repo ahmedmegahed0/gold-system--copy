@@ -324,46 +324,67 @@ function CashierTab() {
                   </td>
                 </tr>
               ) : (
-                cart.map(item => (
-                  <tr key={item.barcode} className="hover:bg-gray-50/50">
-                    <td className="px-4 py-3 font-mono text-xs text-[#C9A84C]">{item.barcode}</td>
-                    <td className="px-4 py-3 font-medium">{item.title}</td>
-                    <td className="px-4 py-3 text-gray-600">{item.netWeight}g</td>
-                    <td className="px-4 py-3">
-                      <input 
-                        type="number"
-                        min="0"
-                        className="w-24 p-1 border rounded text-center"
-                        value={(item as any).goldPricePerGram || ''}
-                        onChange={(e) => updateCartItem(item.barcode, 'goldPricePerGram', parseFloat(e.target.value) || 0)}
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <input 
-                        type="number"
-                        min="0"
-                        className="w-24 p-1 border rounded text-center"
-                        value={item.makingChargePerGram || ''}
-                        onChange={(e) => updateCartItem(item.barcode, 'makingChargePerGram', parseFloat(e.target.value) || 0)}
-                      />
-                    </td>
-                    <td className="px-4 py-3 font-bold text-[#1A1A1A]">
-                      <input 
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        className="w-28 p-1.5 border border-gray-200 rounded-lg text-center font-bold text-[#C9A84C] focus:ring-2 focus:ring-[#C9A84C] outline-none"
-                        value={item.itemTotal || ''}
-                        onChange={(e) => updateCartItem(item.barcode, 'itemTotal', parseFloat(e.target.value) || 0)}
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <button onClick={() => removeFromCart(item.barcode)} className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded">
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                cart.map(item => {
+                  let displayItemTotal = item.itemTotal;
+                  let displayMakingCharge = item.makingChargePerGram || 0;
+                  
+                  if (isManualTotal && manualTotalAmount !== '' && autoGrandTotal > 0 && item.netWeight > 0) {
+                     const ratio = Number(manualTotalAmount) / autoGrandTotal;
+                     displayItemTotal = item.itemTotal * ratio;
+                     const gp = (item as any).goldPricePerGram || 0;
+                     displayMakingCharge = (displayItemTotal / item.netWeight) - gp;
+                  }
+
+                  return (
+                    <tr key={item.barcode} className="hover:bg-gray-50/50">
+                      <td className="px-4 py-3 font-mono text-xs text-[#C9A84C]">{item.barcode}</td>
+                      <td className="px-4 py-3 font-medium">{item.title}</td>
+                      <td className="px-4 py-3 text-gray-600">{item.netWeight}g</td>
+                      <td className="px-4 py-3">
+                        <input 
+                          type="number"
+                          min="0"
+                          className="w-24 p-1 border rounded text-center"
+                          value={(item as any).goldPricePerGram || ''}
+                          onChange={(e) => {
+                            setIsManualTotal(false);
+                            updateCartItem(item.barcode, 'goldPricePerGram', parseFloat(e.target.value) || 0);
+                          }}
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <input 
+                          type="number"
+                          min="0"
+                          className={`w-24 p-1 border rounded text-center ${isManualTotal ? 'bg-amber-50 text-amber-600 font-bold border-amber-200' : ''}`}
+                          value={isManualTotal ? displayMakingCharge.toFixed(2) : (item.makingChargePerGram || '')}
+                          onChange={(e) => {
+                            setIsManualTotal(false);
+                            updateCartItem(item.barcode, 'makingChargePerGram', parseFloat(e.target.value) || 0);
+                          }}
+                        />
+                      </td>
+                      <td className="px-4 py-3 font-bold text-[#1A1A1A]">
+                        <input 
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          className={`w-28 p-1.5 border rounded-lg text-center font-bold outline-none focus:ring-2 focus:ring-[#C9A84C] ${isManualTotal ? 'bg-amber-50 text-amber-600 border-amber-200' : 'border-gray-200 text-[#C9A84C]'}`}
+                          value={isManualTotal ? displayItemTotal.toFixed(2) : (item.itemTotal || '')}
+                          onChange={(e) => {
+                            setIsManualTotal(false);
+                            updateCartItem(item.barcode, 'itemTotal', parseFloat(e.target.value) || 0);
+                          }}
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <button onClick={() => removeFromCart(item.barcode)} className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded">
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
