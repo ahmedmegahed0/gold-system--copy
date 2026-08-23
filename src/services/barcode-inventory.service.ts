@@ -1,44 +1,45 @@
 import apiClient from '../core/apiClient';
 import type { 
-  BarcodeInventoryItem, 
-  CreateBarcodeItemDto 
-} from '../common/types/barcode.types';
+  CreateBarcodeItemDto,
+  UpdateBarcodeItemDto,
+  BarcodeItem 
+} from '../common/types/barcode-inventory.types';
 
 export const BarcodeInventoryService = {
-  createItem: async (data: CreateBarcodeItemDto): Promise<BarcodeInventoryItem> => {
+  createBarcodeItem: async (data: CreateBarcodeItemDto): Promise<BarcodeItem> => {
     const response = await apiClient.post<any>('/barcode-inventory', data);
     return response.data?.data || response.data;
   },
 
-  scanBarcode: async (barcode: string): Promise<BarcodeInventoryItem> => {
-    const response = await apiClient.get<any>(`/barcode-inventory/scan/${barcode}`);
-    return response.data?.data || response.data;
-  },
-
-  findAllArchived: async (): Promise<BarcodeInventoryItem[]> => {
-    const response = await apiClient.get<any>('/barcode-inventory/archived');
-    const result = response.data?.data || response.data;
-    return Array.isArray(result) ? result : [];
-  },
-
-  findAllAvailable: async (karat?: number): Promise<BarcodeInventoryItem[]> => {
+  getBarcodeItems: async (karat?: 18 | 21 | 24): Promise<BarcodeItem[]> => {
     const params = karat ? { karat } : {};
     const response = await apiClient.get<any>('/barcode-inventory', { params });
     const result = response.data?.data || response.data;
     return Array.isArray(result) ? result : [];
   },
 
-  updateItem: async (id: string, data: Partial<CreateBarcodeItemDto>): Promise<BarcodeInventoryItem> => {
+  scanBarcodeItem: async (barcode: string): Promise<BarcodeItem> => {
+    const response = await apiClient.get<any>(`/barcode-inventory/scan/${barcode}`);
+    return response.data?.data || response.data;
+  },
+
+  getArchivedBarcodeItems: async (): Promise<BarcodeItem[]> => {
+    const response = await apiClient.get<any>('/barcode-inventory/archived');
+    const result = response.data?.data || response.data;
+    return Array.isArray(result) ? result : [];
+  },
+
+  updateBarcodeItem: async (id: string, data: UpdateBarcodeItemDto): Promise<BarcodeItem> => {
     const response = await apiClient.put<any>(`/barcode-inventory/${id}`, data);
     return response.data?.data || response.data;
   },
 
-  softDelete: async (id: string): Promise<void> => {
+  archiveBarcodeItem: async (id: string): Promise<void> => {
     await apiClient.delete(`/barcode-inventory/${id}`);
   },
 
   getPrintTag: async (barcode: string): Promise<{ barcode: string; imageBase64: string }> => {
     const response = await apiClient.get<any>(`/barcode-inventory/print-tag/${barcode}`);
     return response.data?.data || response.data;
-  },
+  }
 };

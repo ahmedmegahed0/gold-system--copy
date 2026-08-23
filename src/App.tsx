@@ -29,8 +29,7 @@ import { InvoicesPage } from './pages/workspace/InvoicesPage';
 import { ProfitLedgerPage } from './pages/workspace/ProfitLedgerPage';
 import { IncomesPage } from './pages/workspace/IncomesPage';
 import { BarcodeInventoryPage } from './pages/workspace/BarcodeInventoryPage';
-import { BarcodeSalesCounterPage } from './pages/workspace/BarcodeSalesCounterPage';
-import { BarcodeInvoicesPage } from './pages/workspace/BarcodeInvoicesPage';
+import { BarcodeSalesWorkspacePage } from './pages/workspace/BarcodeSalesWorkspacePage';
 
 const App: React.FC = () => {
   return (
@@ -61,8 +60,7 @@ const App: React.FC = () => {
               <Route path="scrap-invoices" element={<ScrapInvoicesPage />} />
               <Route path="bullion-sales" element={<BullionSalesCounterPage />} />
               <Route path="bullion-invoices" element={<BullionInvoicesPage />} />
-              <Route path="barcode-sales" element={<BarcodeSalesCounterPage />} />
-              <Route path="barcode-invoices" element={<BarcodeInvoicesPage />} />
+              <Route path="barcode-sales" element={<BarcodeSalesWorkspacePage />} />
               <Route path="inventory" element={<InventoryPage />} />
               <Route path="bullion-inventory" element={<BullionInventoryPage />} />
               <Route path="barcode-inventory" element={<BarcodeInventoryPage />} />

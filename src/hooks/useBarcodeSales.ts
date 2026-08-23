@@ -1,6 +1,10 @@
 import { useState, useCallback } from 'react';
 import { BarcodeSalesService } from '../services/barcode-sales.service';
-import type { BarcodeInvoice, CreateBarcodeInvoiceDto } from '../common/types/barcode.types';
+import type { 
+  BarcodeInvoice, 
+  BarcodeCheckoutDto,
+  UpdateBarcodeInvoiceDto
+} from '../common/types/barcode-sales.types';
 
 export const useBarcodeSales = () => {
   const [invoices, setInvoices] = useState<BarcodeInvoice[]>([]);
@@ -11,7 +15,7 @@ export const useBarcodeSales = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await BarcodeSalesService.getInvoices();
+      const data = await BarcodeSalesService.getBarcodeInvoices();
       setInvoices(data);
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'فشل في جلب الفواتير');
@@ -20,20 +24,27 @@ export const useBarcodeSales = () => {
     }
   }, []);
 
-  const checkout = async (data: CreateBarcodeInvoiceDto) => {
-    const invoice = await BarcodeSalesService.checkout(data);
+  const checkoutBarcodeSale = async (data: BarcodeCheckoutDto) => {
+    const invoice = await BarcodeSalesService.checkoutBarcodeSale(data);
+    // Add to top of list if we've already fetched invoices
+    setInvoices(prev => [invoice, ...prev]);
     return invoice;
   };
   
-  const cancelInvoice = async (id: string) => {
-    await BarcodeSalesService.cancelInvoice(id);
-    setInvoices(prev => prev.filter(inv => inv._id !== id));
+  const cancelBarcodeInvoice = async (id: string) => {
+    await BarcodeSalesService.cancelBarcodeInvoice(id);
+    // Refresh to get correct statuses or manually update
+    setInvoices(prev => prev.map(inv => inv._id === id ? { ...inv, status: 'CANCELLED' } : inv));
   };
   
-  const updateInvoice = async (id: string, data: CreateBarcodeInvoiceDto) => {
-    const updated = await BarcodeSalesService.updateInvoice(id, data);
+  const updateBarcodeInvoice = async (id: string, data: UpdateBarcodeInvoiceDto) => {
+    const updated = await BarcodeSalesService.updateBarcodeInvoice(id, data);
     setInvoices(prev => prev.map(inv => inv._id === id ? updated : inv));
     return updated;
+  };
+
+  const getBarcodeInvoiceById = async (id: string) => {
+    return BarcodeSalesService.getBarcodeInvoiceById(id);
   };
 
   return {
@@ -41,8 +52,9 @@ export const useBarcodeSales = () => {
     isLoading,
     error,
     fetchInvoices,
-    checkout,
-    cancelInvoice,
-    updateInvoice
+    checkoutBarcodeSale,
+    cancelBarcodeInvoice,
+    updateBarcodeInvoice,
+    getBarcodeInvoiceById
   };
 };

@@ -1,14 +1,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import { BarcodeInventoryService } from '../services/barcode-inventory.service';
-import type { BarcodeInventoryItem, CreateBarcodeItemDto } from '../common/types/barcode.types';
+import type { 
+  BarcodeItem, 
+  CreateBarcodeItemDto,
+  UpdateBarcodeItemDto
+} from '../common/types/barcode-inventory.types';
 
 export const useBarcodeInventory = (initialArchived = false) => {
-  const [items, setItems] = useState<BarcodeInventoryItem[]>([]);
+  const [items, setItems] = useState<BarcodeItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   const [filters, setFilters] = useState({
-    karat: undefined as number | undefined,
+    karat: undefined as 18 | 21 | 24 | undefined,
     isArchived: initialArchived,
     search: '',
   });
@@ -17,11 +21,11 @@ export const useBarcodeInventory = (initialArchived = false) => {
     setIsLoading(true);
     setError(null);
     try {
-      let data: BarcodeInventoryItem[] = [];
+      let data: BarcodeItem[] = [];
       if (filters.isArchived) {
-        data = await BarcodeInventoryService.findAllArchived();
+        data = await BarcodeInventoryService.getArchivedBarcodeItems();
       } else {
-        data = await BarcodeInventoryService.findAllAvailable(filters.karat);
+        data = await BarcodeInventoryService.getBarcodeItems(filters.karat);
       }
       
       if (filters.search) {
@@ -30,7 +34,7 @@ export const useBarcodeInventory = (initialArchived = false) => {
           item => 
             item.title.toLowerCase().includes(query) || 
             item.barcode.toLowerCase().includes(query) ||
-            item.companyName.toLowerCase().includes(query)
+            (item.companyName && item.companyName.toLowerCase().includes(query))
         );
       }
       
@@ -47,21 +51,21 @@ export const useBarcodeInventory = (initialArchived = false) => {
   }, [fetchItems]);
 
   const createItem = async (data: CreateBarcodeItemDto) => {
-    const newItem = await BarcodeInventoryService.createItem(data);
+    const newItem = await BarcodeInventoryService.createBarcodeItem(data);
     if (!filters.isArchived) {
       setItems(prev => [newItem, ...prev]);
     }
     return newItem;
   };
 
-  const updateItem = async (id: string, data: Partial<CreateBarcodeItemDto>) => {
-    const updated = await BarcodeInventoryService.updateItem(id, data);
+  const updateItem = async (id: string, data: UpdateBarcodeItemDto) => {
+    const updated = await BarcodeInventoryService.updateBarcodeItem(id, data);
     setItems(prev => prev.map(item => item._id === id ? updated : item));
     return updated;
   };
 
   const archiveItem = async (id: string) => {
-    await BarcodeInventoryService.softDelete(id);
+    await BarcodeInventoryService.archiveBarcodeItem(id);
     if (!filters.isArchived) {
       setItems(prev => prev.filter(item => item._id !== id));
     } else {
@@ -71,6 +75,10 @@ export const useBarcodeInventory = (initialArchived = false) => {
   
   const getPrintTag = async (barcode: string) => {
     return BarcodeInventoryService.getPrintTag(barcode);
+  };
+
+  const scanItem = async (barcode: string) => {
+    return BarcodeInventoryService.scanBarcodeItem(barcode);
   };
 
   return {
@@ -84,5 +92,6 @@ export const useBarcodeInventory = (initialArchived = false) => {
     updateItem,
     archiveItem,
     getPrintTag,
+    scanItem,
   };
 };
