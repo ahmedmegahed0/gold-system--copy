@@ -19,7 +19,9 @@ export const BarcodeInventoryService = {
   },
 
   scanBarcodeItem: async (barcode: string): Promise<BarcodeItem> => {
-    const response = await apiClient.get<any>(`/barcode-inventory/scan/${barcode}`);
+    const response = await apiClient.get<any>(`/barcode-inventory/scan/${barcode}`, {
+      params: { _t: new Date().getTime() }
+    });
     return response.data?.data || response.data;
   },
 

@@ -56,7 +56,10 @@ export const BarcodeInvoicesPage: React.FC = () => {
   }, [fetchInvoices]);
 
   const filteredInvoices = useMemo(() => {
-    let list = invoices.filter(inv => inv.status === activeTab);
+    let list = invoices.filter(inv => {
+      const status = inv.status || 'ACTIVE';
+      return activeTab === 'ACTIVE' ? status !== 'CANCELLED' : status === 'CANCELLED';
+    });
     if (searchTerm) {
       list = list.filter((inv) => inv.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()));
     }
@@ -200,8 +203,8 @@ export const BarcodeInvoicesPage: React.FC = () => {
                         <td className="border border-charcoal py-3 px-2">{item.title}</td>
                         <td className="border border-charcoal py-3 px-2" dir="ltr">{item.barcode}</td>
                         <td className="border border-charcoal py-3 px-2" dir="ltr">{item.karat}k</td>
-                        <td className="border border-charcoal py-3 px-2">{item.weight.toFixed(2)}</td>
-                        <td className="border border-charcoal py-3 px-2" dir="ltr">{item.itemTotal.toLocaleString()}</td>
+                        <td className="border border-charcoal py-3 px-2">{(item.weight || 0).toFixed(2)}</td>
+                        <td className="border border-charcoal py-3 px-2" dir="ltr">{(item.itemTotal || 0).toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -209,7 +212,7 @@ export const BarcodeInvoicesPage: React.FC = () => {
                 <div className="flex justify-end mt-8">
                   <div className="border-2 border-charcoal rounded-xl p-4 w-72 bg-gray-50 space-y-2">
                     <div className="flex justify-between items-center text-sm font-bold text-gray-500"><span>إجمالي وزن الذهب:</span><span dir="ltr">{totalGoldWeight.toFixed(2)} g</span></div>
-                    <div className="border-t border-gray-300 pt-2 flex justify-between items-center text-lg font-black mt-2"><span>الإجمالي الكلي:</span><span dir="ltr">{viewingInvoice.totalAmount.toLocaleString()}</span></div>
+                    <div className="border-t border-gray-300 pt-2 flex justify-between items-center text-lg font-black mt-2"><span>الإجمالي الكلي:</span><span dir="ltr">{(viewingInvoice.totalAmount || 0).toLocaleString()}</span></div>
                   </div>
                 </div>
               </div>

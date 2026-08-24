@@ -12,8 +12,11 @@ export const BarcodeSalesService = {
   },
 
   getBarcodeInvoices: async (): Promise<BarcodeInvoice[]> => {
-    const response = await apiClient.get<any>('/barcode-sales/invoices');
-    const result = response.data?.data || response.data;
+    const response = await apiClient.get<any>('/barcode-sales/invoices', { params: { limit: 1000000 } });
+    let result = response.data?.data || response.data;
+    if (result && !Array.isArray(result)) {
+      result = result.docs || result.data || result.invoices || result.items || [];
+    }
     return Array.isArray(result) ? result : [];
   },
 
