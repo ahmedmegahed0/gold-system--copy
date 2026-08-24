@@ -20,7 +20,8 @@ import {
   Menu,
   X,
   Banknote,
-  Barcode
+  Barcode,
+  Flame
 } from 'lucide-react';
 import { useLiveNotifications } from '../../hooks/useLiveNotifications';
 import { useNotificationsStore } from '../../store/notifications.store';
@@ -50,6 +51,7 @@ const THEME_COLORS: Record<string, { bg: string; text: string; activeBg: string 
   '/barcode-sales':   { bg: 'bg-indigo-50', text: 'text-indigo-600', activeBg: 'bg-indigo-50' },
   '/barcode-invoices':{ bg: 'bg-indigo-50', text: 'text-indigo-600', activeBg: 'bg-indigo-50' },
   '/barcode-inventory':{ bg: 'bg-indigo-50', text: 'text-indigo-600', activeBg: 'bg-indigo-50' },
+  '/melting':       { bg: 'bg-orange-50', text: 'text-orange-600', activeBg: 'bg-orange-50' },
 };
 
 const NavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => {
@@ -125,28 +127,28 @@ export const AppLayout: React.FC = () => {
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">
           {isOwner ? (
             <>
-              {/* ── Sales & POS (Red) ── */}
+              {/* ── Barcode System (Indigo) ── */}
               <div className="pt-2 pb-1">
-                <span className="text-[10px] font-bold text-theme-sales/60 uppercase tracking-wider px-3">
-                  {t('nav.sales')}
+                <span className="text-[10px] font-bold text-indigo-600/60 uppercase tracking-wider px-3">
+                  نظام الباركود
                 </span>
               </div>
-              <NavItem to="/sales" icon={ShoppingCart} label={t('nav.sales')} />
-              <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
-              <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
-              <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
-              <NavItem to="/barcode-sales" icon={Barcode} label="بيع قطع بالباركود" />
+              <NavItem to="/barcode-inventory" icon={Barcode} label="مخزن الباركود" />
+              <NavItem to="/barcode-sales" icon={ShoppingCart} label="بيع قطع بالباركود" />
               <NavItem to="/barcode-invoices" icon={FileText} label="فواتير الباركود" />
 
-              {/* ── Inventory (Blue) ── */}
+              {/* ── New Gold & Bullion (Red & Blue) ── */}
               <div className="pt-4 pb-1">
-                <span className="text-[10px] font-bold text-theme-inventory/60 uppercase tracking-wider px-3">
-                  {t('nav.inventory')}
+                <span className="text-[10px] font-bold text-theme-sales/60 uppercase tracking-wider px-3">
+                  الذهب الجديد والسبايك
                 </span>
               </div>
               <NavItem to="/inventory" icon={Box} label={t('nav.inventory')} />
               <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
-              <NavItem to="/barcode-inventory" icon={Barcode} label="مخزن الباركود" />
+              <NavItem to="/sales" icon={ShoppingCart} label={t('nav.sales')} />
+              <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
+              <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
+              <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
               <NavItem to="/categories" icon={Tags} label={t('nav.categories')} />
 
               {/* ── Scrap Gold (Emerald Green) ── */}
@@ -159,6 +161,7 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/scrap-purchases" icon={Receipt} label="دفتر المشتريات" />
               <NavItem to="/scrap-sales" icon={ShoppingCart} label={t('nav.scrapSales')} />
               <NavItem to="/scrap-invoices" icon={FileText} label={t('nav.scrapInvoices')} />
+              <NavItem to="/melting" icon={Flame} label="تسييح الذهب" />
 
               {/* ── Customers (Gold) ── */}
               <div className="pt-4 pb-1">
@@ -190,19 +193,22 @@ export const AppLayout: React.FC = () => {
             </>
           ) : (
             <>
-              <NavItem to="/sales" icon={ShoppingCart} label={t('nav.sales')} />
-              <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
-              <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
-              <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
-              <NavItem to="/barcode-sales" icon={Barcode} label="بيع قطع بالباركود" />
+              <NavItem to="/barcode-inventory" icon={Barcode} label="مخزن الباركود" />
+              <NavItem to="/barcode-sales" icon={ShoppingCart} label="بيع قطع بالباركود" />
               <NavItem to="/barcode-invoices" icon={FileText} label="فواتير الباركود" />
+              <div className="border-t border-gray-100 my-2"></div>
               <NavItem to="/inventory" icon={Box} label={t('nav.inventory')} />
               <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
-              <NavItem to="/barcode-inventory" icon={Barcode} label="مخزن الباركود" />
+              <NavItem to="/sales" icon={ShoppingCart} label={t('nav.sales')} />
+              <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
+              <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
+              <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
+              <div className="border-t border-gray-100 my-2"></div>
               <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
               <NavItem to="/scrap-purchases" icon={Receipt} label="دفتر المشتريات" />
               <NavItem to="/scrap-sales" icon={ShoppingCart} label={t('nav.scrapSales')} />
               <NavItem to="/scrap-invoices" icon={FileText} label={t('nav.scrapInvoices')} />
+              <NavItem to="/melting" icon={Flame} label="تسييح الذهب" />
               <NavItem to="/customers" icon={Users} label={t('nav.customers')} />
               <NavItem to="/incomes" icon={Banknote} label="الدخل والإيرادات" />
               <NavItem to="/expenses" icon={Receipt} label="المصاريف النثرية" />

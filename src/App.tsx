@@ -12,6 +12,7 @@ import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { InventoryPage } from './pages/workspace/InventoryPage';
 import { ScrapPage } from './pages/workspace/ScrapPage';
 import { ScrapPurchasesPage } from './pages/workspace/ScrapPurchasesPage';
+import { MeltingPage } from './pages/workspace/MeltingPage';
 import { BullionInventoryPage } from './pages/workspace/BullionInventoryPage';
 import { ScrapSalesCounterPage } from './pages/workspace/ScrapSalesCounterPage';
 import { ScrapInvoicesPage } from './pages/workspace/ScrapInvoicesPage';
@@ -31,6 +32,7 @@ import { ProfitLedgerPage } from './pages/workspace/ProfitLedgerPage';
 import { IncomesPage } from './pages/workspace/IncomesPage';
 import { BarcodeInventoryPage } from './pages/workspace/BarcodeInventoryPage';
 import { BarcodeSalesWorkspacePage } from './pages/workspace/BarcodeSalesWorkspacePage';
+import { BarcodeInvoicesPage } from './pages/workspace/BarcodeInvoicesPage';
 
 const App: React.FC = () => {
   return (
@@ -62,11 +64,13 @@ const App: React.FC = () => {
               <Route path="bullion-sales" element={<BullionSalesCounterPage />} />
               <Route path="bullion-invoices" element={<BullionInvoicesPage />} />
               <Route path="barcode-sales" element={<BarcodeSalesWorkspacePage />} />
+              <Route path="barcode-invoices" element={<BarcodeInvoicesPage />} />
               <Route path="inventory" element={<InventoryPage />} />
               <Route path="bullion-inventory" element={<BullionInventoryPage />} />
               <Route path="barcode-inventory" element={<BarcodeInventoryPage />} />
               <Route path="scrap" element={<ScrapPage />} />
               <Route path="scrap-purchases" element={<ScrapPurchasesPage />} />
+              <Route path="melting" element={<MeltingPage />} />
 
               {/* Owner Only Routes */}
               <Route element={<RoleGuard allowedRole="OWNER" />}>

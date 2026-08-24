@@ -296,28 +296,28 @@ export function BarcodeInventoryPage() {
                 </tr>
               ) : (
                 items.map((item) => (
-                  <tr key={item._id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 font-mono text-sm text-[#C9A84C]">{item.barcode}</td>
-                    <td className="px-6 py-4 font-medium text-[#1A1A1A]">{item.title}</td>
-                    <td className="px-6 py-4 text-gray-600">
+                  <tr key={item._id} className="hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-none shadow-sm">
+                    <td className="px-6 py-4 font-mono text-sm font-bold text-indigo-700 bg-indigo-50/40">{item.barcode}</td>
+                    <td className="px-6 py-4 font-bold text-base text-gray-800">{item.title}</td>
+                    <td className="px-6 py-4 font-bold text-gray-600 bg-gray-50/50">
                       {typeof item.category === 'object' ? (item.category as any)?.name : categories.find(c => c._id === item.category)?.name || item.category}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#C9A84C]/10 text-[#C9A84C]">
+                      <span className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-sm font-black bg-amber-100 text-amber-800 border border-amber-200">
                         {item.karat}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{item.grossWeight}g</td>
-                    <td className="px-6 py-4 text-gray-600">{item.tagWeight}g</td>
-                    <td className="px-6 py-4 text-gray-600">{item.netWeight}g</td>
-                    <td className="px-6 py-4 text-gray-600">{item.makingChargePerGram || 0}</td>
-                    <td className="px-6 py-4 text-gray-600">{item.companyName || '-'}</td>
+                    <td className="px-6 py-4 font-black text-lg text-gray-700 bg-gray-100/50" dir="ltr">{item.grossWeight}g</td>
+                    <td className="px-6 py-4 font-bold text-blue-700 bg-blue-50/30" dir="ltr">{item.tagWeight}g</td>
+                    <td className="px-6 py-4 font-black text-lg text-emerald-700 bg-emerald-50/40" dir="ltr">{item.netWeight}g</td>
+                    <td className="px-6 py-4 font-bold text-purple-700 bg-purple-50/30">{item.makingChargePerGram || 0}</td>
+                    <td className="px-6 py-4 text-gray-600 font-bold">{item.companyName || '-'}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
                           title="طباعة التاج"
                           onClick={() => openPrintTag(item.barcode)}
-                          className="p-1.5 text-gray-400 hover:text-[#C9A84C] hover:bg-[#C9A84C]/10 rounded-md transition-colors"
+                          className="p-2 text-indigo-600 hover:text-white hover:bg-indigo-600 rounded-lg transition-colors border border-indigo-200 shadow-sm"
                         >
                           <Printer size={18} />
                         </button>
@@ -326,7 +326,7 @@ export function BarcodeInventoryPage() {
                             <button
                               title="تعديل"
                               onClick={() => { setEditingItem(item); setIsFormModalOpen(true); }}
-                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                              className="p-2 text-blue-600 hover:text-white hover:bg-blue-600 rounded-lg transition-colors border border-blue-200 shadow-sm"
                             >
                               <Edit size={18} />
                             </button>
@@ -338,7 +338,7 @@ export function BarcodeInventoryPage() {
                                     archiveItem(item._id);
                                   }
                                 }}
-                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                className="p-2 text-red-600 hover:text-white hover:bg-red-600 rounded-lg transition-colors border border-red-200 shadow-sm"
                               >
                                 <Archive size={18} />
                               </button>
@@ -483,18 +483,19 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">الباركود (اختياري، يولد تلقائياً)</label>
-              <input
-                type="text"
-                name="barcode"
-                value={formData.barcode}
-                onChange={handleChange}
-                placeholder="اتركه فارغاً للتوليد التلقائي"
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent transition-all outline-none"
-                disabled={!!initialData} // Disallow editing barcode
-              />
-            </div>
+            {initialData && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">الباركود</label>
+                <input
+                  type="text"
+                  name="barcode"
+                  value={formData.barcode}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg outline-none text-gray-500 font-mono font-bold"
+                  disabled={true} 
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">اسم/وصف القطعة *</label>

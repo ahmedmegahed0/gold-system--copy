@@ -336,15 +336,15 @@ function CashierTab() {
                   }
 
                   return (
-                    <tr key={item.barcode} className="hover:bg-gray-50/50">
-                      <td className="px-4 py-3 font-mono text-xs text-[#C9A84C]">{item.barcode}</td>
-                      <td className="px-4 py-3 font-medium">{item.title}</td>
-                      <td className="px-4 py-3 text-gray-600">{item.netWeight}g</td>
-                      <td className="px-4 py-3">
+                    <tr key={item.barcode} className="hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-none shadow-sm">
+                      <td className="px-4 py-4 font-mono text-sm font-bold text-amber-700 bg-amber-50/40">{item.barcode}</td>
+                      <td className="px-4 py-4 font-bold text-base text-gray-800">{item.title}</td>
+                      <td className="px-4 py-4 font-black text-lg text-gray-700 bg-gray-100/50" dir="ltr">{item.netWeight}g</td>
+                      <td className="px-4 py-4">
                         <input 
                           type="number"
                           min="0"
-                          className="w-24 p-1 border rounded text-center"
+                          className="w-28 p-2 border-2 border-blue-200 bg-blue-50 text-blue-800 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition-all shadow-inner"
                           value={(item as any).goldPricePerGram || ''}
                           onChange={(e) => {
                             setIsManualTotal(false);
@@ -352,11 +352,11 @@ function CashierTab() {
                           }}
                         />
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-4">
                         <input 
                           type="number"
                           min="0"
-                          className={`w-24 p-1 border rounded text-center ${isManualTotal ? 'bg-amber-50 text-amber-600 font-bold border-amber-200' : ''}`}
+                          className={`w-28 p-2 border-2 rounded-lg text-center font-bold text-lg focus:ring-2 outline-none transition-all shadow-inner ${isManualTotal ? 'bg-amber-100 text-amber-700 border-amber-300 focus:ring-amber-400' : 'bg-purple-50 text-purple-800 border-purple-200 focus:ring-purple-400 focus:border-purple-400'}`}
                           value={isManualTotal ? displayMakingCharge.toFixed(2) : (item.makingChargePerGram || '')}
                           onChange={(e) => {
                             setIsManualTotal(false);
@@ -364,12 +364,12 @@ function CashierTab() {
                           }}
                         />
                       </td>
-                      <td className="px-4 py-3 font-bold text-[#1A1A1A]">
+                      <td className="px-4 py-4 font-bold text-[#1A1A1A]">
                         <input 
                           type="number"
                           min="0"
                           step="0.01"
-                          className={`w-28 p-1.5 border rounded-lg text-center font-bold outline-none focus:ring-2 focus:ring-[#C9A84C] ${isManualTotal ? 'bg-amber-50 text-amber-600 border-amber-200' : 'border-gray-200 text-[#C9A84C]'}`}
+                          className={`w-32 p-2 border-2 rounded-xl text-center font-black text-xl focus:ring-2 outline-none transition-all shadow-inner ${isManualTotal ? 'bg-amber-100 text-amber-700 border-amber-300 focus:ring-amber-400' : 'bg-emerald-50 text-emerald-800 border-emerald-300 focus:ring-emerald-400 focus:border-emerald-400'}`}
                           value={isManualTotal ? displayItemTotal.toFixed(2) : (item.itemTotal || '')}
                           onChange={(e) => {
                             setIsManualTotal(false);
@@ -377,9 +377,9 @@ function CashierTab() {
                           }}
                         />
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <button onClick={() => removeFromCart(item.barcode)} className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded">
-                          <Trash2 size={16} />
+                      <td className="px-4 py-4 text-center">
+                        <button onClick={() => removeFromCart(item.barcode)} className="p-2 text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-colors border border-transparent hover:border-red-600 shadow-sm">
+                          <Trash2 size={20} />
                         </button>
                       </td>
                     </tr>
