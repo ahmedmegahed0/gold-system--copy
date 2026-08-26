@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   ScanLine, ShoppingCart, Trash2, CheckCircle, 
-  Printer, Ban, FileText, X, XCircle 
+  Printer, X 
 } from 'lucide-react';
 import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
-import { useAuth } from '../../core/context/AuthContext';
 import { useBarcodeSales } from '../../hooks/useBarcodeSales';
 import { useBarcodeInventory } from '../../hooks/useBarcodeInventory';
 import { useCustomers } from '../../hooks/useCustomers';
@@ -41,10 +40,7 @@ const ModalOverlay: React.FC<{ isOpen: boolean; onClose: () => void; title: stri
 };
 
 export function BarcodeSalesWorkspacePage() {
-  const { user } = useAuth();
-  const isOwner = user?.role === 'OWNER';
 
-  const [activeTab, setActiveTab] = useState<'CASHIER' | 'INVOICES'>('CASHIER');
   const [viewingInvoice, setViewingInvoice] = useState<BarcodeInvoice | null>(null);
 
   return (
@@ -57,28 +53,6 @@ export function BarcodeSalesWorkspacePage() {
           <p className="text-gray-500 mt-2">إدارة المبيعات الفورية وسجل الفواتير</p>
         </div>
 
-        <div className="flex p-1 bg-white border border-gray-200 rounded-lg shadow-sm">
-          <button
-            onClick={() => setActiveTab('CASHIER')}
-            className={`flex items-center gap-2 px-6 py-2.5 text-sm font-medium rounded-md transition-all ${
-              activeTab === 'CASHIER'
-                ? 'bg-[#C9A84C] text-white shadow'
-                : 'text-gray-600 hover:text-[#C9A84C] hover:bg-gray-50'
-            }`}
-          >
-            <ShoppingCart size={18} /> شاشة الكاشير
-          </button>
-          <button
-            onClick={() => setActiveTab('INVOICES')}
-            className={`flex items-center gap-2 px-6 py-2.5 text-sm font-medium rounded-md transition-all ${
-              activeTab === 'INVOICES'
-                ? 'bg-[#C9A84C] text-white shadow'
-                : 'text-gray-600 hover:text-[#C9A84C] hover:bg-gray-50'
-            }`}
-          >
-            <FileText size={18} /> سجل الفواتير
-          </button>
-        </div>
       </div>
 
 <ModalOverlay isOpen={!!viewingInvoice} onClose={() => setViewingInvoice(null)} title="تفاصيل الفاتورة" printFriendly={true}>
@@ -95,50 +69,51 @@ export function BarcodeSalesWorkspacePage() {
                 </button>
               </div>
 
-              <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-[#1A1A1A] print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm]">
+              <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-charcoal print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm]" dir="rtl">
                 <InvoicePrintHeader title={`فاتورة مبيعات باركود ${viewingInvoice.status === 'ACTIVE' ? '' : '(ملغاة)'}`} />
                 
-                <div className="border-2 border-[#C9A84C] rounded-xl p-4 text-center mb-8 bg-[#C9A84C]/5">
-                  <span className="text-2xl font-black text-[#1A1A1A]">العميل: {customerName}</span>
+                <div className="border-2 border-blue-600 rounded-xl p-4 text-center mb-8 bg-blue-50/30">
+                  <span className="text-2xl font-black text-blue-800">العميل: {customerName}</span>
                 </div>
                 
                 <div className="flex justify-between items-start mb-8 text-sm font-bold border-b border-gray-200 pb-8">
                   <div className="space-y-3">
                     <div className="flex gap-2"><span className="text-gray-500 w-32">الموظف المسؤول:</span> <span>{sellerName}</span></div>
+                    <div className="flex gap-2"><span className="text-gray-500 w-32">طريقة الدفع:</span> <span>آجل / نقداً</span></div>
                   </div>
                   <div className="space-y-3">
                     <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">رقم الفاتورة:</span> <span dir="ltr">#{viewingInvoice.invoiceNumber}</span></div>
-                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">التاريخ:</span> <span>{new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
+                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">التاريخ والوقت:</span> <span>{new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
                   </div>
                 </div>
 
-                <table className="w-full mb-8 border-collapse border border-[#1A1A1A] text-center text-sm font-bold">
+                <table className="w-full mb-8 border-collapse border border-charcoal text-center text-sm font-bold">
                   <thead>
                     <tr className="bg-gray-100">
-                      <th className="border border-[#1A1A1A] py-3 px-2">م</th>
-                      <th className="border border-[#1A1A1A] py-3 px-2">اسم الصنف</th>
-                      <th className="border border-[#1A1A1A] py-3 px-2">الباركود</th>
-                      <th className="border border-[#1A1A1A] py-3 px-2">العيار</th>
-                      <th className="border border-[#1A1A1A] py-3 px-2">الوزن</th>
-                      <th className="border border-[#1A1A1A] py-3 px-2">السعر (ج.م)</th>
+                      <th className="border border-charcoal py-3 px-2 w-10">م</th>
+                      <th className="border border-charcoal py-3 px-2">اسم الصنف</th>
+                      <th className="border border-charcoal py-3 px-2">الباركود</th>
+                      <th className="border border-charcoal py-3 px-2 w-16">العيار</th>
+                      <th className="border border-charcoal py-3 px-2 w-24">الوزن</th>
+                      <th className="border border-charcoal py-3 px-2 w-32">السعر (ج.م)</th>
                     </tr>
                   </thead>
                   <tbody>
                     {viewingInvoice.items?.map((item, idx) => (
                       <tr key={idx}>
-                        <td className="border border-[#1A1A1A] py-3 px-2">{idx + 1}</td>
-                        <td className="border border-[#1A1A1A] py-3 px-2">{item.title || 'قطعة'}</td>
-                        <td className="border border-[#1A1A1A] py-3 px-2" dir="ltr">{item.barcode}</td>
-                        <td className="border border-[#1A1A1A] py-3 px-2" dir="ltr">{item.karat || 21}k</td>
-                        <td className="border border-[#1A1A1A] py-3 px-2">{(item.weight || 0).toFixed(2)}</td>
-                        <td className="border border-[#1A1A1A] py-3 px-2" dir="ltr">{(item.itemTotal || 0).toLocaleString()}</td>
+                        <td className="border border-charcoal py-3 px-2">{idx + 1}</td>
+                        <td className="border border-charcoal py-3 px-2">{item.title || 'قطعة'}</td>
+                        <td className="border border-charcoal py-3 px-2" dir="ltr">{item.barcode}</td>
+                        <td className="border border-charcoal py-3 px-2" dir="ltr">{item.karat || 21}k</td>
+                        <td className="border border-charcoal py-3 px-2">{(item.weight || 0).toFixed(2)}</td>
+                        <td className="border border-charcoal py-3 px-2" dir="ltr">{(item.itemTotal || 0).toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
 
                 <div className="flex justify-end mt-8">
-                  <div className="border-2 border-[#1A1A1A] rounded-xl p-4 w-72 bg-gray-50 space-y-2">
+                  <div className="border-2 border-charcoal rounded-xl p-4 w-72 bg-gray-50 space-y-2">
                     <div className="flex justify-between items-center text-sm font-bold text-gray-500">
                       <span>إجمالي وزن الذهب:</span><span dir="ltr">{totalGoldWeight.toFixed(2)} g</span>
                     </div>
@@ -156,7 +131,7 @@ export function BarcodeSalesWorkspacePage() {
           );
         })()}
       </ModalOverlay>
-      {activeTab === 'CASHIER' ? <CashierTab setViewingInvoice={setViewingInvoice} /> : <InvoicesTab isOwner={isOwner} setViewingInvoice={setViewingInvoice} />}
+      <CashierTab setViewingInvoice={setViewingInvoice} />
       
     </div>
   );
@@ -279,6 +254,17 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
           };
         })
       };
+
+      if (customerMode === 'SELECT' && !selectedCustomerId) {
+        alert('برجاء اختيار العميل أولاً');
+        setIsSubmitting(false);
+        return;
+      }
+      if (customerMode === 'NEW' && !newCustomerName.trim()) {
+        alert('برجاء إدخال اسم العميل أولاً');
+        setIsSubmitting(false);
+        return;
+      }
 
       if (customerMode === 'SELECT' && selectedCustomerId) {
         payload.customerId = selectedCustomerId;
@@ -548,102 +534,4 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
   );
 }
 
-// =========================================================================
-// INVOICES TAB
-// =========================================================================
-function InvoicesTab({ isOwner, setViewingInvoice }: { isOwner: boolean, setViewingInvoice: any }) {
-  const { invoices, isLoading, fetchInvoices, cancelBarcodeInvoice } = useBarcodeSales();
-  
-  useEffect(() => {
-    fetchInvoices();
-  }, [fetchInvoices]);
 
-  const handleCancel = async (invoice: BarcodeInvoice) => {
-    if (!window.confirm(`هل أنت متأكد من إلغاء الفاتورة ${invoice.invoiceNumber}؟ سيتم استرجاع القطع للمخزن وتسوية الخزينة.`)) return;
-    try {
-      await cancelBarcodeInvoice(invoice._id);
-      fetchInvoices();
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'خطأ في إلغاء الفاتورة');
-    }
-  };
-
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[600px]">
-      <div className="overflow-x-auto">
-        <table className="w-full text-right">
-          <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 font-medium">
-            <tr>
-              <th className="px-6 py-4">رقم الفاتورة</th>
-              <th className="px-6 py-4">تاريخ البيع</th>
-              <th className="px-6 py-4">العميل</th>
-              <th className="px-6 py-4">القطع</th>
-              <th className="px-6 py-4">الإجمالي (ج.م)</th>
-              <th className="px-6 py-4">الكاشير</th>
-              <th className="px-6 py-4">الحالة</th>
-              <th className="px-6 py-4 text-center">الإجراءات</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {isLoading ? (
-              <tr>
-                <td colSpan={8} className="px-6 py-12 text-center text-gray-400">جاري تحميل الفواتير...</td>
-              </tr>
-            ) : invoices.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="px-6 py-12 text-center text-gray-400">لا توجد فواتير سابقة</td>
-              </tr>
-            ) : (
-              invoices.map(invoice => (
-                <tr key={invoice._id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 font-mono font-medium text-[#1A1A1A]">{invoice.invoiceNumber}</td>
-                  <td className="px-6 py-4 text-gray-600">{new Date(invoice.createdAt).toLocaleString('ar-EG')}</td>
-                  <td className="px-6 py-4 font-medium">
-                    {typeof invoice.customer === 'object' ? invoice.customer.fullName : invoice.customer}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="bg-gray-100 px-2.5 py-1 rounded-full text-sm font-medium">{invoice.items.length} قطع</span>
-                  </td>
-                  <td className="px-6 py-4 font-bold text-[#C9A84C]">{(invoice.totalAmount || 0).toLocaleString('ar-EG')}</td>
-                  <td className="px-6 py-4 text-gray-600">{invoice.cashier?.fullName}</td>
-                  <td className="px-6 py-4">
-                    {invoice.status === 'ACTIVE' ? (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#C9A84C]/10 text-[#C9A84C] border border-[#C9A84C]/20">
-                        نشطة
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-600 border border-red-100">
-                        ملغاة
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        title="عرض / طباعة"
-                        onClick={() => setViewingInvoice(invoice)}
-                        className="p-1.5 text-gray-400 hover:text-[#C9A84C] hover:bg-[#C9A84C]/10 rounded-md transition-colors"
-                      >
-                        <Printer size={18} />
-                      </button>
-                      
-                      {isOwner && invoice.status === 'ACTIVE' && (
-                        <button
-                          title="إلغاء الفاتورة"
-                          onClick={() => handleCancel(invoice)}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          <Ban size={18} />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}

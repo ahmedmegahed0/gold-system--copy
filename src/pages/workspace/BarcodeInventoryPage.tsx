@@ -550,7 +550,9 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent transition-all outline-none"
               >
                 <option value="">-- بدون ربط بالمخزون --</option>
-                {inventory.map((inv) => (
+                {inventory
+                  .filter((inv) => Number(inv.karat) === Number(formData.karat))
+                  .map((inv) => (
                   <option key={inv._id} value={inv._id}>
                     {inv.title} (عيار {inv.karat} - {inv.companyName})
                   </option>
