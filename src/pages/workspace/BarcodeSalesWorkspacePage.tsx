@@ -3,7 +3,6 @@ import {
   ScanLine, ShoppingCart, Trash2, CheckCircle, 
   Printer, X 
 } from 'lucide-react';
-import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
 import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
 import { useBarcodeSales } from '../../hooks/useBarcodeSales';
 import { useBarcodeInventory } from '../../hooks/useBarcodeInventory';
@@ -60,7 +59,7 @@ export function BarcodeSalesWorkspacePage() {
         {viewingInvoice && (() => {
           const customerName = (viewingInvoice.customer as any)?.fullName || '---';
           const sellerName = (viewingInvoice.cashier as any)?.fullName || '---';
-          const totalGoldWeight = viewingInvoice.items?.reduce((sum, item) => sum + (item.weight || 0), 0) || 0;
+
           return (
             <div className="flex flex-col items-center justify-center p-6 print:p-0 text-[#1A1A1A]" dir="rtl">
               <div className="flex justify-between items-center w-full max-w-3xl mb-6 print:hidden gap-4">

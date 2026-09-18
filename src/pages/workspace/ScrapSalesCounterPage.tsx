@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
 import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -200,7 +199,7 @@ export const ScrapSalesCounterPage: React.FC = () => {
 
         {/* The Printable A4 Sheet */}
         <PaperInvoiceLayout
-          invoiceNumber={invoiceNumber}
+          invoiceNumber={invoiceNumber || ''}
           date={dateStr}
           customerName={customerName}
           sellerName={actionByName}
