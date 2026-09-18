@@ -27,6 +27,7 @@ import { NotificationsPage } from './pages/workspace/NotificationsPage';
 import { BullionSalesCounterPage } from './pages/workspace/BullionSalesCounterPage';
 import { BullionInvoicesPage } from './pages/workspace/BullionInvoicesPage';
 import { CustomersPage } from './pages/workspace/CustomersPage';
+import { SuppliersPage } from './pages/workspace/SuppliersPage';
 import { InvoicesPage } from './pages/workspace/InvoicesPage';
 import { ProfitLedgerPage } from './pages/workspace/ProfitLedgerPage';
 import { IncomesPage } from './pages/workspace/IncomesPage';
@@ -57,6 +58,7 @@ const App: React.FC = () => {
               <Route path="sales" element={<SalesCounterPage />} />
               <Route path="scrap-sales" element={<ScrapSalesCounterPage />} />
               <Route path="customers" element={<CustomersPage />} />
+              <Route path="suppliers" element={<SuppliersPage />} />
               <Route path="expenses" element={<ExpensesPage />} />
               <Route path="incomes" element={<IncomesPage />} />
               <Route path="invoices" element={<InvoicesPage />} />

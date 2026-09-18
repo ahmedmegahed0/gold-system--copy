@@ -21,7 +21,9 @@ import {
   X,
   Banknote,
   Barcode,
-  Flame
+  Flame,
+  Truck,
+  Gem
 } from 'lucide-react';
 import { useLiveNotifications } from '../../hooks/useLiveNotifications';
 import { useNotificationsStore } from '../../store/notifications.store';
@@ -40,6 +42,7 @@ const THEME_COLORS: Record<string, { bg: string; text: string; activeBg: string 
   '/invoices':      { bg: 'bg-theme-sales/10',      text: 'text-theme-sales',      activeBg: 'bg-theme-sales/10' },
   '/scrap-invoices':{ bg: 'bg-theme-scrap/10',      text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
   '/customers':     { bg: 'bg-theme-customers/10',  text: 'text-theme-customers',  activeBg: 'bg-theme-customers/10' },
+  '/suppliers':     { bg: 'bg-amber-500/10',        text: 'text-amber-600',        activeBg: 'bg-amber-500/10' },
   '/employees':     { bg: 'bg-theme-employees/10', text: 'text-theme-employees', activeBg: 'bg-theme-employees/10' },
   '/audit':         { bg: 'bg-theme-movements/10',  text: 'text-theme-movements',  activeBg: 'bg-theme-movements/10' },
   '/ledger':        { bg: 'bg-gold/10',             text: 'text-gold',             activeBg: 'bg-gold/10' },
@@ -112,9 +115,16 @@ export const AppLayout: React.FC = () => {
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 ${isRtl ? 'right-0' : 'left-0'} z-50 w-64 bg-white flex flex-col shadow-2xl md:shadow-sm transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 print:hidden ${isRtl ? 'border-l border-gray-100' : 'border-r border-gray-100'} ${isMobileMenuOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}`}>
         <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-charcoal">duo dev</h1>
-            <p className="text-sm text-gold font-medium">{t('nav.title')}</p>
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-700 tracking-wider" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.1)' }}>
+                ليلة القدر
+              </h1>
+              <p className="text-xs text-charcoal font-bold mt-1">{t('nav.title')}</p>
+            </div>
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-50 text-yellow-600 shadow-sm border border-yellow-200 shrink-0">
+               <Gem size={24} strokeWidth={2.5} />
+            </div>
           </div>
           <button 
             className="md:hidden text-gray-400 hover:text-charcoal transition-colors p-1"
@@ -137,19 +147,26 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/barcode-sales" icon={ShoppingCart} label="بيع قطع بالباركود" />
               <NavItem to="/barcode-invoices" icon={FileText} label="فواتير الباركود" />
 
-              {/* ── New Gold & Bullion (Red & Blue) ── */}
+              {/* ── New Gold ── */}
               <div className="pt-4 pb-1">
                 <span className="text-[10px] font-bold text-theme-sales/60 uppercase tracking-wider px-3">
-                  الذهب الجديد والسبايك
+                  المشغولات الذهبية
                 </span>
               </div>
               <NavItem to="/inventory" icon={Box} label={t('nav.inventory')} />
-              <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
               <NavItem to="/sales" icon={ShoppingCart} label={t('nav.sales')} />
-              <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
               <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
-              <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
               <NavItem to="/categories" icon={Tags} label={t('nav.categories')} />
+
+              {/* ── Bullion ── */}
+              <div className="pt-4 pb-1">
+                <span className="text-[10px] font-bold text-blue-500/60 uppercase tracking-wider px-3">
+                  السبائك والعملات
+                </span>
+              </div>
+              <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
+              <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
+              <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
 
               {/* ── Scrap Gold (Emerald Green) ── */}
               <div className="pt-4 pb-1">
@@ -176,6 +193,7 @@ export const AppLayout: React.FC = () => {
                   الماليات والمصروفات
                 </span>
               </div>
+              <NavItem to="/suppliers" icon={Truck} label="حسابات الموردين" />
               <NavItem to="/purchases-ledger" icon={FileSpreadsheet} label="دفتر المشتريات والخوارج" />
               <NavItem to="/incomes" icon={Banknote} label="الدخل والإيرادات" />
               <NavItem to="/expenses" icon={Receipt} label="المصاريف النثرية" />
@@ -198,10 +216,11 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/barcode-invoices" icon={FileText} label="فواتير الباركود" />
               <div className="border-t border-gray-100 my-2"></div>
               <NavItem to="/inventory" icon={Box} label={t('nav.inventory')} />
-              <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
               <NavItem to="/sales" icon={ShoppingCart} label={t('nav.sales')} />
-              <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
               <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
+              <div className="border-t border-gray-100 my-2"></div>
+              <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
+              <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
               <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
               <div className="border-t border-gray-100 my-2"></div>
               <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
@@ -210,6 +229,7 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/scrap-invoices" icon={FileText} label={t('nav.scrapInvoices')} />
               <NavItem to="/melting" icon={Flame} label="تسييح الذهب" />
               <NavItem to="/customers" icon={Users} label={t('nav.customers')} />
+              <NavItem to="/suppliers" icon={Truck} label="حسابات الموردين" />
               <NavItem to="/incomes" icon={Banknote} label="الدخل والإيرادات" />
               <NavItem to="/expenses" icon={Receipt} label="المصاريف النثرية" />
             </>

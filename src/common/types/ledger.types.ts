@@ -11,6 +11,8 @@ export interface Financials {
   scrapGoldSalesCash: number;
   extraIncomesCash: number;
   expensesOutflow: number;
+  scrapPurchasesOutflow: number;
+  supplierPaymentsOutflow: number;
   totalInflow: number;
   netCashflow: number;
 }

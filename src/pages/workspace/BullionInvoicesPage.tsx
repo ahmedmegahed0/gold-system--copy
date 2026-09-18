@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
+import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
 import { useTranslation } from 'react-i18next';
 import {
   FileText,
@@ -261,49 +262,19 @@ export const BullionInvoicesPage: React.FC = () => {
                 <button onClick={() => window.print()} className="px-6 py-2.5 bg-charcoal text-white hover:bg-black font-bold rounded-xl transition-colors flex items-center gap-2"><Printer size={18} /> طباعة</button>
               </div>
 
-              <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-charcoal print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm]" dir="rtl">
-                <InvoicePrintHeader title={`فاتورة مبيعات سبايك ${viewingInvoice.status === 'COMPLETED' ? '' : '(ملغاة)'}`} />
-                <div className="border-2 border-blue-600 rounded-xl p-4 text-center mb-8 bg-blue-50/30"><span className="text-2xl font-black text-blue-800">العميل: {customerName}</span></div>
-                <div className="flex justify-between items-start mb-8 text-sm font-bold border-b border-gray-200 pb-8">
-                  <div className="space-y-3"><div className="flex gap-2"><span className="text-gray-500 w-32">الموظف المسؤول:</span> <span>{sellerName}</span></div></div>
-                  <div className="space-y-3">
-                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">رقم الفاتورة:</span> <span dir="ltr">#{viewingInvoice.invoiceNumber}</span></div>
-                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">التاريخ:</span> <span>{new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
-                  </div>
-                </div>
-                <table className="w-full mb-8 border-collapse border border-charcoal text-center text-sm font-bold">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-charcoal py-3 px-2">م</th>
-                      <th className="border border-charcoal py-3 px-2">اسم الصنف</th>
-                      <th className="border border-charcoal py-3 px-2">العدد</th>
-                      <th className="border border-charcoal py-3 px-2">وزن القطعة (ج)</th>
-                      <th className="border border-charcoal py-3 px-2">الوزن الإجمالي</th>
-                      <th className="border border-charcoal py-3 px-2">سعر الجرام اليوم</th>
-                      <th className="border border-charcoal py-3 px-2">السعر الكلي (ج.م)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {viewingInvoice.items.map((item, idx) => (
-                      <tr key={idx}>
-                        <td className="border border-charcoal py-3 px-2">{idx + 1}</td>
-                        <td className="border border-charcoal py-3 px-2">{item.title}</td>
-                        <td className="border border-charcoal py-3 px-2">{item.quantity}</td>
-                        <td className="border border-charcoal py-3 px-2">{item.weightPerUnit.toFixed(2)}</td>
-                        <td className="border border-charcoal py-3 px-2">{(item.weightPerUnit * item.quantity).toFixed(2)}</td>
-                        <td className="border border-charcoal py-3 px-2" dir="ltr">{item.goldPricePerGram.toLocaleString()}</td>
-                        <td className="border border-charcoal py-3 px-2" dir="ltr">{item.itemTotalPrice.toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="flex justify-end mt-8">
-                  <div className="border-2 border-charcoal rounded-xl p-4 w-72 bg-gray-50 space-y-2">
-                    <div className="flex justify-between items-center text-sm font-bold text-gray-500"><span>إجمالي وزن الذهب:</span><span dir="ltr">{viewingInvoice.totalGoldWeight.toFixed(2)} g</span></div>
-                    <div className="border-t border-gray-300 pt-2 flex justify-between items-center text-lg font-black mt-2"><span>الإجمالي الكلي:</span><span dir="ltr">{viewingInvoice.grandTotal.toLocaleString()}</span></div>
-                  </div>
-                </div>
-              </div>
+              <PaperInvoiceLayout
+                invoiceNumber={viewingInvoice.invoiceNumber}
+                date={new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}
+                customerName={customerName}
+                sellerName={sellerName}
+                totalAmount={viewingInvoice.grandTotal || 0}
+                items={viewingInvoice.items.map((item) => ({
+                  name: item.title + (item.quantity > 1 ? ` (عدد ${item.quantity})` : ''),
+                  karat: 24, // Most bullion is 24K, can be hardcoded or extracted if available
+                  weight: item.weightPerUnit * item.quantity,
+                  price: item.itemTotalPrice
+                }))}
+              />
             </div>
           );
         })()}

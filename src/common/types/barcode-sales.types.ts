@@ -25,6 +25,7 @@ export interface BarcodeInvoice {
     goldPricePerGram: number;
     makingChargePerGram: number;
     itemTotal: number;
+    images?: string[];
   }>;
   totalAmount: number;
   status: 'ACTIVE' | 'CANCELLED';

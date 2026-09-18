@@ -270,6 +270,7 @@ export function BarcodeInventoryPage() {
             <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 font-medium">
               <tr>
                 <th className="px-6 py-4">الباركود</th>
+                <th className="px-6 py-4">الصورة</th>
                 <th className="px-6 py-4">اسم القطعة</th>
                 <th className="px-6 py-4">التصنيف</th>
                 <th className="px-6 py-4">العيار</th>
@@ -298,6 +299,13 @@ export function BarcodeInventoryPage() {
                 items.map((item) => (
                   <tr key={item._id} className="hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-none shadow-sm">
                     <td className="px-6 py-4 font-mono text-sm font-bold text-indigo-700 bg-indigo-50/40">{item.barcode}</td>
+                    <td className="px-6 py-4">
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.title} className="w-12 h-12 object-cover rounded-md border border-gray-200" />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 text-xs">لا صورة</div>
+                      )}
+                    </td>
                     <td className="px-6 py-4 font-bold text-base text-gray-800">{item.title}</td>
                     <td className="px-6 py-4 font-bold text-gray-600 bg-gray-50/50">
                       {typeof item.category === 'object' ? (item.category as any)?.name : categories.find(c => c._id === item.category)?.name || item.category}
@@ -459,13 +467,19 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    // For numbers, we keep the string value in state so the user can type "." safely.
-    // The cast to number happens in handleSubmit.
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const { name, value, type } = e.target;
+    if (type === 'file') {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      setFormData(prev => ({
+        ...prev,
+        [name]: file
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   return (
@@ -605,6 +619,17 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
                 value={formData.companyName}
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent transition-all outline-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">صورة القطعة</label>
+              <input
+                type="file"
+                name="file"
+                accept="image/*"
+                onChange={handleChange}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#C9A84C]/10 file:text-[#C9A84C] hover:file:bg-[#C9A84C]/20"
               />
             </div>
 

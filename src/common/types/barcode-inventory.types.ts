@@ -8,6 +8,7 @@ export interface CreateBarcodeItemDto {
   category?: string;
   inventoryId?: string;
   companyName?: string;
+  file?: File | any;
 }
 
 export type UpdateBarcodeItemDto = Partial<CreateBarcodeItemDto>;
@@ -17,6 +18,7 @@ export interface BarcodeItem extends Omit<CreateBarcodeItemDto, 'barcode'> {
   barcode: string;
   netWeight: number;
   tagWeight: number;
+  imageUrl?: string;
   status: 'AVAILABLE' | 'SOLD' | 'RESERVED';
   inventoryRef?: any;
   createdAt: string;

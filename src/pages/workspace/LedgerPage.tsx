@@ -154,12 +154,12 @@ export const LedgerPage: React.FC = () => {
               <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
                 <TrendingUp size={24} />
               </div>
-              <h3 className="text-xl font-black text-charcoal">شراء الذهب الكسر</h3>
+              <h3 className="text-xl font-black text-charcoal">مبيعات الذهب الكسر</h3>
             </div>
             
             <div className="flex-1 flex flex-col gap-6">
               <div>
-                <span className="block text-sm font-bold text-gray-400 mb-1">إجمالي المدفوعات النقدية</span>
+                <span className="block text-sm font-bold text-gray-400 mb-1">إجمالي المقبوضات النقدية</span>
                 <div className="text-3xl font-black text-charcoal" dir="ltr">
                   {data.financials.scrapGoldSalesCash.toLocaleString()} <span className="text-base text-emerald-600">ج.م</span>
                 </div>
@@ -209,10 +209,25 @@ export const LedgerPage: React.FC = () => {
               + {data.financials.extraIncomesCash.toLocaleString()} <span className="text-base">ج.م</span>
             </div>
           </div>
-          <div className="bg-red-50 rounded-2xl shadow-sm border border-red-100 p-6 flex flex-col justify-center text-center relative overflow-hidden">
-            <span className="block text-sm font-bold text-red-600 mb-2">إجمالي المصروفات والنثريات الخارجية</span>
-            <div className="text-3xl font-black text-red-700" dir="ltr">
+          <div className="bg-red-50 rounded-2xl shadow-sm border border-red-100 p-6 flex flex-col relative overflow-hidden">
+            <span className="block text-sm font-bold text-red-600 mb-4 text-center">إجمالي المصروفات والمدفوعات</span>
+            <div className="text-3xl font-black text-red-700 text-center mb-6" dir="ltr">
               - {data.financials.expensesOutflow.toLocaleString()} <span className="text-base">ج.م</span>
+            </div>
+            
+            <div className="flex flex-col gap-2 mt-auto border-t border-red-200/50 pt-4">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-red-700 font-medium">نثريات ورواتب ومصاريف</span>
+                <span className="font-bold text-red-800" dir="ltr">{(data.financials.expensesOutflow - data.financials.scrapPurchasesOutflow - data.financials.supplierPaymentsOutflow).toLocaleString()} ج.م</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-red-700 font-medium">شراء ذهب كسر</span>
+                <span className="font-bold text-red-800" dir="ltr">{data.financials.scrapPurchasesOutflow.toLocaleString()} ج.م</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-red-700 font-medium">سداد للموردين (نقدي+مصنعية)</span>
+                <span className="font-bold text-red-800" dir="ltr">{data.financials.supplierPaymentsOutflow.toLocaleString()} ج.م</span>
+              </div>
             </div>
           </div>
         </div>

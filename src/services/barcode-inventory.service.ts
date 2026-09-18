@@ -7,7 +7,19 @@ import type {
 
 export const BarcodeInventoryService = {
   createBarcodeItem: async (data: CreateBarcodeItemDto): Promise<BarcodeItem> => {
-    const response = await apiClient.post<any>('/barcode-inventory', data);
+    let payload: any = data;
+    let headers: any = {};
+    if (data.file) {
+      const formData = new FormData();
+      Object.keys(data).forEach((key) => {
+        if ((data as any)[key] !== undefined && (data as any)[key] !== null) {
+          formData.append(key, (data as any)[key]);
+        }
+      });
+      payload = formData;
+      headers['Content-Type'] = 'multipart/form-data';
+    }
+    const response = await apiClient.post<any>('/barcode-inventory', payload, { headers });
     return response.data?.data || response.data;
   },
 
@@ -32,7 +44,19 @@ export const BarcodeInventoryService = {
   },
 
   updateBarcodeItem: async (id: string, data: UpdateBarcodeItemDto): Promise<BarcodeItem> => {
-    const response = await apiClient.put<any>(`/barcode-inventory/${id}`, data);
+    let payload: any = data;
+    let headers: any = {};
+    if (data.file) {
+      const formData = new FormData();
+      Object.keys(data).forEach((key) => {
+        if ((data as any)[key] !== undefined && (data as any)[key] !== null) {
+          formData.append(key, (data as any)[key]);
+        }
+      });
+      payload = formData;
+      headers['Content-Type'] = 'multipart/form-data';
+    }
+    const response = await apiClient.put<any>(`/barcode-inventory/${id}`, payload, { headers });
     return response.data?.data || response.data;
   },
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
+import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
 import { useTranslation } from 'react-i18next';
 import {
   FileText,
@@ -399,7 +400,7 @@ export const InvoicesPage: React.FC = () => {
                   <th className="px-6 py-4 font-semibold">{t('sales.invoices.table.customer')}</th>
                   <th className="px-6 py-4 font-semibold">{t('sales.invoices.table.seller')}</th>
                   <th className="px-6 py-4 font-semibold">{t('sales.invoices.table.weight')}</th>
-                  <th className="px-6 py-4 font-semibold">المصنعية</th>
+                  <th className="px-6 py-4 font-semibold">المصنعية للجرام</th>
                   <th className="px-6 py-4 font-semibold">{t('sales.invoices.table.price')}</th>
                   <th className="px-6 py-4 font-semibold">{t('sales.invoices.table.status')}</th>
                   <th className="px-6 py-4 font-semibold text-center">{t('sales.invoices.table.actions')}</th>
@@ -443,7 +444,12 @@ export const InvoicesPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-block bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg border border-purple-100/50 font-bold text-sm" dir="ltr">
-                        {(((inv as any).totalMakingCharges) || inv.items?.reduce((s,i)=>s+(((i as any).totalMakingCharge) || (i.makingChargesPerGram*i.soldNetWeight)||0),0) || 0).toLocaleString()} ج.م
+                        {(() => {
+                          const totalMaking = ((inv as any).totalMakingCharges) || inv.items?.reduce((s,i)=>s+(((i as any).totalMakingCharge) || (i.makingChargesPerGram*i.soldNetWeight)||0),0) || 0;
+                          const totalNet = inv.items?.reduce((s,i)=>s+(i.soldNetWeight || 0),0) || 1;
+                          const avgPerGram = totalNet > 0 ? totalMaking / totalNet : 0;
+                          return avgPerGram.toLocaleString(undefined, { maximumFractionDigits: 2 });
+                        })()} ج.م للجرام
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -596,71 +602,19 @@ export const InvoicesPage: React.FC = () => {
               </div>
 
               {/* The Printable A4 Sheet */}
-              <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-charcoal print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm]" dir="rtl">
-                
-                {/* Header */}
-                <InvoicePrintHeader title={`فاتورة مبيعات ذهب ${viewingInvoice.status === 'COMPLETED' ? '' : '(ملغاة)'}`} />
-
-                {/* Customer Box */}
-                <div className="border-2 border-blue-600 rounded-xl p-4 text-center mb-8 bg-blue-50/30">
-                  <span className="text-2xl font-black text-blue-800">العميل: {customerName}</span>
-                </div>
-
-                {/* Invoice Info Details */}
-                <div className="flex justify-between items-start mb-8 text-sm font-bold border-b border-gray-200 pb-8">
-                  <div className="space-y-3">
-                    <div className="flex gap-2"><span className="text-gray-500 w-32">اسم الموظف المسؤول:</span> <span>{sellerName}</span></div>
-                    <div className="flex gap-2"><span className="text-gray-500 w-32">طريقة الدفع:</span> <span>آجل / نقداً</span></div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">رقم الفاتورة:</span> <span dir="ltr">#{invoiceNumber}</span></div>
-                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">التاريخ والوقت:</span> <span>{dateStr}</span></div>
-                  </div>
-                </div>
-
-                {/* Table */}
-                <table className="w-full mb-8 border-collapse border border-charcoal text-center text-sm font-bold">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-charcoal py-3 px-2 w-10">م</th>
-                      <th className="border border-charcoal py-3 px-2">اسم الصنف</th>
-                      <th className="border border-charcoal py-3 px-2 w-16">العيار</th>
-                      <th className="border border-charcoal py-3 px-2 w-16">العدد</th>
-                      <th className="border border-charcoal py-3 px-2 w-24">الصافي (ج)</th>
-                      <th className="border border-charcoal py-3 px-2 w-28">سعر الجرام اليوم</th>
-                      <th className="border border-charcoal py-3 px-2 w-32">السعر الكلي (ج.م)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {viewingInvoice.items?.map((item: any, idx: number) => {
-                      const title = (item.inventoryItem && typeof item.inventoryItem === 'object') ? item.inventoryItem.title : '---';
-                      const karat = (item.inventoryItem && typeof item.inventoryItem === 'object') ? item.inventoryItem.karat : '---';
-                      return (
-                        <tr key={idx}>
-                          <td className="border border-charcoal py-3 px-2">{idx + 1}</td>
-                          <td className="border border-charcoal py-3 px-2">{title} {item.hasTag === false ? '(بدون تيكت)' : ''}</td>
-                          <td className="border border-charcoal py-3 px-2" dir="ltr">{karat}K</td>
-                          <td className="border border-charcoal py-3 px-2">{item.soldCount || 1}</td>
-                          <td className="border border-charcoal py-3 px-2">{item.soldNetWeight?.toFixed(2)}</td>
-                          <td className="border border-charcoal py-3 px-2" dir="ltr">{item.goldPriceToday?.toLocaleString()}</td>
-                          <td className="border border-charcoal py-3 px-2" dir="ltr">{item.itemTotalPrice?.toLocaleString()}</td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-
-                {/* Total */}
-                <div className="flex justify-end mt-8">
-                  <div className="border-2 border-charcoal rounded-xl p-4 w-64 bg-gray-50">
-                    <div className="flex justify-between items-center text-lg font-black">
-                      <span>الإجمالي الكلي:</span>
-                      <span dir="ltr">{viewingInvoice.totalPrice?.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
+              <PaperInvoiceLayout
+                invoiceNumber={invoiceNumber}
+                date={dateStr}
+                customerName={customerName}
+                sellerName={sellerName}
+                totalAmount={viewingInvoice.totalPrice || 0}
+                items={viewingInvoice.items?.map((item: any) => ({
+                  name: ((item.inventoryItem && typeof item.inventoryItem === 'object') ? item.inventoryItem.title : '---') + (item.hasTag === false ? ' (بدون تيكت)' : ''),
+                  karat: (item.inventoryItem && typeof item.inventoryItem === 'object') ? item.inventoryItem.karat : '---',
+                  weight: item.soldNetWeight || 0,
+                  price: item.itemTotalPrice || 0,
+                })) || []}
+              />
             </div>
           );
         })()}

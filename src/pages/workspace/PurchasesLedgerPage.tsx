@@ -194,7 +194,7 @@ export const PurchasesLedgerPage: React.FC = () => {
           </div>
 
           {/* 2. Structural Breakdown Grid (تفنيط المخرجات) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             
             {/* Card 1: Gold Purchases */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
@@ -204,15 +204,47 @@ export const PurchasesLedgerPage: React.FC = () => {
                 </div>
                 <h3 className="text-lg font-black text-charcoal">مشتريات الذهب</h3>
               </div>
-              <p className="text-xs text-gray-400 mb-4 h-8">تكلفة شراء المشغولات الذهبية (زبون أو جملة)</p>
+              <p className="text-xs text-gray-400 mb-4 h-8">تكلفة شراء الذهب الجديد (زبون أو جملة)</p>
               <div className="h-px w-full bg-gray-50 mb-4"></div>
               <div className="mt-auto" dir="ltr">
-                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.goldPurchasesCash.toLocaleString()}</span>
+                <span className="text-3xl font-black text-charcoal tracking-tight">{(report.outflowsBreakdown.goldPurchasesCash - report.outflowsBreakdown.scrapGoldPurchasesCash).toLocaleString()}</span>
                 <span className="text-sm font-bold text-gold ml-1">ج.م</span>
               </div>
             </div>
 
-            {/* Card 2: Petty Expenses (Shop Costs) */}
+            {/* Card 2: Scrap Gold Purchases */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                  <ShoppingCart size={20} />
+                </div>
+                <h3 className="text-lg font-black text-charcoal">شراء الذهب الكسر</h3>
+              </div>
+              <p className="text-xs text-gray-400 mb-4 h-8">إجمالي شراء الكسر (وزن: {report.scrapPurchasedGrams?.karat21}g عيار 21)</p>
+              <div className="h-px w-full bg-gray-50 mb-4"></div>
+              <div className="mt-auto" dir="ltr">
+                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.scrapGoldPurchasesCash.toLocaleString()}</span>
+                <span className="text-sm font-bold text-gold ml-1">ج.م</span>
+              </div>
+            </div>
+
+            {/* Card 3: Supplier Payments */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+                  <Wallet size={20} />
+                </div>
+                <h3 className="text-lg font-black text-charcoal">سداد الموردين</h3>
+              </div>
+              <p className="text-xs text-gray-400 mb-4 h-8">إجمالي السداد النقدي والمصنعيات للموردين</p>
+              <div className="h-px w-full bg-gray-50 mb-4"></div>
+              <div className="mt-auto" dir="ltr">
+                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.supplierPaymentsCash.toLocaleString()}</span>
+                <span className="text-sm font-bold text-gold ml-1">ج.م</span>
+              </div>
+            </div>
+
+            {/* Card 4: Petty Expenses (Shop Costs) */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
@@ -228,10 +260,10 @@ export const PurchasesLedgerPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Card 3: Salaries */}
+            {/* Card 5: Salaries */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                <div className="p-2.5 bg-cyan-50 text-cyan-600 rounded-xl">
                   <Briefcase size={20} />
                 </div>
                 <h3 className="text-lg font-black text-charcoal">المرتبات</h3>
@@ -244,7 +276,7 @@ export const PurchasesLedgerPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Card 4: Others */}
+            {/* Card 6: Others */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2.5 bg-gray-100 text-gray-600 rounded-xl">

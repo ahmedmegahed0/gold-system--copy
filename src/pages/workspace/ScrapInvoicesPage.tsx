@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
+import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
 import { useTranslation } from 'react-i18next';
 import { 
   FileText, 
@@ -84,7 +85,7 @@ const EditScrapInvoiceModal: React.FC<{
         karat: invoice.karat,
         weight: invoice.weight,
         goldPriceToday: invoice.goldPriceToday || 0,
-        makingChargesPerGram: 0,
+        makingChargesPerGram: invoice.makingChargesPerGram || 0,
       });
       setError('');
     }
@@ -100,7 +101,7 @@ const EditScrapInvoiceModal: React.FC<{
         ...formData,
         weight: Number(formData.weight) || 0,
         goldPriceToday: Number(formData.goldPriceToday) || 0,
-        makingChargesPerGram: 0,
+        makingChargesPerGram: Number(formData.makingChargesPerGram) || 0,
       };
       await ScrapInvoiceService.updateScrapInvoice(invoice._id || invoice.id || '', payload as any);
       onSuccess();
@@ -160,6 +161,18 @@ const EditScrapInvoiceModal: React.FC<{
             min="0"
             value={formData.goldPriceToday ?? ''}
             onChange={(e) => setFormData({ ...formData, goldPriceToday: e.target.value as any })}
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal font-bold text-center"
+            dir="ltr"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-bold text-charcoal mb-2">مصنعية الجرام (إن وجدت)</label>
+          <input
+            type="number"
+            min="0"
+            value={formData.makingChargesPerGram ?? ''}
+            onChange={(e) => setFormData({ ...formData, makingChargesPerGram: e.target.value as any })}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal font-bold text-center"
             dir="ltr"
           />
@@ -382,7 +395,7 @@ export const ScrapInvoicesPage: React.FC = () => {
                   <th className="px-6 py-4 font-semibold">العميل المشتري</th>
                   <th className="px-6 py-4 font-semibold text-center">العيار</th>
                   <th className="px-6 py-4 font-semibold text-center">الوزن الصافي الكلي (ج)</th>
-                  <th className="px-6 py-4 font-semibold text-center">المصنعية</th>
+                  <th className="px-6 py-4 font-semibold text-center">المصنعية للجرام</th>
                   <th className="px-6 py-4 font-semibold">المبلغ المستلم</th>
                   <th className="px-6 py-4 font-semibold">المسؤول</th>
                   <th className="px-6 py-4 font-semibold text-center">إجراءات</th>
@@ -429,7 +442,7 @@ export const ScrapInvoicesPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className="inline-block bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg border border-purple-100/50 font-bold text-sm" dir="ltr">
-                        0 ج.م
+                        {(inv.makingChargesPerGram || 0).toLocaleString()} ج.م
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -592,63 +605,19 @@ export const ScrapInvoicesPage: React.FC = () => {
               </div>
 
               {/* The Printable A4 Sheet */}
-              <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-charcoal print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm]" dir="rtl">
-                
-                {/* Header */}
-                <InvoicePrintHeader title={`فاتورة شراء ذهب كسر ${viewingInvoice.status === 'COMPLETED' ? '' : '(ملغاة)'}`} />
-
-                {/* Customer Box */}
-                <div className="border-2 border-blue-600 rounded-xl p-4 text-center mb-8 bg-blue-50/30">
-                  <span className="text-2xl font-black text-blue-800">العميل: {customerName}</span>
-                </div>
-
-                {/* Invoice Info Details */}
-                <div className="flex justify-between items-start mb-8 text-sm font-bold border-b border-gray-200 pb-8">
-                  <div className="space-y-3">
-                    <div className="flex gap-2"><span className="text-gray-500 w-32">اسم الموظف المسؤول:</span> <span>{sellerName}</span></div>
-                    <div className="flex gap-2"><span className="text-gray-500 w-32">طريقة الدفع:</span> <span>آجل / نقداً</span></div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">رقم الفاتورة:</span> <span dir="ltr">#{invoiceNumber?.toUpperCase()}</span></div>
-                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">التاريخ والوقت:</span> <span>{dateStr}</span></div>
-                  </div>
-                </div>
-
-                {/* Table */}
-                <table className="w-full mb-8 border-collapse border border-charcoal text-center text-sm font-bold">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-charcoal py-3 px-2 w-10">م</th>
-                      <th className="border border-charcoal py-3 px-2">اسم الصنف</th>
-                      <th className="border border-charcoal py-3 px-2 w-16">العيار</th>
-                      <th className="border border-charcoal py-3 px-2 w-24">الصافي (ج)</th>
-                      <th className="border border-charcoal py-3 px-2 w-28">سعر الجرام اليوم</th>
-                      <th className="border border-charcoal py-3 px-2 w-32">السعر الكلي (ج.م)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border border-charcoal py-3 px-2">1</td>
-                      <td className="border border-charcoal py-3 px-2">ذهب كسر</td>
-                      <td className="border border-charcoal py-3 px-2" dir="ltr">{viewingInvoice.karat}K</td>
-                      <td className="border border-charcoal py-3 px-2">{viewingInvoice.weight?.toFixed(2)}</td>
-                      <td className="border border-charcoal py-3 px-2" dir="ltr">{viewingInvoice.goldPriceToday?.toLocaleString()}</td>
-                      <td className="border border-charcoal py-3 px-2" dir="ltr">{viewingInvoice.totalPrice?.toLocaleString()}</td>
-                    </tr>
-                  </tbody>
-                </table>
-
-                {/* Total */}
-                <div className="flex justify-end mt-8">
-                  <div className="border-2 border-charcoal rounded-xl p-4 w-64 bg-gray-50">
-                    <div className="flex justify-between items-center text-lg font-black">
-                      <span>المبلغ المستلم:</span>
-                      <span dir="ltr">{viewingInvoice.totalPrice?.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
+              <PaperInvoiceLayout
+                invoiceNumber={invoiceNumber || ''}
+                date={dateStr}
+                customerName={customerName}
+                sellerName={sellerName}
+                totalAmount={viewingInvoice.totalPrice || 0}
+                items={[{
+                  name: 'ذهب كسر',
+                  karat: viewingInvoice.karat || '---',
+                  weight: viewingInvoice.weight || 0,
+                  price: viewingInvoice.totalPrice || 0
+                }]}
+              />
             </div>
           );
         })()}
