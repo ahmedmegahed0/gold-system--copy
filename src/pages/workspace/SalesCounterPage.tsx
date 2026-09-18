@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
+import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
 import { useTranslation } from 'react-i18next';
 import {
   ShoppingCart,
@@ -315,75 +316,28 @@ export const SalesCounterPage: React.FC = () => {
           </button>
         </div>
 
-        {/* The Printable A4 Sheet */}
-        <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-charcoal print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm]" dir="rtl">
-          
-          {/* Header */}
-          <InvoicePrintHeader title="فاتورة مبيعات ذهب" />
-
-          {/* Customer Box */}
-          <div className="border-2 border-blue-600 rounded-xl p-4 text-center mb-8 bg-blue-50/30">
-            <span className="text-2xl font-black text-blue-800">العميل: {customerName}</span>
-          </div>
-
-          {/* Invoice Info Details */}
-          <div className="flex justify-between items-start mb-8 text-sm font-bold border-b border-gray-200 pb-8">
-            <div className="space-y-3">
-              <div className="flex gap-2"><span className="text-gray-500 w-32">اسم الموظف المسؤول:</span> <span>{sellerName}</span></div>
-              <div className="flex gap-2"><span className="text-gray-500 w-32">طريقة الدفع:</span> <span>آجل / نقداً</span></div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">رقم الفاتورة:</span> <span dir="ltr">#{invoiceNumber}</span></div>
-              <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">التاريخ والوقت:</span> <span>{dateStr}</span></div>
-            </div>
-          </div>
-
-          {/* Table */}
-          <table className="w-full mb-8 border-collapse border border-charcoal text-center text-sm font-bold">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-charcoal py-3 px-2 w-10">م</th>
-                <th className="border border-charcoal py-3 px-2">اسم الصنف</th>
-                <th className="border border-charcoal py-3 px-2 w-16">العيار</th>
-                <th className="border border-charcoal py-3 px-2 w-16">العدد</th>
-                <th className="border border-charcoal py-3 px-2 w-24">الصافي (ج)</th>
-                <th className="border border-charcoal py-3 px-2 w-28">سعر الجرام اليوم</th>
-                <th className="border border-charcoal py-3 px-2 w-32">السعر الكلي (ج.م)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cart.map((cartItem, idx) => {
-                const item = cartItem.item;
-                const tagW = cartItem.selectedTagWeight ?? (item.tagDetails && item.tagDetails.length > 0 ? item.tagDetails[0].weight : 0.06);
-                const count = (cartItem.soldCount && typeof cartItem.soldCount === 'number') ? cartItem.soldCount : 1;
-                const netWeight = cartItem.hasTag ? Math.max(0, (cartItem.soldGrossWeight || 0) - (tagW * count)) : (cartItem.soldGrossWeight || 0);
-                const itemTotal = netWeight * ((cartItem.goldPriceToday || 0) + (cartItem.makingChargesPerGram || 0));
-                return (
-                  <tr key={cartItem.cartItemId}>
-                    <td className="border border-charcoal py-3 px-2">{idx + 1}</td>
-                    <td className="border border-charcoal py-3 px-2">{item.title}</td>
-                    <td className="border border-charcoal py-3 px-2" dir="ltr">{item.karat}K</td>
-                    <td className="border border-charcoal py-3 px-2">{cartItem.soldCount || 1}</td>
-                    <td className="border border-charcoal py-3 px-2">{netWeight.toFixed(2)}</td>
-                    <td className="border border-charcoal py-3 px-2" dir="ltr">{cartItem.goldPriceToday?.toLocaleString()}</td>
-                    <td className="border border-charcoal py-3 px-2" dir="ltr">{itemTotal.toLocaleString()}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-
-          {/* Total */}
-          <div className="flex justify-end mt-8">
-            <div className="border-2 border-charcoal rounded-xl p-4 w-64 bg-gray-50">
-              <div className="flex justify-between items-center text-lg font-black">
-                <span>الإجمالي الكلي:</span>
-                <span dir="ltr">{successInvoice.totalPrice?.toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
+        <PaperInvoiceLayout
+          invoiceNumber={invoiceNumber}
+          date={dateStr}
+          customerName={customerName}
+          sellerName={sellerName}
+          totalAmount={successInvoice.totalPrice || 0}
+          items={cart.map((cartItem) => {
+            const item = cartItem.item;
+            const tagW = cartItem.selectedTagWeight ?? (item.tagDetails && item.tagDetails.length > 0 ? item.tagDetails[0].weight : 0.06);
+            const count = (cartItem.soldCount && typeof cartItem.soldCount === 'number') ? cartItem.soldCount : 1;
+            const netWeight = cartItem.hasTag ? Math.max(0, (cartItem.soldGrossWeight || 0) - (tagW * count)) : (cartItem.soldGrossWeight || 0);
+            const itemTotal = netWeight * ((cartItem.goldPriceToday || 0) + (cartItem.makingChargesPerGram || 0));
+            
+            return {
+              name: item.title,
+              karat: item.karat,
+              weight: netWeight,
+              price: itemTotal,
+              images: [] // Assuming images are not heavily used in basic pos cart items here, but can be added if available
+            };
+          })}
+        />
       </div>
     );
   }

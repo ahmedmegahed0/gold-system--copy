@@ -1,4 +1,5 @@
 import React from 'react';
+import logoImg from '../../assets/logo .jpeg';
 
 export interface PaperInvoiceItem {
   name: string;
@@ -52,16 +53,13 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
           <div className="flex justify-center items-center gap-8 mb-6 mt-2">
             <h1 className="text-[80px] leading-none font-black tracking-widest text-black whitespace-nowrap" style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>ليلة القدر</h1>
             
-            {/* Creative Diamond Crown Logo */}
-            <div className="flex flex-col items-center justify-center w-32 h-32 border-[3px] border-black shrink-0 bg-white transform rotate-45 shadow-[6px_-6px_0_0_rgba(0,0,0,1)] relative ml-4">
-               <div className="absolute inset-1 border border-dashed border-black"></div>
-               <div className="transform -rotate-45 flex flex-col items-center justify-center mt-1 z-10 bg-white px-2">
-                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-black mb-1">
-                   <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path>
-                 </svg>
-                 <span className="text-3xl font-black leading-none text-black tracking-tighter">ليلة</span>
-                 <span className="text-xl font-black tracking-widest text-black mt-1">القدر</span>
-               </div>
+            {/* Styled Logo from assets */}
+            <div className="shrink-0 ml-6 relative">
+              <div className="w-32 h-32 rounded-full border-[4px] border-[#b59540] p-1 shadow-[4px_4px_0_0_rgba(181,149,64,0.3)] bg-white relative">
+                <div className="w-full h-full rounded-full border-[2px] border-dashed border-black overflow-hidden bg-black flex items-center justify-center">
+                  <img src={logoImg} alt="شعار ليلة القدر" className="w-full h-full object-cover scale-110" />
+                </div>
+              </div>
             </div>
           </div>
           <p className="text-xl font-black">إدارة الحاج / صلاح الهوش - موبايل: ٠١٠٠٢٩٠٨٠٢٦</p>

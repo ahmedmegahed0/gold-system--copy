@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
+import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
 import { useTranslation } from 'react-i18next';
 import { 
   ShoppingCart, Search, AlertCircle, Loader2, UserPlus, Info, CheckCircle2, CircleDollarSign, Scale, Printer
@@ -198,62 +199,19 @@ export const ScrapSalesCounterPage: React.FC = () => {
         </div>
 
         {/* The Printable A4 Sheet */}
-        <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-charcoal print:shadow-none print:border-none print:p-0 mx-auto" dir="rtl">
-          
-          {/* Header */}
-          <InvoicePrintHeader title="فاتورة شراء كسر" />
-
-          {/* Customer Box */}
-          <div className="border-2 border-blue-600 rounded-xl p-4 text-center mb-8 bg-blue-50/30">
-            <span className="text-2xl font-black text-blue-800">العميل: {customerName}</span>
-          </div>
-
-          {/* Invoice Info Details */}
-          <div className="flex justify-between items-start mb-8 text-sm font-bold border-b border-gray-200 pb-8">
-            <div className="space-y-3">
-              <div className="flex gap-2"><span className="text-gray-500 w-32">نوع الفاتورة:</span> <span>شراء كسر</span></div>
-              <div className="flex gap-2"><span className="text-gray-500 w-32">مسؤول الاستلام:</span> <span>{actionByName}</span></div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">رقم الإيصال:</span> <span dir="ltr">SCRAP-SALE-{new Date().getFullYear()}-{invoiceNumber}</span></div>
-              <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">تاريخ الإيصال:</span> <span dir="ltr">{dateStr}</span></div>
-            </div>
-          </div>
-
-          <table className="w-full mb-8 border-collapse border border-charcoal text-center text-sm font-bold">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-charcoal py-3 px-2 w-10">م</th>
-                <th className="border border-charcoal py-3 px-2 w-16">العيار</th>
-                <th className="border border-charcoal py-3 px-2 w-24">الصافي (ج)</th>
-                <th className="border border-charcoal py-3 px-2 w-28">سعر الجرام اليوم</th>
-                <th className="border border-charcoal py-3 px-2 w-24">المصنعية/جرام</th>
-                <th className="border border-charcoal py-3 px-2 w-32">السعر الكلي (ج.م)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="border border-charcoal py-3 px-2">1</td>
-                <td className="border border-charcoal py-3 px-2" dir="ltr">{successInvoice.karat}K</td>
-                <td className="border border-charcoal py-3 px-2">{successInvoice.weight?.toFixed(2)}</td>
-                <td className="border border-charcoal py-3 px-2" dir="ltr">{successInvoice.goldPriceToday?.toLocaleString()}</td>
-                <td className="border border-charcoal py-3 px-2" dir="ltr">{successInvoice.makingChargesPerGram?.toLocaleString()}</td>
-                <td className="border border-charcoal py-3 px-2" dir="ltr">{successInvoice.totalPrice?.toLocaleString()}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          {/* Total Price */}
-          <div className="flex justify-end mt-8">
-            <div className="border-2 border-charcoal rounded-xl p-4 w-72 bg-gray-50">
-              <div className="flex justify-between items-center text-lg font-black">
-                <span>المبلغ المدفوع (ج.م):</span>
-                <span dir="ltr">{successInvoice.totalPrice?.toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
+        <PaperInvoiceLayout
+          invoiceNumber={invoiceNumber}
+          date={dateStr}
+          customerName={customerName}
+          sellerName={actionByName}
+          totalAmount={successInvoice.totalPrice || 0}
+          items={[{
+            name: 'شراء ذهب كسر',
+            karat: successInvoice.karat,
+            weight: successInvoice.weight || 0,
+            price: successInvoice.totalPrice || 0
+          }]}
+        />
       </div>
     );
   }

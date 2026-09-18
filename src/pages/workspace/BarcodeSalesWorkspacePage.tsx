@@ -4,6 +4,7 @@ import {
   Printer, X 
 } from 'lucide-react';
 import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
+import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
 import { useBarcodeSales } from '../../hooks/useBarcodeSales';
 import { useBarcodeInventory } from '../../hooks/useBarcodeInventory';
 import { useCustomers } from '../../hooks/useCustomers';
@@ -69,64 +70,20 @@ export function BarcodeSalesWorkspacePage() {
                 </button>
               </div>
 
-              <div className="bg-white p-8 sm:p-12 shadow-xl border border-gray-200 max-w-3xl w-full text-charcoal print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm]" dir="rtl">
-                <InvoicePrintHeader title={`فاتورة مبيعات باركود ${viewingInvoice.status === 'ACTIVE' ? '' : '(ملغاة)'}`} />
-                
-                <div className="border-2 border-blue-600 rounded-xl p-4 text-center mb-8 bg-blue-50/30">
-                  <span className="text-2xl font-black text-blue-800">العميل: {customerName}</span>
-                </div>
-                
-                <div className="flex justify-between items-start mb-8 text-sm font-bold border-b border-gray-200 pb-8">
-                  <div className="space-y-3">
-                    <div className="flex gap-2"><span className="text-gray-500 w-32">الموظف المسؤول:</span> <span>{sellerName}</span></div>
-                    <div className="flex gap-2"><span className="text-gray-500 w-32">طريقة الدفع:</span> <span>آجل / نقداً</span></div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">رقم الفاتورة:</span> <span dir="ltr">#{viewingInvoice.invoiceNumber}</span></div>
-                    <div className="flex gap-2"><span className="text-gray-500 w-24 text-left">التاريخ والوقت:</span> <span>{new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
-                  </div>
-                </div>
-
-                <table className="w-full mb-8 border-collapse border border-charcoal text-center text-sm font-bold">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-charcoal py-3 px-2 w-10">م</th>
-                      <th className="border border-charcoal py-3 px-2">اسم الصنف</th>
-                      <th className="border border-charcoal py-3 px-2">الباركود</th>
-                      <th className="border border-charcoal py-3 px-2 w-16">العيار</th>
-                      <th className="border border-charcoal py-3 px-2 w-24">الوزن</th>
-                      <th className="border border-charcoal py-3 px-2 w-32">السعر (ج.م)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {viewingInvoice.items?.map((item, idx) => (
-                      <tr key={idx}>
-                        <td className="border border-charcoal py-3 px-2">{idx + 1}</td>
-                        <td className="border border-charcoal py-3 px-2">{item.title || 'قطعة'}</td>
-                        <td className="border border-charcoal py-3 px-2" dir="ltr">{item.barcode}</td>
-                        <td className="border border-charcoal py-3 px-2" dir="ltr">{item.karat || 21}k</td>
-                        <td className="border border-charcoal py-3 px-2">{(item.weight || 0).toFixed(2)}</td>
-                        <td className="border border-charcoal py-3 px-2" dir="ltr">{(item.itemTotal || 0).toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                <div className="flex justify-end mt-8">
-                  <div className="border-2 border-charcoal rounded-xl p-4 w-72 bg-gray-50 space-y-2">
-                    <div className="flex justify-between items-center text-sm font-bold text-gray-500">
-                      <span>إجمالي وزن الذهب:</span><span dir="ltr">{totalGoldWeight.toFixed(2)} g</span>
-                    </div>
-                    <div className="border-t border-gray-300 pt-2 flex justify-between items-center text-lg font-black mt-2">
-                      <span>الإجمالي الكلي:</span><span dir="ltr">{(viewingInvoice.totalAmount || 0).toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-12 text-center text-gray-500 font-bold text-sm">
-                  <p>شكراً لزيارتكم!</p>
-                </div>
-              </div>
+              <PaperInvoiceLayout
+                invoiceNumber={viewingInvoice.invoiceNumber}
+                date={new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}
+                customerName={customerName}
+                sellerName={sellerName}
+                totalAmount={viewingInvoice.totalAmount || 0}
+                items={viewingInvoice.items?.map((item) => ({
+                  name: item.title + (item.barcode ? ` (${item.barcode})` : ''),
+                  karat: item.karat || '---',
+                  weight: item.weight || 0,
+                  price: item.itemTotal || 0,
+                  images: item.images
+                })) || []}
+              />
             </div>
           );
         })()}
