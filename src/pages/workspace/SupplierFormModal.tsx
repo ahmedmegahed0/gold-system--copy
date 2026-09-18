@@ -29,7 +29,7 @@ const ModalOverlay: React.FC<{
 export const SupplierFormModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: any) => Promise<any>;
   initialData?: Supplier;
 }> = ({ isOpen, onClose, onSubmit, initialData }) => {
   const { t } = useTranslation();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
+
 import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
 import { useTranslation } from 'react-i18next';
 import {
@@ -162,7 +162,7 @@ export const BarcodeInvoicesPage: React.FC = () => {
         {viewingInvoice && (() => {
           const customerName = (viewingInvoice.customer as any)?.fullName || '---';
           const sellerName = (viewingInvoice.cashier as any)?.fullName || '---';
-          const totalGoldWeight = viewingInvoice.items?.reduce((sum, item) => sum + (item.weight || 0), 0) || 0;
+
           return (
             <div className="flex flex-col items-center justify-center p-6 print:p-0">
               <div className="flex justify-between items-center w-full max-w-3xl mb-6 print:hidden gap-4">

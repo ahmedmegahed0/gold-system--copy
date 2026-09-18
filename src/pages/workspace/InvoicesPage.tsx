@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
+
 import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
 import { useTranslation } from 'react-i18next';
 import {
@@ -556,7 +556,7 @@ export const InvoicesPage: React.FC = () => {
       >
         {viewingInvoice && (() => {
           const customerName = (viewingInvoice.customer && typeof viewingInvoice.customer === 'object') ? viewingInvoice.customer.fullName : '---';
-          const invoiceNumber = viewingInvoice.invoiceNumber || viewingInvoice._id?.substring(0,8) || viewingInvoice.id?.substring(0,8);
+          const invoiceNumber = viewingInvoice.invoiceNumber || viewingInvoice._id?.substring(0,8) || viewingInvoice.id?.substring(0,8) || '';
           const dateStr = new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
           const sellerName = (viewingInvoice.soldBy && typeof viewingInvoice.soldBy === 'object') ? viewingInvoice.soldBy.fullName : '---';
 

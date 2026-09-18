@@ -56,7 +56,7 @@ const ConfirmDeleteModal: React.FC<{
 };
 
 export const SuppliersPage: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const isRtl = i18n.language.startsWith('ar');
 
   const {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { InvoicePrintHeader } from '../../components/print/InvoicePrintHeader';
+
 import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
 import { useTranslation } from 'react-i18next';
 import { 

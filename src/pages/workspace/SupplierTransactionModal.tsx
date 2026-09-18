@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { X, Loader2, Plus, AlertCircle, Banknote, Trash2, Box, Info } from 'lucide-react';
+
+import { X, Loader2, Plus, AlertCircle, Banknote, Trash2, Box } from 'lucide-react';
 import type { Supplier, RecordSupplierTransactionDto, ReceivedItemDto, ScrapPaidDto } from '../../common/types/supplier.types';
 
 const ModalOverlay: React.FC<{
@@ -32,7 +32,7 @@ export const SupplierTransactionModal: React.FC<{
   onSubmit: (data: RecordSupplierTransactionDto) => Promise<void>;
   supplier: Supplier | null;
 }> = ({ isOpen, onClose, onSubmit, supplier }) => {
-  const { t } = useTranslation();
+
 
   const [type, setType] = useState<'GOODS_RECEIVE' | 'PAYMENT'>('GOODS_RECEIVE');
   
