@@ -13,6 +13,7 @@ export const useBarcodeInventory = (initialArchived = false) => {
   
   const [filters, setFilters] = useState({
     karat: undefined as 18 | 21 | 24 | undefined,
+    category: undefined as string | undefined,
     isArchived: initialArchived,
     search: '',
   });
@@ -26,6 +27,13 @@ export const useBarcodeInventory = (initialArchived = false) => {
         data = await BarcodeInventoryService.getArchivedBarcodeItems();
       } else {
         data = await BarcodeInventoryService.getBarcodeItems(filters.karat);
+      }
+      
+      if (filters.category) {
+        data = data.filter(item => {
+           const itemCatId = typeof item.category === 'object' ? (item.category as any)?._id : item.category;
+           return String(itemCatId) === String(filters.category);
+        });
       }
       
       if (filters.search) {

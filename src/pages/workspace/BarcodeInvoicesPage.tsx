@@ -48,6 +48,7 @@ export const BarcodeInvoicesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewingInvoice, setViewingInvoice] = useState<BarcodeInvoice | null>(null);
   const [cancelConfirmInvoice, setCancelConfirmInvoice] = useState<BarcodeInvoice | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 8;
@@ -116,6 +117,7 @@ export const BarcodeInvoicesPage: React.FC = () => {
                     <th className="px-6 py-4 font-semibold">رقم الفاتورة</th>
                     <th className="px-6 py-4 font-semibold">التاريخ</th>
                     <th className="px-6 py-4 font-semibold">العميل</th>
+                    <th className="px-6 py-4 font-semibold">الصور</th>
                     <th className="px-6 py-4 font-semibold">إجمالي الذهب</th>
                     <th className="px-6 py-4 font-semibold">السعر الكلي</th>
                     <th className="px-6 py-4 font-semibold">الحالة</th>
@@ -130,6 +132,24 @@ export const BarcodeInvoicesPage: React.FC = () => {
                       <td className="px-6 py-4"><button onClick={() => setViewingInvoice(inv)} className="font-black text-charcoal bg-gray-50 px-3 py-1.5 rounded text-base cursor-pointer hover:bg-gray-200 hover:text-gold transition-colors" dir="ltr">#{inv.invoiceNumber}</button></td>
                       <td className="px-6 py-4"><div className="flex items-center gap-1.5 text-gray-500 text-sm font-semibold" dir="ltr"><Calendar size={14} />{new Date(inv.createdAt).toLocaleDateString('ar-EG')}</div></td>
                       <td className="px-6 py-4"><div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg border border-blue-100/50"><User size={14} /><span className="font-bold text-sm">{(inv.customer as any)?.fullName || '---'}</span></div></td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1 flex-wrap max-w-[100px]">
+                          {inv.items?.flatMap(item => item.images || []).filter(Boolean).slice(0, 3).map((imgUrl, i) => (
+                            <img 
+                              key={i} 
+                              src={imgUrl} 
+                              alt="Item" 
+                              className="w-8 h-8 rounded object-cover cursor-pointer hover:opacity-80 transition-opacity border border-gray-200 shadow-sm"
+                              onClick={() => setSelectedImage(imgUrl)}
+                            />
+                          ))}
+                          {(inv.items?.flatMap(item => item.images || []).filter(Boolean).length || 0) > 3 && (
+                            <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 border border-gray-200">
+                              +{(inv.items?.flatMap(item => item.images || []).filter(Boolean).length || 0) - 3}
+                            </div>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-6 py-4"><span className="inline-block bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg border border-amber-100/50 font-bold text-sm" dir="ltr">{totalGoldWeight.toFixed(2)}g</span></td>
                       <td className="px-6 py-4"><span className="inline-block bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-100/50 font-black text-sm" dir="ltr">{(inv.totalAmount || 0).toLocaleString()} ج.م</span></td>
                       <td className="px-6 py-4">{inv.status === 'ACTIVE' ? <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-md text-sm font-bold"><CheckCircle2 size={14} /> مكتملة</span> : <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-theme-returns/10 text-theme-returns rounded-md text-sm font-bold"><XCircle size={14} /> ملغاة</span>}</td>
@@ -161,7 +181,7 @@ export const BarcodeInvoicesPage: React.FC = () => {
       <ModalOverlay isOpen={!!viewingInvoice} onClose={() => setViewingInvoice(null)} title="تفاصيل الفاتورة" printFriendly={true}>
         {viewingInvoice && (() => {
           const customerName = (viewingInvoice.customer as any)?.fullName || '---';
-          const sellerName = (viewingInvoice.cashier as any)?.fullName || '---';
+          const sellerName = (viewingInvoice.createdBy as any)?.fullName || (viewingInvoice.cashier as any)?.fullName || (viewingInvoice.seller as any)?.fullName || (viewingInvoice as any).soldBy?.fullName || (viewingInvoice as any).actionBy?.fullName || user?.fullName || '---';
 
           return (
             <div className="flex flex-col items-center justify-center p-6 print:p-0">
@@ -207,6 +227,29 @@ export const BarcodeInvoicesPage: React.FC = () => {
           </div>
         </div>
       </ModalOverlay>
+
+      {/* Image Preview Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out transition-all"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center animate-in fade-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-12 right-0 md:-right-12 text-white/70 hover:text-white transition-colors bg-black/20 hover:bg-black/40 p-2 rounded-full cursor-pointer"
+            >
+              <X size={28} />
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Expanded view" 
+              className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.5)] cursor-default ring-1 ring-white/10"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

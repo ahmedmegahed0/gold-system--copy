@@ -11,6 +11,7 @@ import type {
   CreateBarcodeItemDto, 
   BarcodeItem 
 } from '../../common/types/barcode-inventory.types';
+import logoImg from '../../assets/logo .jpeg';
 
 const GoldButton = ({ children, onClick, className = '', type = 'button', icon: Icon }: any) => (
   <button
@@ -60,7 +61,9 @@ export function BarcodeInventoryPage() {
   const [editingItem, setEditingItem] = useState<BarcodeItem | null>(null);
 
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
-  const [printData, setPrintData] = useState<{ barcode: string, imageBase64: string } | null>(null);
+  const [printData, setPrintData] = useState<{ barcode: string, imageBase64: string, item?: BarcodeItem } | null>(null);
+
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const scanInputRef = useRef<HTMLInputElement>(null);
 
@@ -93,10 +96,10 @@ export function BarcodeInventoryPage() {
     setScannedResult(null);
   };
 
-  const openPrintTag = async (barcode: string) => {
+  const openPrintTag = async (item: BarcodeItem) => {
     try {
-      const tagData = await getPrintTag(barcode);
-      setPrintData(tagData);
+      const tagData = await getPrintTag(item.barcode);
+      setPrintData({ ...tagData, item });
       setIsPrintModalOpen(true);
     } catch (err) {
       alert('خطأ في جلب بيانات الطباعة');
@@ -107,22 +110,159 @@ export function BarcodeInventoryPage() {
     if (!printData) return;
     const printWindow = window.open('', '_blank');
     if (printWindow) {
+      const itemWeight = printData.item?.grossWeight || '';
+      const itemKarat = printData.item?.karat || '';
+      
       printWindow.document.write(`
-        <html>
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
           <head>
-            <title>Print Tag</title>
+            <meta charset="utf-8">
+            <title>طباعة التاج</title>
+            <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
             <style>
+              body { 
+                margin: 0; 
+                padding: 0;
+                width: 82mm;
+                height: 25mm;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-sizing: border-box;
+                font-family: 'Tajawal', sans-serif;
+                background: white;
+              }
+              .tag-section {
+                width: 25mm; 
+                height: 25mm;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                overflow: hidden;
+                padding: 1mm;
+                box-sizing: border-box;
+              }
+              .tail-space {
+                flex: 1; 
+              }
+              
+              /* Face 1: Branding */
+              .brand-face {
+                gap: 1px;
+              }
+              .logo-container {
+                width: 10mm;
+                height: 10mm;
+                border-radius: 50%;
+                border: 1px dashed #000;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #000;
+              }
+              .logo-img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transform: scale(1.1);
+              }
+              .company-name {
+                font-size: 8.5pt;
+                font-weight: 900;
+                color: #000;
+                line-height: 1;
+                margin-top: 1px;
+              }
+              .owner-name {
+                font-size: 6.5pt;
+                font-weight: 700;
+                color: #333;
+                line-height: 1;
+              }
+
+              /* Face 2: Barcode & Details */
+              .details-face {
+                justify-content: flex-end;
+                padding-bottom: 2mm;
+              }
+              .barcode-img {
+                width: 100%;
+                max-height: 11mm;
+                object-fit: contain;
+                margin-bottom: 1px;
+              }
+              .details-row {
+                display: flex;
+                gap: 4px;
+                align-items: center;
+                justify-content: center;
+                direction: ltr;
+              }
+              .weight-text {
+                font-size: 9pt;
+                font-weight: 900;
+                color: #000;
+              }
+              .karat-text {
+                font-size: 7pt;
+                font-weight: 700;
+                color: #000;
+                border: 1px solid #000;
+                border-radius: 3px;
+                padding: 0 2px;
+              }
+              
               @media print {
-                @page { margin: 0; }
-                body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-                img { max-width: 100%; height: auto; }
+                @page { 
+                  size: 82mm 25mm;
+                  margin: 0; 
+                }
+                body {
+                  width: 82mm;
+                  height: 25mm;
+                }
+              }
+              
+              @media screen {
+                body {
+                  border: 1px dashed #ccc;
+                  margin: 20px auto;
+                  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                  zoom: 1.5;
+                }
               }
             </style>
           </head>
           <body>
-            <img src="${printData.imageBase64}" />
+            <div class="tag-section details-face">
+              <img src="${printData.imageBase64}" class="barcode-img" />
+              <div class="details-row">
+                <span class="weight-text">${itemWeight}g</span>
+                <span class="karat-text">${itemKarat}K</span>
+              </div>
+            </div>
+            
+            <div class="tail-space"></div>
+            
+            <div class="tag-section brand-face">
+              <div class="logo-container">
+                <img src="${window.location.origin}${logoImg}" class="logo-img" alt="Logo" />
+              </div>
+              <div class="company-name">مجوهرات ليلة القدر</div>
+              <div class="owner-name">صلاح الهوش</div>
+            </div>
+            
             <script>
-              window.onload = function() { window.print(); window.close(); };
+              window.onload = function() { 
+                setTimeout(function() {
+                  window.print(); 
+                  window.close();
+                }, 500);
+              };
             </script>
           </body>
         </html>
@@ -195,7 +335,7 @@ export function BarcodeInventoryPage() {
             </div>
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <OutlineButton icon={Printer} onClick={() => openPrintTag(scannedResult.barcode)}>
+            <OutlineButton icon={Printer} onClick={() => openPrintTag(scannedResult)}>
               طباعة التاج
             </OutlineButton>
             <GoldButton icon={ShoppingCart} onClick={() => handleAddToSale(scannedResult)}>
@@ -231,6 +371,22 @@ export function BarcodeInventoryPage() {
               {tab.label}
             </button>
           ))}
+        </div>
+
+        {/* Category Filter */}
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <select
+            value={filters.category || ''}
+            onChange={(e) => setFilters({ ...filters, category: e.target.value || undefined })}
+            className="w-full md:w-48 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-1 focus:ring-[#C9A84C] focus:border-[#C9A84C] transition-all outline-none text-sm text-gray-700 font-medium"
+          >
+            <option value="">كل التصنيفات</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat._id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Status Tabs (Owner Only for Archived) */}
@@ -301,7 +457,12 @@ export function BarcodeInventoryPage() {
                     <td className="px-6 py-4 font-mono text-sm font-bold text-indigo-700 bg-indigo-50/40">{item.barcode}</td>
                     <td className="px-6 py-4">
                       {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.title} className="w-12 h-12 object-cover rounded-md border border-gray-200" />
+                        <img 
+                          src={item.imageUrl} 
+                          alt={item.title} 
+                          className="w-12 h-12 object-cover rounded-md border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity hover:shadow-md" 
+                          onClick={() => setSelectedImage(item.imageUrl!)}
+                        />
                       ) : (
                         <div className="w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 text-xs">لا صورة</div>
                       )}
@@ -324,7 +485,7 @@ export function BarcodeInventoryPage() {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           title="طباعة التاج"
-                          onClick={() => openPrintTag(item.barcode)}
+                          onClick={() => openPrintTag(item)}
                           className="p-2 text-indigo-600 hover:text-white hover:bg-indigo-600 rounded-lg transition-colors border border-indigo-200 shadow-sm"
                         >
                           <Printer size={18} />
@@ -362,6 +523,29 @@ export function BarcodeInventoryPage() {
           </table>
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out transition-all"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center animate-in fade-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-12 right-0 md:-right-12 text-white/70 hover:text-white transition-colors bg-black/20 hover:bg-black/40 p-2 rounded-full cursor-pointer"
+            >
+              <X size={28} />
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Expanded view" 
+              className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.5)] cursor-default ring-1 ring-white/10"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Item Form Modal */}
       {isFormModalOpen && (

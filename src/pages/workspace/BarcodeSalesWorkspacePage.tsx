@@ -9,6 +9,7 @@ import { useBarcodeInventory } from '../../hooks/useBarcodeInventory';
 import { useCustomers } from '../../hooks/useCustomers';
 import type { BarcodeCheckoutDto, BarcodeInvoice } from '../../common/types/barcode-sales.types';
 import type { BarcodeItem } from '../../common/types/barcode-inventory.types';
+import { useAuth } from '../../core/context/AuthContext';
 
 const GoldButton = ({ children, onClick, className = '', icon: Icon, disabled = false }: any) => (
   <button
@@ -40,7 +41,7 @@ const ModalOverlay: React.FC<{ isOpen: boolean; onClose: () => void; title: stri
 };
 
 export function BarcodeSalesWorkspacePage() {
-
+  const { user } = useAuth();
   const [viewingInvoice, setViewingInvoice] = useState<BarcodeInvoice | null>(null);
 
   return (
@@ -58,7 +59,7 @@ export function BarcodeSalesWorkspacePage() {
 <ModalOverlay isOpen={!!viewingInvoice} onClose={() => setViewingInvoice(null)} title="تفاصيل الفاتورة" printFriendly={true}>
         {viewingInvoice && (() => {
           const customerName = (viewingInvoice.customer as any)?.fullName || '---';
-          const sellerName = (viewingInvoice.cashier as any)?.fullName || '---';
+          const sellerName = (viewingInvoice.createdBy as any)?.fullName || (viewingInvoice.cashier as any)?.fullName || (viewingInvoice.seller as any)?.fullName || (viewingInvoice as any).soldBy?.fullName || (viewingInvoice as any).actionBy?.fullName || user?.fullName || '---';
 
           return (
             <div className="flex flex-col items-center justify-center p-6 print:p-0 text-[#1A1A1A]" dir="rtl">

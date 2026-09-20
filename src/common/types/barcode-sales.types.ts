@@ -29,7 +29,9 @@ export interface BarcodeInvoice {
   }>;
   totalAmount: number;
   status: 'ACTIVE' | 'CANCELLED';
-  cashier: { _id: string; fullName: string };
+  cashier?: { _id: string; fullName: string };
+  createdBy?: any;
+  seller?: any;
   createdAt: string;
   updatedAt: string;
 }

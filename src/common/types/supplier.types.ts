@@ -31,22 +31,23 @@ export interface UpdateSupplierDto {
 export interface ReceivedItemDto {
   karat: number;
   weight: number;
-  pricePerGram: number;
+  pricePerGram?: number;
   manufacturingFeePerGram?: number;
-  totalPrice: number;
+  totalPrice?: number;
 }
 
 export interface ScrapPaidDto {
   karat: number;
   weight: number;
-  pricePerGram: number;
-  totalValue: number;
+  pricePerGram?: number;
+  totalValue?: number;
 }
 
 export interface PaymentDetailsDto {
-  cashPaid?: number;
-  scrapPaid?: ScrapPaidDto[];
   manufacturingFeePaid?: number;
+  cashPaidForGold?: number;
+  goldPriceForCashDeduction?: number;
+  scrapPaid?: ScrapPaidDto[];
 }
 
 export interface RecordSupplierTransactionDto {

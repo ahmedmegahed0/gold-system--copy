@@ -23,8 +23,11 @@ export const BarcodeInventoryService = {
     return response.data?.data || response.data;
   },
 
-  getBarcodeItems: async (karat?: 18 | 21 | 24): Promise<BarcodeItem[]> => {
-    const params = karat ? { karat } : {};
+  getBarcodeItems: async (karat?: 18 | 21 | 24, category?: string): Promise<BarcodeItem[]> => {
+    const params: any = {};
+    if (karat) params.karat = karat;
+    if (category) params.category = category;
+    
     const response = await apiClient.get<any>('/barcode-inventory', { params });
     const result = response.data?.data || response.data;
     return Array.isArray(result) ? result : [];

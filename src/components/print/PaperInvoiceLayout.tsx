@@ -37,32 +37,41 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
   }
 
   return (
-    <div className="bg-blue-50 p-8 sm:p-12 shadow-xl max-w-3xl w-full text-black print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm] relative overflow-hidden font-sans" dir="rtl" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+    <div className="bg-blue-100 p-8 sm:p-12 shadow-xl max-w-3xl w-full text-black print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm] relative overflow-hidden font-sans" dir="rtl" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
       
       {/* Watermark Background */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10 z-0 print:opacity-[0.08]">
-        <h1 className="text-[150px] font-black -rotate-45 text-[#b59540] whitespace-nowrap">ليلة القدر</h1>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-15 z-0 print:opacity-[0.12]">
+        <h1 className="text-[150px] font-black -rotate-45 text-[#D4AF37] whitespace-nowrap">ليلة القدر</h1>
       </div>
 
       <div className="relative z-10">
         {/* Header Section */}
         <div className="text-center mb-6">
-          <p className="text-base font-bold mb-1">بسم الله الرحمن الرحيم</p>
-          <p className="text-base font-bold mb-4">﴿ وَأَقِيمُوا الْوَزْنَ بِالْقِسْطِ وَلَا تُخْسِرُوا الْمِيزَانَ ﴾ <span className="text-sm">صدق الله العظيم</span></p>
-          <p className="text-2xl font-black mb-1">مصوغات ومجوهرات</p>
-          <div className="flex justify-center items-center gap-8 mb-6 mt-2">
-            <h1 className="text-[80px] leading-none font-black tracking-widest text-black whitespace-nowrap" style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>ليلة القدر</h1>
+          <div className="flex justify-between items-start w-full">
+            <div className="w-28 shrink-0 opacity-0 hidden sm:block"></div> {/* Spacer for perfect centering */}
             
-            {/* Styled Logo from assets */}
-            <div className="shrink-0 ml-6 relative">
-              <div className="w-32 h-32 rounded-full border-[4px] border-[#b59540] p-1 shadow-[4px_4px_0_0_rgba(181,149,64,0.3)] bg-white relative">
-                <div className="w-full h-full rounded-full border-[2px] border-dashed border-black overflow-hidden bg-black flex items-center justify-center">
-                  <img src={logoImg} alt="شعار ليلة القدر" className="w-full h-full object-cover scale-110" />
-                </div>
+            <div className="flex-1 text-center pt-2">
+              <p className="text-lg font-bold mb-1">بسم الله الرحمن الرحيم</p>
+              <p className="text-lg font-bold mb-6">﴿ وَأَقِيمُوا الْوَزْنَ بِالْقِسْطِ وَلَا تُخْسِرُوا الْمِيزَانَ ﴾ <span className="text-base">صدق الله العظيم</span></p>
+            </div>
+            
+            {/* Styled Logo - Top Left */}
+            <div className="w-28 h-28 shrink-0 rounded-full border-[4px] border-[#D4AF37] p-1 shadow-[4px_4px_0_0_rgba(212,175,55,0.3)] bg-white z-20">
+              <div className="w-full h-full rounded-full border-[2px] border-dashed border-black overflow-hidden bg-black flex items-center justify-center">
+                <img src={logoImg} alt="شعار ليلة القدر" className="w-full h-full object-cover scale-110" />
               </div>
             </div>
           </div>
-          <p className="text-xl font-black">إدارة الحاج / صلاح الهوش - موبايل: ٠١٠٠٢٩٠٨٠٢٦</p>
+          
+          <p className="text-4xl font-black mb-3 mt-4">مصوغات ومجوهرات</p>
+          
+          <div className="flex justify-center items-center mb-6 mt-4">
+            <h1 className="text-[110px] leading-none font-black tracking-widest whitespace-nowrap text-[#D4AF37]" style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 3px 3px 0 #222' }}>
+              ليلة القدر
+            </h1>
+          </div>
+          
+          <p className="text-xl font-black mt-2">إدارة الحاج / صلاح الهوش - موبايل: ٠١٠٠٢٩٠٨٠٢٦</p>
           <p className="text-lg font-bold mt-1 text-gray-800">إبراهيم صلاح الهوش - موبايل: ٠١٠٣٢٥٦١٠٦٨</p>
         </div>
 
@@ -124,12 +133,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
                     <td className="border border-black px-1">{wholeGrams !== '' ? toArabicNumerals(wholeGrams) : ''}</td>
                     <td className="border border-black px-1" dir="ltr">{item.karat ? `${toArabicNumerals(item.karat)}K` : ''}</td>
                     <td className="border border-black px-2 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {item.name}
-                        {item.images && item.images.length > 0 && (
-                          <img src={item.images[0]} alt={item.name} className="w-8 h-8 object-cover rounded-sm border border-gray-300" />
-                        )}
-                      </div>
+                      {item.name}
                     </td>
                   </tr>
                 );

@@ -48,13 +48,11 @@ export const SupplierTransactionModal: React.FC<{
   // Temp states for adding received item
   const [recvKarat, setRecvKarat] = useState<number | ''>(21);
   const [recvWeight, setRecvWeight] = useState<number | ''>('');
-  const [recvPrice, setRecvPrice] = useState<number | ''>('');
   const [recvFee, setRecvFee] = useState<number | ''>('');
 
   // Temp states for adding scrap paid
   const [scrapKarat, setScrapKarat] = useState<number | ''>(21);
   const [scrapWeight, setScrapWeight] = useState<number | ''>('');
-  const [scrapPrice, setScrapPrice] = useState<number | ''>('');
 
   useEffect(() => {
     if (isOpen) {
@@ -69,13 +67,11 @@ export const SupplierTransactionModal: React.FC<{
   }, [isOpen]);
 
   const addReceivedItem = () => {
-    if (!recvKarat || !recvWeight || !recvPrice) return;
+    if (!recvKarat || !recvWeight || recvFee === '') return;
     const item: ReceivedItemDto = {
       karat: Number(recvKarat),
       weight: Number(recvWeight),
-      pricePerGram: Number(recvPrice),
       manufacturingFeePerGram: Number(recvFee) || 0,
-      totalPrice: (Number(recvPrice) + (Number(recvFee) || 0)) * Number(recvWeight),
     };
     setReceivedItems([...receivedItems, item]);
     setRecvWeight('');
@@ -83,12 +79,10 @@ export const SupplierTransactionModal: React.FC<{
   };
 
   const addScrapItem = () => {
-    if (!scrapKarat || !scrapWeight || !scrapPrice) return;
+    if (!scrapKarat || !scrapWeight) return;
     const item: ScrapPaidDto = {
       karat: Number(scrapKarat),
       weight: Number(scrapWeight),
-      pricePerGram: Number(scrapPrice),
-      totalValue: Number(scrapPrice) * Number(scrapWeight),
     };
     setScrapPaid([...scrapPaid, item]);
     setScrapWeight('');
@@ -121,10 +115,9 @@ export const SupplierTransactionModal: React.FC<{
       payload.receivedItems = receivedItems;
     }
 
-    const hasPayment = Number(cashPaid) > 0 || Number(manufacturingFeePaid) > 0 || scrapPaid.length > 0;
+    const hasPayment = Number(manufacturingFeePaid) > 0 || scrapPaid.length > 0;
     if (hasPayment) {
       payload.paymentDetails = {
-        cashPaid: Number(cashPaid) || undefined,
         manufacturingFeePaid: Number(manufacturingFeePaid) || undefined,
         scrapPaid: scrapPaid.length > 0 ? scrapPaid : undefined,
       };
@@ -140,9 +133,8 @@ export const SupplierTransactionModal: React.FC<{
     }
   };
 
-  const totalGoodsValue = receivedItems.reduce((sum, item) => sum + item.totalPrice, 0);
-  const totalScrapValue = scrapPaid.reduce((sum, item) => sum + item.totalValue, 0);
-  const totalPaymentValue = Number(cashPaid || 0) + Number(manufacturingFeePaid || 0) + totalScrapValue;
+  const totalManufacturingValue = receivedItems.reduce((sum, item) => sum + (item.weight * (item.manufacturingFeePerGram || 0)), 0);
+
 
   return (
     <ModalOverlay
@@ -198,14 +190,10 @@ export const SupplierTransactionModal: React.FC<{
                 <input type="number" step="0.01" value={recvWeight} onChange={e => setRecvWeight(e.target.value ? Number(e.target.value) : '')} className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white" placeholder="جرام" />
               </div>
               <div className="flex-1">
-                <label className="block text-xs font-semibold text-gray-500 mb-1">سعر الجرام</label>
-                <input type="number" step="1" value={recvPrice} onChange={e => setRecvPrice(e.target.value ? Number(e.target.value) : '')} className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white" placeholder="ج.م" />
-              </div>
-              <div className="flex-1">
                 <label className="block text-xs font-semibold text-gray-500 mb-1">المصنعية/ج</label>
                 <input type="number" step="1" value={recvFee} onChange={e => setRecvFee(e.target.value ? Number(e.target.value) : '')} className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white" placeholder="ج.م" />
               </div>
-              <button type="button" onClick={addReceivedItem} disabled={!recvKarat || !recvWeight || !recvPrice} className="p-2.5 bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg font-bold disabled:opacity-50">
+              <button type="button" onClick={addReceivedItem} disabled={!recvKarat || !recvWeight || recvFee === ''} className="p-2.5 bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg font-bold disabled:opacity-50">
                 <Plus size={20} />
               </button>
             </div>
@@ -217,9 +205,8 @@ export const SupplierTransactionModal: React.FC<{
                     <tr>
                       <th className="px-4 py-2 font-semibold">العيار</th>
                       <th className="px-4 py-2 font-semibold">الوزن</th>
-                      <th className="px-4 py-2 font-semibold">سعر الجرام</th>
-                      <th className="px-4 py-2 font-semibold">المصنعية</th>
-                      <th className="px-4 py-2 font-semibold">الإجمالي</th>
+                      <th className="px-4 py-2 font-semibold">أجر الجرام (مصنعية)</th>
+                      <th className="px-4 py-2 font-semibold">إجمالي المصنعية</th>
                       <th className="px-4 py-2"></th>
                     </tr>
                   </thead>
@@ -228,9 +215,8 @@ export const SupplierTransactionModal: React.FC<{
                       <tr key={idx}>
                         <td className="px-4 py-2" dir="ltr">{item.karat}K</td>
                         <td className="px-4 py-2">{item.weight}g</td>
-                        <td className="px-4 py-2">{item.pricePerGram}</td>
-                        <td className="px-4 py-2">{item.manufacturingFeePerGram}</td>
-                        <td className="px-4 py-2 font-bold">{item.totalPrice}</td>
+                        <td className="px-4 py-2">{item.manufacturingFeePerGram} ج.م</td>
+                        <td className="px-4 py-2 font-bold">{(item.weight * (item.manufacturingFeePerGram || 0)).toLocaleString()} ج.م</td>
                         <td className="px-4 py-2">
                           <button type="button" onClick={() => setReceivedItems(receivedItems.filter((_, i) => i !== idx))} className="text-red-500 hover:bg-red-50 p-1 rounded">
                             <Trash2 size={16} />
@@ -244,7 +230,7 @@ export const SupplierTransactionModal: React.FC<{
             )}
             
             <div className="flex justify-end pt-2 text-sm">
-              <span className="font-bold text-gray-500">إجمالي البضاعة: <span className="text-amber-600 text-lg mx-1">{totalGoodsValue.toLocaleString()}</span> ج.م</span>
+              <span className="font-bold text-gray-500">إجمالي المصنعية المطلوبة: <span className="text-amber-600 text-lg mx-1">{totalManufacturingValue.toLocaleString()}</span> ج.م</span>
             </div>
           </div>
         )}
@@ -258,11 +244,7 @@ export const SupplierTransactionModal: React.FC<{
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">نقدية كاش (ج.م)</label>
-              <input type="number" step="1" value={cashPaid} onChange={e => setCashPaid(e.target.value ? Number(e.target.value) : '')} className="w-full p-2.5 border border-emerald-200 rounded-lg text-sm bg-white focus:ring-emerald-500 focus:border-emerald-500" placeholder="0" />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">مصنعية كاش (ج.م)</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">مصنعية كاش مدفوعة (ج.م)</label>
               <input type="number" step="1" value={manufacturingFeePaid} onChange={e => setManufacturingFeePaid(e.target.value ? Number(e.target.value) : '')} className="w-full p-2.5 border border-emerald-200 rounded-lg text-sm bg-white focus:ring-emerald-500 focus:border-emerald-500" placeholder="0" />
             </div>
           </div>
@@ -282,11 +264,7 @@ export const SupplierTransactionModal: React.FC<{
                 <label className="block text-xs font-semibold text-gray-500 mb-1">الوزن (جرام)</label>
                 <input type="number" step="0.01" value={scrapWeight} onChange={e => setScrapWeight(e.target.value ? Number(e.target.value) : '')} className="w-full p-2.5 border border-emerald-200 rounded-lg text-sm bg-white" placeholder="0.00" />
               </div>
-              <div className="flex-1">
-                <label className="block text-xs font-semibold text-gray-500 mb-1">سعر الجرام اليوم</label>
-                <input type="number" step="1" value={scrapPrice} onChange={e => setScrapPrice(e.target.value ? Number(e.target.value) : '')} className="w-full p-2.5 border border-emerald-200 rounded-lg text-sm bg-white" placeholder="0" />
-              </div>
-              <button type="button" onClick={addScrapItem} disabled={!scrapKarat || !scrapWeight || !scrapPrice} className="p-2.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg font-bold disabled:opacity-50">
+              <button type="button" onClick={addScrapItem} disabled={!scrapKarat || !scrapWeight} className="p-2.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg font-bold disabled:opacity-50">
                 <Plus size={20} />
               </button>
             </div>
@@ -297,9 +275,7 @@ export const SupplierTransactionModal: React.FC<{
                   <thead className="bg-emerald-50 text-emerald-700">
                     <tr>
                       <th className="px-4 py-2 font-semibold">العيار</th>
-                      <th className="px-4 py-2 font-semibold">الوزن</th>
-                      <th className="px-4 py-2 font-semibold">السعر</th>
-                      <th className="px-4 py-2 font-semibold">القيمة</th>
+                      <th className="px-4 py-2 font-semibold">الوزن الكسري</th>
                       <th className="px-4 py-2"></th>
                     </tr>
                   </thead>
@@ -307,9 +283,7 @@ export const SupplierTransactionModal: React.FC<{
                     {scrapPaid.map((item, idx) => (
                       <tr key={idx}>
                         <td className="px-4 py-2" dir="ltr">{item.karat}K</td>
-                        <td className="px-4 py-2">{item.weight}g</td>
-                        <td className="px-4 py-2">{item.pricePerGram}</td>
-                        <td className="px-4 py-2 font-bold">{item.totalValue}</td>
+                        <td className="px-4 py-2 font-bold">{item.weight}g</td>
                         <td className="px-4 py-2">
                           <button type="button" onClick={() => setScrapPaid(scrapPaid.filter((_, i) => i !== idx))} className="text-red-500 hover:bg-red-50 p-1 rounded">
                             <Trash2 size={16} />
@@ -324,7 +298,7 @@ export const SupplierTransactionModal: React.FC<{
           </div>
           
           <div className="flex justify-end pt-2 text-sm">
-            <span className="font-bold text-emerald-700">إجمالي المدفوع: <span className="text-xl mx-1">{totalPaymentValue.toLocaleString()}</span> ج.م</span>
+            <span className="font-bold text-emerald-700">إجمالي النقدية المدفوعة: <span className="text-xl mx-1">{Number(manufacturingFeePaid || 0).toLocaleString()}</span> ج.م</span>
           </div>
         </div>
 

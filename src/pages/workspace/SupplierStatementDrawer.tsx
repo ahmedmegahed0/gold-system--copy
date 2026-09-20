@@ -151,31 +151,30 @@ export const SupplierStatementDrawer: React.FC<{
                         {txn.receivedItems.map((item, idx) => (
                           <div key={idx} className="flex justify-between items-center text-sm mb-1 last:mb-0">
                             <span className="font-semibold text-charcoal">{item.weight}g ({item.karat}K)</span>
-                            <span className="text-gray-500" dir="ltr">{(item.totalPrice)?.toLocaleString()} EGP</span>
+                            <span className="text-gray-500" dir="ltr">مصنعية {(item.weight * (item.manufacturingFeePerGram || 0)).toLocaleString()} EGP</span>
                           </div>
                         ))}
                       </div>
                     )}
 
-                    {(((txn.paymentDetails?.cashPaid ?? 0) > 0) || ((txn.paymentDetails?.manufacturingFeePaid ?? 0) > 0) || (txn.paymentDetails?.scrapPaid && txn.paymentDetails.scrapPaid.length > 0)) && (
+                    {(((txn.paymentDetails?.cashPaidForGold ?? 0) > 0) || ((txn.paymentDetails?.manufacturingFeePaid ?? 0) > 0) || (txn.paymentDetails?.scrapPaid && txn.paymentDetails.scrapPaid.length > 0)) && (
                       <div className="p-3 bg-emerald-50/50 rounded-lg border border-emerald-100">
-                        <span className="text-xs font-bold text-emerald-600 block mb-2">المدفوعات:</span>
-                        {(txn.paymentDetails?.cashPaid ?? 0) > 0 && (
+                        <span className="text-xs font-bold text-emerald-600 block mb-2">المدفوعات والتسويات:</span>
+                        {(txn.paymentDetails?.cashPaidForGold ?? 0) > 0 && (
                           <div className="flex justify-between items-center text-sm mb-1">
-                            <span className="font-medium text-charcoal">كاش</span>
-                            <span className="font-bold text-emerald-600" dir="ltr">{txn.paymentDetails?.cashPaid?.toLocaleString()} EGP</span>
+                            <span className="font-medium text-charcoal">كاش مقابل ذهب</span>
+                            <span className="font-bold text-emerald-600" dir="ltr">{txn.paymentDetails?.cashPaidForGold?.toLocaleString()} EGP</span>
                           </div>
                         )}
                         {(txn.paymentDetails?.manufacturingFeePaid ?? 0) > 0 && (
                           <div className="flex justify-between items-center text-sm mb-1">
-                            <span className="font-medium text-charcoal">مصنعية كاش</span>
+                            <span className="font-medium text-charcoal">سداد مصنعية (كاش)</span>
                             <span className="font-bold text-emerald-600" dir="ltr">{txn.paymentDetails?.manufacturingFeePaid?.toLocaleString()} EGP</span>
                           </div>
                         )}
                         {txn.paymentDetails?.scrapPaid?.map((scrap, idx) => (
                           <div key={idx} className="flex justify-between items-center text-sm mb-1 last:mb-0">
-                            <span className="font-medium text-charcoal">كسر {scrap.weight}g ({scrap.karat}K)</span>
-                            <span className="font-bold text-emerald-600" dir="ltr">{scrap.totalValue?.toLocaleString()} EGP</span>
+                            <span className="font-medium text-charcoal">تسليم كسر {scrap.weight}g ({scrap.karat}K)</span>
                           </div>
                         ))}
                       </div>

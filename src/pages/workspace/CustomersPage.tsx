@@ -28,6 +28,7 @@ import { useCustomers } from '../../hooks/useCustomers';
 import { SalesService } from '../../services/sales.service';
 import { ScrapInvoiceService } from '../../services/scrap-invoice.service';
 import { BullionSalesService } from '../../services/bullion-sales.service';
+import { BarcodeSalesService } from '../../services/barcode-sales.service';
 import type { CreateCustomerDto, UpdateCustomerDto, Customer } from '../../common/types/customer.types';
 
 /* ──────────────────────────────────────────────
@@ -295,10 +296,11 @@ const CustomerStatementDrawer: React.FC<{
         setError(null);
         try {
           // Bypass the broken backend endpoint by fetching invoices directly and calculating locally
-          const [allInvoices, allScrap, allBullion] = await Promise.all([
+          const [allInvoices, allScrap, allBullion, allBarcode] = await Promise.all([
             SalesService.getInvoices(),
             ScrapInvoiceService.getScrapInvoices(),
-            BullionSalesService.getAllInvoices()
+            BullionSalesService.getAllInvoices(),
+            BarcodeSalesService.getBarcodeInvoices()
           ]);
 
           const customerInvoices = allInvoices.filter(inv => {
@@ -315,14 +317,21 @@ const CustomerStatementDrawer: React.FC<{
             if (typeof inv.customer === 'string') return inv.customer === customerId;
             return inv.customer?._id === customerId || inv.customer?.id === customerId;
           }).map(inv => ({ ...inv, type: 'BULLION' }));
+
+          const customerBarcode = allBarcode.filter(inv => {
+            if (typeof inv.customer === 'string') return inv.customer === customerId;
+            return inv.customer?._id === customerId;
+          }).map(inv => ({ ...inv, type: 'BARCODE' }));
           
           const totalSpent = customerInvoices.reduce((sum, inv) => sum + (inv.totalPrice || 0), 0) +
-                             customerBullion.reduce((sum, inv) => sum + (inv.grandTotal || 0), 0);
+                             customerBullion.reduce((sum, inv) => sum + (inv.grandTotal || 0), 0) +
+                             customerBarcode.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0);
           const totalScrapBought = customerScrap.reduce((sum, inv) => sum + (inv.totalPrice || 0), 0);
-          const invoicesCount = customerInvoices.length + customerScrap.length + customerBullion.length;
+          const invoicesCount = customerInvoices.length + customerScrap.length + customerBullion.length + customerBarcode.length;
           const totalGoldWeight = customerInvoices.reduce((sum, inv) => 
             sum + (inv.items?.reduce((w: number, item: any) => w + (item.soldGrossWeight || 0), 0) || 0), 0) +
-            customerBullion.reduce((sum, inv) => sum + (inv.totalGoldWeight || 0), 0);
+            customerBullion.reduce((sum, inv) => sum + (inv.totalGoldWeight || 0), 0) +
+            customerBarcode.reduce((sum, inv) => sum + (inv.items?.reduce((w: number, item: any) => w + (item.weight || 0), 0) || 0), 0);
           const totalScrapGoldWeight = customerScrap.reduce((sum, inv) => sum + (inv.weight || 0), 0);
           
           const statementData = {
@@ -331,7 +340,7 @@ const CustomerStatementDrawer: React.FC<{
             invoicesCount,
             totalGoldWeight,
             totalScrapGoldWeight,
-            recentInvoices: [...customerInvoices, ...customerScrap, ...customerBullion].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+            recentInvoices: [...customerInvoices, ...customerScrap, ...customerBullion, ...customerBarcode].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
           };
           
           setStatement(statementData);
@@ -433,6 +442,9 @@ const CustomerStatementDrawer: React.FC<{
                       {inv.type === 'BULLION' && (
                         <span className="text-[10px] font-black px-2 py-0.5 rounded bg-gold/20 text-yellow-800">بيع سبايك</span>
                       )}
+                      {inv.type === 'BARCODE' && (
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">بيع باركود</span>
+                      )}
                       <span className="text-xs text-gray-400 flex items-center gap-1" dir="ltr">
                         <Calendar size={12} />
                         {new Date(inv.createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}
@@ -442,7 +454,7 @@ const CustomerStatementDrawer: React.FC<{
                       <div className="flex flex-col gap-0.5">
                         <span className="text-sm font-medium text-gray-500">{t('customers.statement.invoiceTotal')}</span>
                         <span className="text-lg font-bold text-charcoal" dir="ltr">
-                          {(inv.type === 'BULLION' ? inv.grandTotal : inv.totalPrice)?.toLocaleString() || '0'} {t('customers.currency')}
+                          {(inv.type === 'BULLION' ? inv.grandTotal : inv.type === 'BARCODE' ? inv.totalAmount : inv.totalPrice)?.toLocaleString() || '0'} {t('customers.currency')}
                         </span>
                       </div>
                       <button 
@@ -470,7 +482,7 @@ const CustomerStatementDrawer: React.FC<{
       <ModalOverlay
         isOpen={!!viewingInvoice}
         onClose={() => setViewingInvoice(null)}
-        title={viewingInvoice?.type === 'SCRAP' ? 'تفاصيل فاتورة شراء الكسر' : viewingInvoice?.type === 'BULLION' ? 'تفاصيل فاتورة بيع سبايك' : t('sales.invoices.transcriptTitle')}
+        title={viewingInvoice?.type === 'SCRAP' ? 'تفاصيل فاتورة شراء الكسر' : viewingInvoice?.type === 'BULLION' ? 'تفاصيل فاتورة بيع سبايك' : viewingInvoice?.type === 'BARCODE' ? 'تفاصيل فاتورة باركود' : t('sales.invoices.transcriptTitle')}
       >
         {viewingInvoice && (
           <div className="space-y-6">
@@ -521,7 +533,7 @@ const CustomerStatementDrawer: React.FC<{
                     <User size={18} />
                   </div>
                   <div>
-                    <span className="block font-bold text-charcoal">{(viewingInvoice.seller || viewingInvoice.actionBy) && typeof (viewingInvoice.seller || viewingInvoice.actionBy) === 'object' ? (viewingInvoice.seller || viewingInvoice.actionBy).fullName : '---'}</span>
+                    <span className="block font-bold text-charcoal">{(viewingInvoice.seller || viewingInvoice.actionBy || viewingInvoice.cashier) && typeof (viewingInvoice.seller || viewingInvoice.actionBy || viewingInvoice.cashier) === 'object' ? (viewingInvoice.seller || viewingInvoice.actionBy || viewingInvoice.cashier).fullName : '---'}</span>
                   </div>
                 </div>
               </div>
@@ -545,6 +557,11 @@ const CustomerStatementDrawer: React.FC<{
                     ) : viewingInvoice.type === 'BULLION' ? (
                       <>
                         <span className="w-16 text-center">الكمية</span>
+                        <span className="w-16 text-center">الوزن</span>
+                      </>
+                    ) : viewingInvoice.type === 'BARCODE' ? (
+                      <>
+                        <span className="w-16 text-center">العيار</span>
                         <span className="w-16 text-center">الوزن</span>
                       </>
                     ) : (
@@ -580,6 +597,19 @@ const CustomerStatementDrawer: React.FC<{
                         </div>
                       </div>
                     ))
+                  ) : viewingInvoice.type === 'BARCODE' ? (
+                    viewingInvoice.items?.map((item: any, idx: number) => (
+                      <div key={idx} className="px-4 py-3 flex justify-between items-center hover:bg-gold/[0.02] transition-colors">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-charcoal">{item.title}</span>
+                          <span className="text-xs text-gray-400" dir="ltr">{item.barcode}</span>
+                        </div>
+                        <div className="flex gap-8 text-sm font-semibold">
+                          <span className="w-16 text-center text-charcoal" dir="ltr">{item.karat}K</span>
+                          <span className="w-16 text-center text-gold" dir="ltr">{item.weight?.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    ))
                   ) : (
                     viewingInvoice.items?.map((item: any, idx: number) => (
                       <div key={idx} className="px-4 py-3 flex justify-between items-center hover:bg-gold/[0.02] transition-colors">
@@ -603,8 +633,8 @@ const CustomerStatementDrawer: React.FC<{
               <div>
                 <span className="block text-sm font-bold text-gold/80 mb-1">{t('sales.invoices.table.weight')}</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-gold" dir="ltr">{(viewingInvoice.type === 'SCRAP' ? viewingInvoice.weight : viewingInvoice.type === 'BULLION' ? viewingInvoice.totalGoldWeight : viewingInvoice.totalGrossWeight)?.toFixed(2)}g</span>
-                  {viewingInvoice.type !== 'SCRAP' && viewingInvoice.type !== 'BULLION' && (
+                  <span className="text-2xl font-black text-gold" dir="ltr">{(viewingInvoice.type === 'SCRAP' ? viewingInvoice.weight : viewingInvoice.type === 'BULLION' ? viewingInvoice.totalGoldWeight : viewingInvoice.type === 'BARCODE' ? viewingInvoice.items?.reduce((w:number, i:any)=>w+(i.weight||0), 0) : viewingInvoice.totalGrossWeight)?.toFixed(2)}g</span>
+                  {viewingInvoice.type !== 'SCRAP' && viewingInvoice.type !== 'BULLION' && viewingInvoice.type !== 'BARCODE' && (
                     <span className="text-sm font-semibold text-gold/60" dir="ltr">({viewingInvoice.totalNetWeight?.toFixed(2)}g net)</span>
                   )}
                 </div>
@@ -612,7 +642,7 @@ const CustomerStatementDrawer: React.FC<{
               <div className="text-right">
                 <span className="block text-sm font-bold text-charcoal mb-1">{t('sales.invoice.totalPrice')}</span>
                 <span className="text-3xl font-black text-charcoal" dir="ltr">
-                  {(viewingInvoice.type === 'BULLION' ? viewingInvoice.grandTotal : viewingInvoice.totalPrice)?.toLocaleString()} <span className="text-lg text-gray-400">{t('customers.currency')}</span>
+                  {(viewingInvoice.type === 'BULLION' ? viewingInvoice.grandTotal : viewingInvoice.type === 'BARCODE' ? viewingInvoice.totalAmount : viewingInvoice.totalPrice)?.toLocaleString()} <span className="text-lg text-gray-400">{t('customers.currency')}</span>
                 </span>
               </div>
             </div>

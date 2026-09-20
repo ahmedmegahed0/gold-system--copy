@@ -1,4 +1,6 @@
 export interface CreateScrapPurchaseDto {
+  customerName: string;
+  customerPhone?: string;
   karat: 18 | 21;
   weight: number;
   totalPrice: number;
@@ -10,6 +12,8 @@ export interface UpdateScrapPurchaseDto extends Partial<CreateScrapPurchaseDto> 
 export interface ScrapPurchase {
   _id: string;
   purchaseNumber: string;
+  customerName: string;
+  customerPhone?: string;
   karat: 18 | 21;
   weight: number;
   totalPrice: number;

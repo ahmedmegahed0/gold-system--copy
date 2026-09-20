@@ -56,6 +56,8 @@ export const ScrapPurchasesPage: React.FC = () => {
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [editingPurchaseId, setEditingPurchaseId] = useState<string | null>(null);
   const [purchasePayload, setPurchasePayload] = useState<CreateScrapPurchaseDto>({
+    customerName: '',
+    customerPhone: '',
     karat: 21,
     weight: 0,
     totalPrice: 0,
@@ -65,13 +67,15 @@ export const ScrapPurchasesPage: React.FC = () => {
 
   const openCreatePurchaseModal = () => {
     setEditingPurchaseId(null);
-    setPurchasePayload({ karat: 21, weight: 0, totalPrice: 0, notes: '' });
+    setPurchasePayload({ customerName: '', customerPhone: '', karat: 21, weight: 0, totalPrice: 0, notes: '' });
     setIsPurchaseModalOpen(true);
   };
 
   const openEditPurchaseModal = (purchase: ScrapPurchase) => {
     setEditingPurchaseId(purchase._id);
     setPurchasePayload({
+      customerName: purchase.customerName,
+      customerPhone: purchase.customerPhone || '',
       karat: purchase.karat,
       weight: purchase.weight,
       totalPrice: purchase.totalPrice,
@@ -82,6 +86,10 @@ export const ScrapPurchasesPage: React.FC = () => {
 
   const handlePurchaseSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!purchasePayload.customerName?.trim()) {
+      alert('اسم الزبون مطلوب');
+      return;
+    }
     if (purchasePayload.weight <= 0) {
       alert('الوزن يجب أن يكون أكبر من صفر');
       return;
@@ -158,6 +166,7 @@ export const ScrapPurchasesPage: React.FC = () => {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100 text-charcoal">
                   <th className="px-6 py-4 font-bold text-sm">رقم الفاتورة</th>
+                  <th className="px-6 py-4 font-bold text-sm">الزبون</th>
                   <th className="px-6 py-4 font-bold text-sm">العيار</th>
                   <th className="px-6 py-4 font-bold text-sm">الوزن المشتري</th>
                   <th className="px-6 py-4 font-bold text-sm">المدفوع للزبون</th>
@@ -183,6 +192,12 @@ export const ScrapPurchasesPage: React.FC = () => {
                       <tr key={p._id} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4 font-mono text-sm text-theme-scrap font-bold">
                           {p.purchaseNumber}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-charcoal">{p.customerName}</span>
+                            {p.customerPhone && <span className="text-xs text-gray-500" dir="ltr">{p.customerPhone}</span>}
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-sm font-bold bg-gold/10 text-gold" dir="ltr">
@@ -250,6 +265,30 @@ export const ScrapPurchasesPage: React.FC = () => {
           )}
           
           <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2 sm:col-span-1">
+              <label className="block text-sm font-bold text-charcoal mb-2">اسم الزبون *</label>
+              <input
+                type="text"
+                value={purchasePayload.customerName || ''}
+                onChange={(e) => setPurchasePayload({ ...purchasePayload, customerName: e.target.value })}
+                className="w-full py-2.5 px-4 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent font-bold text-charcoal"
+                placeholder="مثال: محمد أحمد"
+                required
+              />
+            </div>
+
+            <div className="col-span-2 sm:col-span-1">
+              <label className="block text-sm font-bold text-charcoal mb-2">رقم الهاتف (اختياري)</label>
+              <input
+                type="tel"
+                value={purchasePayload.customerPhone || ''}
+                onChange={(e) => setPurchasePayload({ ...purchasePayload, customerPhone: e.target.value })}
+                className="w-full py-2.5 px-4 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent font-bold text-charcoal"
+                placeholder="رقم الموبايل"
+                dir="ltr"
+              />
+            </div>
+
             <div className="col-span-2">
               <label className="block text-sm font-bold text-charcoal mb-2">العيار (Karat)</label>
               <div className="flex gap-4">
