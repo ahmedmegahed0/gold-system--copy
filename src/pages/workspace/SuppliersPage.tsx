@@ -66,6 +66,7 @@ export const SuppliersPage: React.FC = () => {
     createSupplier,
     updateSupplier,
     deleteSupplier,
+    fetchSuppliers,
   } = useSuppliers();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -264,13 +265,8 @@ export const SuppliersPage: React.FC = () => {
           onClose={() => setTransactionSupplier(null)}
           supplier={transactionSupplier}
           onSubmit={async (data) => {
-            // Note: In a real app we'd want to reload the specific supplier or all suppliers to reflect new balances.
-            // Since we're using react state loosely, reloading window is a brute-force approach, or we could add a `recordTransaction` to `useSuppliers` hook.
-            // For now, let's just reload the page on successful transaction, or better: just call a hook function. 
-            // We didn't expose recordTransaction in useSuppliers, let's just reload.
-            // A better way is imported in next step.
             await import('../../services/suppliers.service').then(m => m.SuppliersService.recordTransaction(data));
-            window.location.reload(); 
+            fetchSuppliers(); 
           }}
         />
       )}

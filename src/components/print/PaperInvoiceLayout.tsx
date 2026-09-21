@@ -37,7 +37,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
   }
 
   return (
-    <div className="bg-blue-100 p-8 sm:p-12 shadow-xl max-w-3xl w-full text-black print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[297mm] relative overflow-hidden font-sans" dir="rtl" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+    <div className="bg-blue-100 p-8 sm:p-12 shadow-xl w-full text-black print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[210mm] max-w-[148mm] relative overflow-hidden font-sans" dir="rtl" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
       
       {/* Watermark Background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-15 z-0 print:opacity-[0.12]">
@@ -52,7 +52,8 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
             
             <div className="flex-1 text-center pt-2">
               <p className="text-lg font-bold mb-1">بسم الله الرحمن الرحيم</p>
-              <p className="text-lg font-bold mb-6">﴿ وَأَقِيمُوا الْوَزْنَ بِالْقِسْطِ وَلَا تُخْسِرُوا الْمِيزَانَ ﴾ <span className="text-base">صدق الله العظيم</span></p>
+              <p className="text-lg font-bold mb-1">﴿ وَأَقِيمُوا الْوَزْنَ بِالْقِسْطِ وَلَا تُخْسِرُوا الْمِيزَانَ ﴾</p>
+              <p className="text-base font-bold mb-6">صدق الله العظيم</p>
             </div>
             
             {/* Styled Logo - Top Left */}
@@ -83,19 +84,21 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
             <p className="flex items-center gap-2" dir="rtl"><span>📞</span> <span>٠٤٨ / ٣٦٦٦٦٨١</span></p>
           </div>
           <div className="text-left flex flex-col justify-end gap-1">
-            <p>منوف - ش السينما - أول سوق الصرف</p>
+            <p>منوف - ش السينما - أول سوق الصرف (الصاغة)</p>
           </div>
         </div>
 
         {/* Invoice Meta */}
         <div className="flex justify-between text-sm font-bold mb-4">
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-end">
             <span>تحريراً في :</span>
             <span dir="ltr">{toArabicNumerals(date)}</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-end text-base">
             <span>المطلوب من السيد :</span>
-            <span className="w-64 border-b-2 border-dotted border-black inline-block text-center">{customerName}</span>
+            <span className="w-40 border-b-2 border-dotted border-black inline-block text-center text-xl pb-1">{customerName}</span>
+            <span className="mr-2">البلد /</span>
+            <span className="w-24 border-b-2 border-dotted border-black inline-block"></span>
           </div>
         </div>
 
@@ -180,6 +183,12 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
       <style dangerouslySetInnerHTML={{__html: `
         .writing-vertical-rl {
           writing-mode: vertical-rl;
+        }
+        @media print {
+          @page {
+            size: 148mm 210mm;
+            margin: 0;
+          }
         }
       `}} />
     </div>

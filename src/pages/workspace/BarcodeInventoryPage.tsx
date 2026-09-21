@@ -121,111 +121,73 @@ export function BarcodeInventoryPage() {
             <title>طباعة التاج</title>
             <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
             <style>
-              body { 
-                margin: 0; 
+              /* ضبط مقاس الطباعة للطابعة */
+              @page {
+                size: 82mm 37mm;
+                margin: 0;
+              }
+          
+              body {
+                margin: 0;
                 padding: 0;
                 width: 82mm;
-                height: 25mm;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+                height: 37mm;
+                font-family: 'Tajawal', Arial, sans-serif;
                 box-sizing: border-box;
-                font-family: 'Tajawal', sans-serif;
                 background: white;
               }
-              .tag-section {
-                width: 25mm; 
+          
+              /* الحاوية الرئيسية بعرض الرول الكامل */
+              .label-page {
+                width: 82mm;
+                height: 37mm;
+                position: relative;
+                background: #fff;
+              }
+          
+              /* مربع الطباعة (2سم × 2.5سم) */
+              .printable-area {
+                width: 20mm;
                 height: 25mm;
+                position: absolute;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
+                text-align: center;
+                box-sizing: border-box;
+              }
+          
+              .left-box { left: 0; bottom: 0; }
+              /* .right-box { right: 0; top: 0; } */
+          
+              /* النصف العلوي: 1.25سم + دوران 180 درجة */
+              .top-half {
+                width: 100%;
+                height: 12.5mm;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                transform: rotate(180deg);
+                overflow: hidden;
+              }
+          
+              /* النصف السفلي: 1.25سم + اتجاه عدل */
+              .bottom-half {
+                width: 100%;
+                height: 12.5mm;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                text-align: center;
                 overflow: hidden;
-                padding: 1mm;
-                box-sizing: border-box;
+                font-size: 5.5pt;
+                font-weight: bold;
+                line-height: 1.2;
               }
-              .tail-space {
-                flex: 1; 
-              }
-              
-              /* Face 1: Branding */
-              .brand-face {
-                gap: 1px;
-              }
-              .logo-container {
-                width: 10mm;
-                height: 10mm;
-                border-radius: 50%;
-                border: 1px dashed #000;
-                overflow: hidden;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: #000;
-              }
-              .logo-img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transform: scale(1.1);
-              }
-              .company-name {
-                font-size: 8.5pt;
-                font-weight: 900;
-                color: #000;
-                line-height: 1;
-                margin-top: 1px;
-              }
-              .owner-name {
-                font-size: 6.5pt;
-                font-weight: 700;
-                color: #333;
-                line-height: 1;
-              }
-
-              /* Face 2: Barcode & Details */
-              .details-face {
-                justify-content: flex-end;
-                padding-bottom: 2mm;
-              }
-              .barcode-img {
-                width: 100%;
-                max-height: 11mm;
-                object-fit: contain;
-                margin-bottom: 1px;
-              }
-              .details-row {
-                display: flex;
-                gap: 4px;
-                align-items: center;
-                justify-content: center;
-                direction: ltr;
-              }
-              .weight-text {
-                font-size: 9pt;
-                font-weight: 900;
-                color: #000;
-              }
-              .karat-text {
-                font-size: 7pt;
-                font-weight: 700;
-                color: #000;
-                border: 1px solid #000;
-                border-radius: 3px;
-                padding: 0 2px;
-              }
-              
-              @media print {
-                @page { 
-                  size: 82mm 25mm;
-                  margin: 0; 
-                }
-                body {
-                  width: 82mm;
-                  height: 25mm;
-                }
-              }
+          
+              .barcode-img { max-height: 7mm; width: 18mm; }
+              .logo-img { max-height: 6mm; object-fit: contain; }
               
               @media screen {
                 body {
@@ -238,24 +200,23 @@ export function BarcodeInventoryPage() {
             </style>
           </head>
           <body>
-            <div class="tag-section details-face">
-              <img src="${printData.imageBase64}" class="barcode-img" />
-              <div class="details-row">
-                <span class="weight-text">${itemWeight}g</span>
-                <span class="karat-text">${itemKarat}K</span>
+          
+            <div class="label-page">
+              <div class="printable-area left-box">
+                <!-- النصف العلوي: الباركود مقلوب للطي -->
+                <div class="top-half">
+                  <img src="${printData.imageBase64}" class="barcode-img" />
+                </div>
+                
+                <!-- النصف السفلي: التفاصيل واللوجو عدل -->
+                <div class="bottom-half">
+                  <img src="${window.location.origin}${logoImg}" class="logo-img" />
+                  <div>مجوهرات ليلة القدر</div>
+                  <div dir="ltr">${itemWeight}g | ${itemKarat}K</div>
+                </div>
               </div>
             </div>
-            
-            <div class="tail-space"></div>
-            
-            <div class="tag-section brand-face">
-              <div class="logo-container">
-                <img src="${window.location.origin}${logoImg}" class="logo-img" alt="Logo" />
-              </div>
-              <div class="company-name">مجوهرات ليلة القدر</div>
-              <div class="owner-name">صلاح الهوش</div>
-            </div>
-            
+          
             <script>
               window.onload = function() { 
                 setTimeout(function() {
