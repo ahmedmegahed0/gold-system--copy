@@ -103,7 +103,7 @@ export const AppLayout: React.FC = () => {
   const isRtl = i18n.language.startsWith('ar');
 
   return (
-    <div className="flex h-screen bg-light-gray text-charcoal overflow-hidden relative">
+    <div className="flex h-screen bg-light-gray text-charcoal overflow-hidden relative print:h-auto print:overflow-visible">
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div 
@@ -257,7 +257,7 @@ export const AppLayout: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen print:w-full relative">
+      <div className="flex-1 flex flex-col min-w-0 h-screen print:h-auto print:overflow-visible relative">
         {/* Top Bar */}
         <header className="h-16 shrink-0 bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-8 shadow-sm z-10 print:hidden">
           <div className="flex items-center gap-4">
@@ -330,7 +330,7 @@ export const AppLayout: React.FC = () => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-8 print:p-0 print:overflow-visible">
           <Outlet />
         </main>
       </div>

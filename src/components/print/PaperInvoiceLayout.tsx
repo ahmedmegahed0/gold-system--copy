@@ -37,7 +37,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
   }
 
   return (
-    <div className="bg-blue-100 p-8 sm:p-12 shadow-xl w-full text-black print:shadow-none print:border-none print:p-8 print:pt-12 mx-auto min-h-[210mm] max-w-[148mm] relative overflow-hidden font-sans" dir="rtl" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+    <div id="invoice-print-area" className="bg-blue-100 p-8 sm:p-12 shadow-xl w-full text-black print:shadow-none print:border-none mx-auto min-h-[210mm] max-w-[148mm] relative overflow-hidden font-sans" dir="rtl" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
       
       {/* Watermark Background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-15 z-0 print:opacity-[0.12]">
@@ -188,6 +188,23 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
           @page {
             size: 148mm 210mm;
             margin: 0;
+          }
+          body * {
+            visibility: hidden;
+          }
+          #invoice-print-area, #invoice-print-area * {
+            visibility: visible;
+          }
+          #invoice-print-area {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 148mm !important;
+            min-height: 210mm !important;
+            margin: 0 !important;
+            padding: 8mm 10mm !important; /* Adjust padding to match on-screen look */
+            box-sizing: border-box !important;
+            background-color: #dbeafe !important;
           }
         }
       `}} />
