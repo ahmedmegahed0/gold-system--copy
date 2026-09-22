@@ -26,7 +26,7 @@ const ModalOverlay: React.FC<{
   );
 };
 
-import { useAuth } from '../../core/context/AuthContext';
+// useAuth removed
 
 export const SupplierTransactionModal: React.FC<{
   isOpen: boolean;
@@ -34,7 +34,7 @@ export const SupplierTransactionModal: React.FC<{
   onSubmit: (data: RecordSupplierTransactionDto) => Promise<void>;
   supplier: Supplier | null;
 }> = ({ isOpen, onClose, onSubmit, supplier }) => {
-  const { user } = useAuth();
+  // useAuth removed
   const [type, setType] = useState<'GOODS_RECEIVE' | 'PAYMENT'>('GOODS_RECEIVE');
   
   const [receivedItems, setReceivedItems] = useState<ReceivedItemDto[]>([]);

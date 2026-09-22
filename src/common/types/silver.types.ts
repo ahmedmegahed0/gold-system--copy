@@ -1,14 +1,13 @@
-import { Category } from './category.types';
-import { User } from './auth.types';
+import type { Category } from './category.types';
+import type { UserSession } from './auth.types';
 
-export enum SilverTransactionType {
-  SALE_INCOME = 'بيع_فضة',
-  SCRAP_PURCHASE_EXPENSE = 'شراء_كسر_فضة',
-  MANUAL_DEPOSIT = 'إيداع_يدوي',
-  MANUAL_WITHDRAWAL = 'سحب_يدوي',
-  RESET = 'تصفير_الخزنة',
-  ADJUSTMENT = 'تعديل_رصيد',
-}
+export type SilverTransactionType = 
+  | 'بيع_فضة'
+  | 'شراء_كسر_فضة'
+  | 'إيداع_يدوي'
+  | 'سحب_يدوي'
+  | 'تصفير_الخزنة'
+  | 'تعديل_رصيد';
 
 export interface SilverItem {
   _id?: string;
@@ -42,7 +41,7 @@ export interface SilverSale {
   totalPrice: number;
   customerName?: string;
   customerPhone?: string;
-  soldBy: User | string;
+  soldBy: UserSession | string;
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -65,7 +64,7 @@ export interface SilverScrapPurchase {
   totalPaid: number;
   customerName?: string;
   customerPhone?: string;
-  purchasedBy: User | string;
+  purchasedBy: UserSession | string;
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -87,7 +86,7 @@ export interface SilverSafeTransaction {
   amount: number;
   weightChange: number;
   karat?: number;
-  createdBy: User | string;
+  createdBy: UserSession | string;
   notes?: string;
   createdAt?: string;
   updatedAt?: string;

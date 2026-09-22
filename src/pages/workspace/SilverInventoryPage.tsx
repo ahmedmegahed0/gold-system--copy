@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Filter, Loader2, RefreshCw } from 'lucide-react';
-import { useAuth } from '../../core/context/AuthContext';
+import { Plus, Search, Loader2, RefreshCw } from 'lucide-react';
+// Removed useAuth
 import { SilverService } from '../../services/silver.service';
 import type { SilverItem, CreateSilverItemDto } from '../../common/types/silver.types';
 import { CategoryService } from '../../services/category.service';
 import type { Category } from '../../common/types/category.types';
 
 export const SilverInventoryPage: React.FC = () => {
-  const { user } = useAuth();
+  // useAuth() was here but unused
   const [items, setItems] = useState<SilverItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);

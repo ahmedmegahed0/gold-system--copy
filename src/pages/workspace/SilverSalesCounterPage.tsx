@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShoppingCart, Search, Filter, Loader2, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, Search, Loader2, CheckCircle2 } from 'lucide-react';
 import { SilverService } from '../../services/silver.service';
 import type { SilverItem, QuickSilverSaleDto } from '../../common/types/silver.types';
 
