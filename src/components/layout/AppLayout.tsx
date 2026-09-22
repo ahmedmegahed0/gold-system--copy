@@ -23,7 +23,9 @@ import {
   Barcode,
   Flame,
   Truck,
-  Gem
+  Gem,
+  Vault,
+  FileBarChart2
 } from 'lucide-react';
 import { useLiveNotifications } from '../../hooks/useLiveNotifications';
 import { useNotificationsStore } from '../../store/notifications.store';
@@ -168,6 +170,18 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
               <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
 
+              {/* ── Silver (Silver Gray) ── */}
+              <div className="pt-4 pb-1">
+                <span className="text-[10px] font-bold text-slate-500/60 uppercase tracking-wider px-3">
+                  الفضة
+                </span>
+              </div>
+              <NavItem to="/silver-inventory" icon={Box} label="مخزن الفضة" />
+              <NavItem to="/silver-sales" icon={ShoppingCart} label="بيع الفضة (سريع)" />
+              <NavItem to="/silver-scrap" icon={Receipt} label="شراء كسر فضة" />
+              <NavItem to="/silver-safe" icon={Vault} label="خزنة الفضة" />
+              <NavItem to="/silver-reports" icon={FileBarChart2} label="تقارير الفضة" />
+
               {/* ── Scrap Gold (Emerald Green) ── */}
               <div className="pt-4 pb-1">
                 <span className="text-[10px] font-bold text-theme-scrap/60 uppercase tracking-wider px-3">
@@ -222,6 +236,12 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
               <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
               <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
+              <div className="border-t border-gray-100 my-2"></div>
+              <NavItem to="/silver-inventory" icon={Box} label="مخزن الفضة" />
+              <NavItem to="/silver-sales" icon={ShoppingCart} label="بيع الفضة (سريع)" />
+              <NavItem to="/silver-scrap" icon={Receipt} label="شراء كسر فضة" />
+              <NavItem to="/silver-safe" icon={Vault} label="خزنة الفضة" />
+              <NavItem to="/silver-reports" icon={FileBarChart2} label="تقارير الفضة" />
               <div className="border-t border-gray-100 my-2"></div>
               <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
               <NavItem to="/scrap-purchases" icon={Receipt} label="دفتر المشتريات" />

@@ -26,14 +26,15 @@ const ModalOverlay: React.FC<{
   );
 };
 
+import { useAuth } from '../../core/context/AuthContext';
+
 export const SupplierTransactionModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: RecordSupplierTransactionDto) => Promise<void>;
   supplier: Supplier | null;
 }> = ({ isOpen, onClose, onSubmit, supplier }) => {
-
-
+  const { user } = useAuth();
   const [type, setType] = useState<'GOODS_RECEIVE' | 'PAYMENT'>('GOODS_RECEIVE');
   
   const [receivedItems, setReceivedItems] = useState<ReceivedItemDto[]>([]);
@@ -105,11 +106,13 @@ export const SupplierTransactionModal: React.FC<{
     setSaving(true);
     setFormError('');
 
-    const payload: RecordSupplierTransactionDto = {
+    const payload: any = {
       supplierId: supplier._id || supplier.id || '',
       type,
       notes: notes.trim() || undefined,
     };
+    
+    console.log("--- SENDING PAYLOAD ---", payload);
 
     if (receivedItems.length > 0) {
       payload.receivedItems = receivedItems;

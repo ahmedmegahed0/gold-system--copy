@@ -31,15 +31,18 @@ apiClient.interceptors.response.use(
     const isUserNotFoundError = status === 404 && message === 'المستخدم غير موجود أو تم نقله للأرشيف';
 
     if (error.response && (isAuthError || isUserNotFoundError)) {
-      // Don't redirect for auth endpoints - let the component handle the error
+      // Don't redirect for auth endpoints or suppliers/transaction - let the component handle the error
       const url = error.config?.url || '';
       const isAuthEndpoint = url.includes('/auth/');
+      const isSupplierTx = url.includes('/suppliers/transaction');
       
-      if (!isAuthEndpoint) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('gms_user_session');
-        sessionStorage.removeItem('accessToken');
-        window.location.href = '/login';
+      if (!isAuthEndpoint && !isSupplierTx) {
+        // TEMPORARILY DISABLED LOGOUT FOR DEBUGGING
+        // localStorage.removeItem('accessToken');
+        // localStorage.removeItem('gms_user_session');
+        // sessionStorage.removeItem('accessToken');
+        // window.location.href = '/login';
+        console.error('API 401/404 ERROR CAUGHT:', error.response.data);
       }
     }
     return Promise.reject(error);

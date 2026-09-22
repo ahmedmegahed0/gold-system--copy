@@ -67,7 +67,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
           <p className="text-4xl font-black mb-3 mt-4">مصوغات ومجوهرات</p>
           
           <div className="flex justify-center items-center mb-6 mt-4">
-            <h1 className="text-[110px] leading-none font-black tracking-widest whitespace-nowrap text-[#D4AF37]" style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 3px 3px 0 #222' }}>
+            <h1 className="text-[75px] leading-none font-black tracking-widest whitespace-nowrap text-[#D4AF37]" style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 3px 3px 0 #222' }}>
               ليلة القدر
             </h1>
           </div>
@@ -186,7 +186,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
         }
         @media print {
           @page {
-            size: 148mm 210mm;
+            size: A5 portrait;
             margin: 0;
           }
           body * {
@@ -199,10 +199,12 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
             position: absolute !important;
             left: 0 !important;
             top: 0 !important;
-            width: 148mm !important;
+            width: 100% !important;
+            max-width: 148mm !important;
             min-height: 210mm !important;
+            height: auto !important;
             margin: 0 !important;
-            padding: 8mm 10mm !important; /* Adjust padding to match on-screen look */
+            padding: 8mm 10mm !important;
             box-sizing: border-box !important;
             background-color: #dbeafe !important;
           }

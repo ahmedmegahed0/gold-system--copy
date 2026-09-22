@@ -35,6 +35,13 @@ import { BarcodeInventoryPage } from './pages/workspace/BarcodeInventoryPage';
 import { BarcodeSalesWorkspacePage } from './pages/workspace/BarcodeSalesWorkspacePage';
 import { BarcodeInvoicesPage } from './pages/workspace/BarcodeInvoicesPage';
 
+// Silver Module
+import { SilverInventoryPage } from './pages/workspace/SilverInventoryPage';
+import { SilverSalesCounterPage } from './pages/workspace/SilverSalesCounterPage';
+import { SilverScrapPurchasesPage } from './pages/workspace/SilverScrapPurchasesPage';
+import { SilverSafePage } from './pages/workspace/SilverSafePage';
+import { SilverReportsPage } from './pages/workspace/SilverReportsPage';
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -73,6 +80,13 @@ const App: React.FC = () => {
               <Route path="scrap" element={<ScrapPage />} />
               <Route path="scrap-purchases" element={<ScrapPurchasesPage />} />
               <Route path="melting" element={<MeltingPage />} />
+
+              {/* Silver Module Routes */}
+              <Route path="silver-inventory" element={<SilverInventoryPage />} />
+              <Route path="silver-sales" element={<SilverSalesCounterPage />} />
+              <Route path="silver-scrap" element={<SilverScrapPurchasesPage />} />
+              <Route path="silver-safe" element={<SilverSafePage />} />
+              <Route path="silver-reports" element={<SilverReportsPage />} />
 
               {/* Owner Only Routes */}
               <Route element={<RoleGuard allowedRole="OWNER" />}>
