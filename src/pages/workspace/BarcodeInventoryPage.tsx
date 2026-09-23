@@ -122,6 +122,7 @@ export function BarcodeInventoryPage() {
         <html lang="ar" dir="rtl">
           <head>
             <meta charset="utf-8">
+            <base href="${window.location.origin}">
             <title>طباعة التاج</title>
             <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
             <style>
@@ -214,8 +215,10 @@ export function BarcodeInventoryPage() {
                   <div dir="ltr" style="font-size: 5.5pt; font-weight: 900; margin-top: 1px;">${itemWeight}g | ${itemKarat}K</div>
                 </div>
                 
+                <!-- النصف السفلي: التفاصيل عدل -->
+                <div class="bottom-half">
                   <div style="height: 5.8mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
-                    <img src="${window.location.origin}${printLogoImg}" style="width: 11mm; margin-top: -0.5mm; mix-blend-mode: multiply;" />
+                    <img src="${printLogoImg}" style="width: 11mm; margin-top: -0.5mm; mix-blend-mode: multiply;" />
                   </div>
                   <div style="font-size: 8pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px;">ليلة القدر</div>
                   <div style="font-size: 4.5pt; font-weight: bold;">صلاح الهوش</div>
@@ -289,8 +292,8 @@ export function BarcodeInventoryPage() {
                 <div dir="ltr" style="font-size: 5.5pt; font-weight: 900; margin-top: 1px;">${itemWeight}g | ${itemKarat}K</div>
               </div>
               <div class="bottom-half">
-                <div style="height: 5.8mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
-                  <img src="${window.location.origin}${printLogoImg}" style="width: 11mm; margin-top: -0.5mm; mix-blend-mode: multiply;" />
+                <div style="height: 5mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
+                  <img src="${printLogoImg}" style="width: 11mm; margin-top: -0.5mm; mix-blend-mode: multiply;" />
                 </div>
                 <div style="font-size: 8pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px;">ليلة القدر</div>
                 <div style="font-size: 4.5pt; font-weight: bold;">صلاح الهوش</div>
@@ -312,6 +315,7 @@ export function BarcodeInventoryPage() {
         <html lang="ar" dir="rtl">
           <head>
             <meta charset="utf-8">
+            <base href="${window.location.origin}">
             <title>طباعة التاجات المحددة</title>
             <style>
               @page { size: 82mm 37mm; margin: 0; }
@@ -320,7 +324,7 @@ export function BarcodeInventoryPage() {
               .printable-area { width: 20mm; height: 25mm; position: absolute; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; box-sizing: border-box; }
               .left-box { left: 0; bottom: 0; }
               .right-box { right: 0; top: 0; }
-              .top-half { width: 100%; height: 12.5mm; display: flex; justify-content: center; align-items: center; transform: rotate(180deg); overflow: hidden; }
+              .top-half { width: 100%; height: 12.5mm; display: flex; flex-direction: column; justify-content: center; align-items: center; transform: rotate(180deg); overflow: hidden; }
               .bottom-half { width: 100%; height: 12.5mm; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; font-size: 5.5pt; font-weight: bold; line-height: 1.2; }
               .barcode-img { max-height: 7mm; width: 18mm; margin-bottom: 2mm; }
               @media screen { body { border: 1px dashed #ccc; margin: 20px auto; zoom: 1.5; } }
