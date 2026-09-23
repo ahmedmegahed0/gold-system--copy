@@ -213,7 +213,7 @@ export function BarcodeInventoryPage() {
                 
                 <!-- النصف السفلي: التفاصيل عدل -->
                 <div class="bottom-half">
-                  <div style="font-size: 5.5pt; font-weight: bold; margin-bottom: 1px;">ليلة القدر</div>
+                  <div style="font-size: 5.5pt; font-weight: bold; margin-bottom: 1px; margin-top: 6mm;">ليلة القدر</div>
                   <div style="font-size: 5.5pt; font-weight: bold; margin-bottom: 3px;">صلاح الهوش</div>
                   <div dir="ltr" style="font-size: 5.5pt; font-weight: bold;">${itemWeight}g | ${itemKarat}K</div>
                 </div>
@@ -285,7 +285,7 @@ export function BarcodeInventoryPage() {
                 <img src="${tagData.imageBase64}" class="barcode-img" />
               </div>
               <div class="bottom-half">
-                <div style="font-size: 5.5pt; font-weight: bold; margin-bottom: 1px;">ليلة القدر</div>
+                <div style="font-size: 5.5pt; font-weight: bold; margin-bottom: 1px; margin-top: 6mm;">ليلة القدر</div>
                 <div style="font-size: 5.5pt; font-weight: bold; margin-bottom: 3px;">صلاح الهوش</div>
                 <div dir="ltr" style="font-size: 5.5pt; font-weight: bold;">${itemWeight}g | ${itemKarat}K</div>
               </div>
