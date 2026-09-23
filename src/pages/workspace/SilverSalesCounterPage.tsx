@@ -1,15 +1,49 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShoppingCart, Search, Loader2, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, Search, Loader2, CheckCircle2, Printer, X } from 'lucide-react';
 import { SilverService } from '../../services/silver.service';
 import type { SilverItem, QuickSilverSaleDto } from '../../common/types/silver.types';
+import { PaperInvoiceLayout } from '../../components/print/PaperInvoiceLayout';
+import { useAuth } from '../../core/context/AuthContext';
+
+const ModalOverlay: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  printFriendly?: boolean;
+}> = ({ isOpen, onClose, title, children, printFriendly = false }) => {
+  if (!isOpen) return null;
+  return (
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${printFriendly ? 'print:static print:inset-auto print:z-auto print:flex-none print:bg-white' : ''}`}>
+      <div
+        className={`absolute inset-0 bg-charcoal/50 backdrop-blur-sm transition-opacity ${printFriendly ? 'print:hidden' : ''}`}
+        onClick={onClose}
+      />
+      <div className={`relative w-full ${printFriendly ? 'max-w-4xl bg-gray-50/50' : 'max-w-2xl bg-white'} mx-4 rounded-2xl shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 max-h-[90vh] flex flex-col ${printFriendly ? 'print:max-w-none print:w-full print:mx-0 print:border-none print:shadow-none print:rounded-none print:max-h-none print:block print:p-8 print:bg-white' : ''}`}>
+        <div className={`flex items-center justify-between px-8 py-6 border-b border-gray-100 shrink-0 bg-white rounded-t-2xl ${printFriendly ? 'print:hidden' : ''}`}>
+          <h2 className="text-xl font-bold text-charcoal">{title}</h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg text-gray-400 hover:text-charcoal hover:bg-gray-50 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <div className={`p-8 overflow-y-auto ${printFriendly ? 'print:overflow-visible print:p-0' : ''}`}>{children}</div>
+      </div>
+    </div>
+  );
+};
 
 export const SilverSalesCounterPage: React.FC = () => {
+  const { user } = useAuth();
   const [items, setItems] = useState<SilverItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
   const [search, setSearch] = useState('');
   const [selectedItem, setSelectedItem] = useState<SilverItem | null>(null);
+  const [saleInvoice, setSaleInvoice] = useState<any>(null);
   
   const [saleData, setSaleData] = useState({
     pricePerGram: '',
@@ -48,17 +82,26 @@ export const SilverSalesCounterPage: React.FC = () => {
         notes: saleData.notes || undefined,
       };
       
-      await SilverService.quickSale(dto);
+      const response = await SilverService.quickSale(dto);
       
-      alert('تم البيع بنجاح وتسجيل المبلغ في الخزنة');
+      // Store the invoice to display it
+      setSaleInvoice({
+        ...response,
+        itemTitle: selectedItem.title
+      });
       
       // Reset form
       setSelectedItem(null);
       setSaleData({ pricePerGram: '', customerName: '', customerPhone: '', notes: '' });
       fetchItems();
-    } catch (error) {
-      console.error('Error during sale:', error);
-      alert('حدث خطأ أثناء البيع');
+    } catch (error: any) {
+      console.error('Error during quick sale:', error.response?.data || error);
+      const backendMessage = error.response?.data?.message;
+      if (backendMessage) {
+        alert(Array.isArray(backendMessage) ? backendMessage.join('\n') : backendMessage);
+      } else {
+        alert('حدث خطأ أثناء إتمام العملية');
+      }
     } finally {
       setSaving(false);
     }
@@ -69,157 +112,207 @@ export const SilverSalesCounterPage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-charcoal">بيع الفضة (سريع)</h1>
-          <p className="text-gray-500 mt-1">اختر قطعة للبيع ليتم تسجيلها آلياً في الخزنة</p>
+    <div className="space-y-6 relative">
+      <div className={saleInvoice ? 'print:hidden' : ''}>
+        <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-charcoal">بيع الفضة (سريع)</h1>
+            <p className="text-gray-500 mt-1">اختر قطعة للبيع ليتم تسجيلها آلياً في الخزنة</p>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Items Selection */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="ابحث عن قطعة (الاسم أو العيار)..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="w-full pl-4 pr-10 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-colors"
-              />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Items Selection */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="ابحث عن قطعة (الاسم أو العيار)..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full pl-4 pr-10 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 min-h-[400px]">
+              {loading ? (
+                <div className="flex justify-center items-center h-48">
+                  <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+                </div>
+              ) : filteredItems.length === 0 ? (
+                <div className="flex justify-center items-center h-48 text-gray-400">
+                  لا توجد قطع متاحة للبيع
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {filteredItems.map(item => (
+                    <div 
+                      key={item._id || item.id}
+                      onClick={() => setSelectedItem(item)}
+                      className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        selectedItem?._id === item._id || selectedItem?.id === item.id
+                          ? 'border-emerald-500 bg-emerald-50/50 shadow-md' 
+                          : 'border-gray-100 hover:border-emerald-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-bold text-charcoal">{item.title}</h3>
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold">
+                          {item.karat}K
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-500">الوزن:</span>
+                        <span className="font-bold text-charcoal">{item.weight} جم</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 min-h-[400px]">
-            {loading ? (
-              <div className="flex justify-center items-center h-48">
-                <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-              </div>
-            ) : filteredItems.length === 0 ? (
-              <div className="flex justify-center items-center h-48 text-gray-400">
-                لا توجد قطع متاحة للبيع
+          {/* Sale Form */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 self-start sticky top-6">
+            <h2 className="text-xl font-bold text-charcoal mb-6 flex items-center gap-2">
+              <ShoppingCart className="text-emerald-500" />
+              <span>تفاصيل البيع</span>
+            </h2>
+
+            {!selectedItem ? (
+              <div className="text-center py-12 text-gray-400">
+                يرجى اختيار قطعة للبيع من القائمة
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {filteredItems.map(item => (
-                  <div 
-                    key={item._id || item.id}
-                    onClick={() => setSelectedItem(item)}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      selectedItem?._id === item._id || selectedItem?.id === item.id
-                        ? 'border-emerald-500 bg-emerald-50/50 shadow-md' 
-                        : 'border-gray-100 hover:border-emerald-200 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-charcoal">{item.title}</h3>
-                      <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold">
-                        {item.karat}K
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500">الوزن:</span>
-                      <span className="font-bold text-charcoal">{item.weight} جم</span>
-                    </div>
+              <form onSubmit={handleSale} className="space-y-4">
+                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 mb-6">
+                  <h3 className="font-bold text-emerald-800 mb-2">{selectedItem.title}</h3>
+                  <div className="flex justify-between text-sm text-emerald-700">
+                    <span>الوزن: {selectedItem.weight} جم</span>
+                    <span>العيار: {selectedItem.karat}K</span>
                   </div>
-                ))}
-              </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">سعر الجرام (وقت البيع)</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      required
+                      min="0.1"
+                      step="0.01"
+                      value={saleData.pricePerGram}
+                      onChange={e => setSaleData({...saleData, pricePerGram: e.target.value})}
+                      className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-lg font-bold text-left"
+                      dir="ltr"
+                    />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ج.م</span>
+                  </div>
+                </div>
+
+                {saleData.pricePerGram && Number(saleData.pricePerGram) > 0 && (
+                  <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <span className="text-gray-600 font-medium">الإجمالي المطلوب:</span>
+                    <span className="text-xl font-black text-emerald-600">
+                      {(Number(saleData.pricePerGram) * selectedItem.weight).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ج.م
+                    </span>
+                  </div>
+                )}
+
+                <div className="pt-4 border-t border-gray-100 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">اسم العميل (اختياري)</label>
+                    <input
+                      type="text"
+                      value={saleData.customerName}
+                      onChange={e => setSaleData({...saleData, customerName: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف (اختياري)</label>
+                    <input
+                      type="tel"
+                      value={saleData.customerPhone}
+                      onChange={e => setSaleData({...saleData, customerPhone: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">ملاحظات (اختياري)</label>
+                    <input
+                      type="text"
+                      value={saleData.notes}
+                      onChange={e => setSaleData({...saleData, notes: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={saving || !saleData.pricePerGram || Number(saleData.pricePerGram) <= 0}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 flex items-center justify-center gap-2 mt-6"
+                >
+                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
+                  <span>إتمام البيع</span>
+                </button>
+              </form>
             )}
           </div>
         </div>
-
-        {/* Sale Form */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 self-start sticky top-6">
-          <h2 className="text-xl font-bold text-charcoal mb-6 flex items-center gap-2">
-            <ShoppingCart className="text-emerald-500" />
-            <span>تفاصيل البيع</span>
-          </h2>
-
-          {!selectedItem ? (
-            <div className="text-center py-12 text-gray-400">
-              يرجى اختيار قطعة للبيع من القائمة
-            </div>
-          ) : (
-            <form onSubmit={handleSale} className="space-y-4">
-              <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 mb-6">
-                <h3 className="font-bold text-emerald-800 mb-2">{selectedItem.title}</h3>
-                <div className="flex justify-between text-sm text-emerald-700">
-                  <span>الوزن: {selectedItem.weight} جم</span>
-                  <span>العيار: {selectedItem.karat}K</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">سعر الجرام (وقت البيع)</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    required
-                    min="0.1"
-                    step="0.01"
-                    value={saleData.pricePerGram}
-                    onChange={e => setSaleData({...saleData, pricePerGram: e.target.value})}
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-lg font-bold text-left"
-                    dir="ltr"
-                  />
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ج.م</span>
-                </div>
-              </div>
-
-              {saleData.pricePerGram && Number(saleData.pricePerGram) > 0 && (
-                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <span className="text-gray-600 font-medium">الإجمالي المطلوب:</span>
-                  <span className="text-xl font-black text-emerald-600">
-                    {(Number(saleData.pricePerGram) * selectedItem.weight).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ج.م
-                  </span>
-                </div>
-              )}
-
-              <div className="pt-4 border-t border-gray-100 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">اسم العميل (اختياري)</label>
-                  <input
-                    type="text"
-                    value={saleData.customerName}
-                    onChange={e => setSaleData({...saleData, customerName: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف (اختياري)</label>
-                  <input
-                    type="tel"
-                    value={saleData.customerPhone}
-                    onChange={e => setSaleData({...saleData, customerPhone: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">ملاحظات (اختياري)</label>
-                  <input
-                    type="text"
-                    value={saleData.notes}
-                    onChange={e => setSaleData({...saleData, notes: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={saving || !saleData.pricePerGram || Number(saleData.pricePerGram) <= 0}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 flex items-center justify-center gap-2 mt-6"
-              >
-                {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
-                <span>إتمام البيع</span>
-              </button>
-            </form>
-          )}
-        </div>
       </div>
+
+      {/* Invoice Modal */}
+      <ModalOverlay 
+        isOpen={!!saleInvoice} 
+        onClose={() => setSaleInvoice(null)} 
+        title="إيصال بيع فضة"
+        printFriendly={true}
+      >
+        {saleInvoice && (() => {
+          const customerName = saleInvoice.customerName || '---';
+          const invoiceNumber = saleInvoice._id?.substring(0, 8)?.toUpperCase() || '---';
+          const dateStr = new Date(saleInvoice.createdAt || new Date()).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
+          const sellerName = user?.fullName || '---';
+
+          return (
+            <div className="flex flex-col items-center justify-center p-6 print:p-0">
+              <div className="flex justify-between items-center w-full max-w-3xl mb-6 print:hidden gap-4">
+                <div className="px-6 py-2.5 bg-emerald-50 border border-emerald-100 text-emerald-700 font-bold rounded-xl flex items-center gap-2">
+                  <CheckCircle2 size={18} />
+                  تم البيع وتسجيل المبلغ بنجاح
+                </div>
+                <button
+                  onClick={() => window.print()}
+                  className="px-6 py-2.5 bg-charcoal text-white hover:bg-black font-bold rounded-xl transition-colors flex items-center gap-2 shadow-sm"
+                >
+                  <Printer size={18} />
+                  طباعة الإيصال
+                </button>
+              </div>
+
+              <PaperInvoiceLayout
+                invoiceNumber={invoiceNumber}
+                date={dateStr}
+                customerName={customerName}
+                sellerName={sellerName}
+                totalAmount={saleInvoice.totalPrice}
+                items={[{
+                  name: saleInvoice.itemTitle || 'قطعة فضة',
+                  karat: saleInvoice.karat.toString(),
+                  weight: saleInvoice.weight,
+                  price: saleInvoice.totalPrice
+                }]}
+              />
+            </div>
+          );
+        })()}
+      </ModalOverlay>
     </div>
   );
 };
+

@@ -46,63 +46,63 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
 
       <div className="relative z-10">
         {/* Header Section */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-2">
           <div className="flex justify-between items-start w-full">
-            <div className="w-28 shrink-0 opacity-0 hidden sm:block"></div> {/* Spacer for perfect centering */}
+            <div className="w-20 shrink-0 opacity-0 hidden sm:block"></div> {/* Spacer for perfect centering */}
             
-            <div className="flex-1 text-center pt-2">
-              <p className="text-lg font-bold mb-1">بسم الله الرحمن الرحيم</p>
-              <p className="text-lg font-bold mb-1">﴿ وَأَقِيمُوا الْوَزْنَ بِالْقِسْطِ وَلَا تُخْسِرُوا الْمِيزَانَ ﴾</p>
-              <p className="text-base font-bold mb-6">صدق الله العظيم</p>
+            <div className="flex-1 text-center pt-1">
+              <p className="text-base print:text-sm font-bold mb-0.5">بسم الله الرحمن الرحيم</p>
+              <p className="text-base print:text-sm font-bold mb-0.5">﴿ وَأَقِيمُوا الْوَزْنَ بِالْقِسْطِ وَلَا تُخْسِرُوا الْمِيزَانَ ﴾</p>
+              <p className="text-sm print:text-xs font-bold mb-2">صدق الله العظيم</p>
             </div>
             
             {/* Styled Logo - Top Left */}
-            <div className="w-28 h-28 shrink-0 rounded-full border-[4px] border-[#D4AF37] p-1 shadow-[4px_4px_0_0_rgba(212,175,55,0.3)] bg-white z-20">
+            <div className="w-24 h-24 print:w-20 print:h-20 shrink-0 rounded-full border-[3px] border-[#D4AF37] p-1 shadow-[3px_3px_0_0_rgba(212,175,55,0.3)] bg-white z-20">
               <div className="w-full h-full rounded-full border-[2px] border-dashed border-black overflow-hidden bg-black flex items-center justify-center">
                 <img src={logoImg} alt="شعار ليلة القدر" className="w-full h-full object-cover scale-110" />
               </div>
             </div>
           </div>
           
-          <p className="text-4xl font-black mb-3 mt-4">مصوغات ومجوهرات</p>
+          <p className="text-3xl print:text-2xl font-black mb-1 mt-1">مصوغات ومجوهرات</p>
           
-          <div className="flex justify-center items-center mb-6 mt-4">
-            <h1 className="text-[75px] leading-none font-black tracking-widest whitespace-nowrap text-[#D4AF37]" style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 3px 3px 0 #222' }}>
+          <div className="flex justify-center items-center mb-2 mt-1">
+            <h1 className="text-[60px] print:text-[45px] leading-none font-black tracking-widest whitespace-nowrap text-[#D4AF37]" style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 3px 3px 0 #222' }}>
               ليلة القدر
             </h1>
           </div>
           
-          <p className="text-xl font-black mt-2">إدارة الحاج / صلاح الهوش - موبايل: ٠١٠٠٢٩٠٨٠٢٦</p>
-          <p className="text-lg font-bold mt-1 text-gray-800">إبراهيم صلاح الهوش - موبايل: ٠١٠٣٢٥٦١٠٦٨</p>
+          <p className="text-lg print:text-base font-black mt-1">إدارة الحاج / صلاح الهوش - موبايل: ٠١٠٠٢٩٠٨٠٢٦</p>
+          <p className="text-base print:text-sm font-bold mt-0.5 text-gray-800">إبراهيم صلاح الهوش - موبايل: ٠١٠٣٢٥٦١٠٦٨</p>
         </div>
 
         {/* Contact & Legal Info */}
-        <div className="flex justify-between text-base font-bold border-b-2 border-black pb-4 mb-4">
-          <div className="text-right flex flex-col gap-1">
+        <div className="flex justify-between text-sm print:text-xs font-bold border-b-2 border-black pb-1 mb-1">
+          <div className="text-right flex flex-col gap-0.5">
             <p>س.ت : ١٤٠٦٧</p>
             <p>ب.ض : ٤٥٤٩٠٨١٤٨</p>
             <p className="flex items-center gap-2" dir="rtl"><span>📞</span> <span>٠٤٨ / ٣٦٦٦٦٨١</span></p>
           </div>
-          <div className="text-left flex flex-col justify-end gap-1">
+          <div className="text-left flex flex-col justify-end gap-0.5">
             <p>منوف - ش السينما - أول سوق الصرف (الصاغة)</p>
           </div>
         </div>
 
         {/* Invoice Meta */}
-        <div className="flex justify-between text-sm font-bold mb-4">
+        <div className="flex justify-between text-sm print:text-xs font-bold mb-2">
           <div className="flex gap-2 items-end">
             <span>تحريراً في :</span>
             <span dir="ltr">{toArabicNumerals(date)}</span>
           </div>
-          <div className="flex gap-2 items-end text-base">
+          <div className="flex gap-2 items-end text-sm print:text-xs">
             <span>المطلوب من السيد :</span>
-            <span className="w-40 border-b-2 border-dotted border-black inline-block text-center text-xl pb-1">{customerName}</span>
-            <span className="mr-2">البلد /</span>
+            <span className="w-40 border-b-2 border-dotted border-black inline-block text-center text-base print:text-sm pb-0.5">{customerName}</span>
+            <span className="mr-1">البلد /</span>
             <span className="w-24 border-b-2 border-dotted border-black inline-block"></span>
           </div>
         </div>
 
-        <div className="flex gap-2 text-sm font-bold mb-2">
+        <div className="flex gap-2 text-sm print:text-xs font-bold mb-1">
           <span>رقم الفاتورة :</span>
           <span dir="ltr">#{toArabicNumerals(invoiceNumber)}</span>
         </div>
@@ -110,18 +110,18 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
         {/* Main Table */}
         <div className="flex">
           {/* Right side text */}
-          <div className="writing-vertical-rl rotate-180 flex items-center justify-center p-2 text-sm font-bold w-10">
+          <div className="writing-vertical-rl rotate-180 flex items-center justify-center p-1 text-sm print:text-xs font-bold w-10 print:w-6">
             البضاعة وصلتنا بعد المعاينة والقبول
           </div>
 
-          <table className="w-full border-collapse border-2 border-black text-center text-base font-bold">
+          <table className="w-full border-collapse border-2 border-black text-center text-sm print:text-xs font-bold">
             <thead>
               <tr>
-                <th className="border-2 border-black py-2 px-1 w-24 font-black">جنيه</th>
-                <th className="border-2 border-black py-2 px-1 w-16 font-black">مللى</th>
-                <th className="border-2 border-black py-2 px-1 w-16 font-black">جرام</th>
-                <th className="border-2 border-black py-2 px-1 w-16 font-black">عيار</th>
-                <th className="border-2 border-black py-2 px-2 font-black">الصنـــــــــــــــــــف</th>
+                <th className="border-2 border-black py-1 px-1 w-20 print:w-16 font-black">جنيه</th>
+                <th className="border-2 border-black py-1 px-1 w-12 print:w-10 font-black">مللى</th>
+                <th className="border-2 border-black py-1 px-1 w-12 print:w-10 font-black">جرام</th>
+                <th className="border-2 border-black py-1 px-1 w-12 print:w-10 font-black">عيار</th>
+                <th className="border-2 border-black py-1 px-1 font-black">الصنـــــــــــــــــــف</th>
               </tr>
             </thead>
             <tbody>
@@ -130,12 +130,12 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
                 const milliGrams = item.weight ? Math.round((item.weight - Math.floor(item.weight)) * 100) : ''; // 2 decimal digits as milli
                 
                 return (
-                  <tr key={idx} className="h-10">
+                  <tr key={idx} className="h-7 print:h-6">
                     <td className="border border-black px-1">{item.price ? toArabicNumerals(item.price.toLocaleString()) : ''}</td>
                     <td className="border border-black px-1">{milliGrams !== '' ? toArabicNumerals(milliGrams) : ''}</td>
                     <td className="border border-black px-1">{wholeGrams !== '' ? toArabicNumerals(wholeGrams) : ''}</td>
                     <td className="border border-black px-1" dir="ltr">{item.karat ? `${toArabicNumerals(item.karat)}K` : ''}</td>
-                    <td className="border border-black px-2 text-right">
+                    <td className="border border-black px-1 text-right">
                       {item.name}
                     </td>
                   </tr>
@@ -143,15 +143,15 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
               })}
               
               {/* Footer Rows inside Table */}
-              <tr className="h-10">
+              <tr className="h-7 print:h-6">
                 <td className="border border-black px-1 font-black bg-gray-50">{toArabicNumerals(totalAmount.toLocaleString())}</td>
-                <td className="border border-black px-2 text-right" colSpan={4}>
+                <td className="border border-black px-1 text-right" colSpan={4}>
                   الإجمالي
                 </td>
               </tr>
-              <tr className="h-10">
+              <tr className="h-7 print:h-6">
                 <td className="border border-black px-1" colSpan={2}></td>
-                <td className="border border-black px-2 text-right bg-gray-50 font-black" colSpan={3}>
+                <td className="border border-black px-1 text-right bg-gray-50 font-black" colSpan={3}>
                   سعر الجرام خلاف المصنعية والضريبة
                 </td>
               </tr>
@@ -159,22 +159,22 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
           </table>
 
           {/* Left side text */}
-          <div className="writing-vertical-rl rotate-180 flex items-center justify-center p-2 text-xs font-bold w-10 text-center leading-tight">
+          <div className="writing-vertical-rl rotate-180 flex items-center justify-center p-1 text-[11px] print:text-[9px] font-bold w-10 print:w-6 text-center leading-tight">
             تتم مراجعة الميزان والسعر خلال اسبوع فقط من تاريخه والمحل غير مسئول بعد ذلك
           </div>
         </div>
 
         {/* Footer Details */}
-        <div className="mt-6 flex flex-col items-center gap-8 text-base font-bold">
+        <div className="mt-2 flex flex-col items-center gap-2 text-sm print:text-xs font-bold">
           <p>﴿ الضريبة والدمغة ٤ جنيه عيار ٢١ & ٦ عيار ١٨ حسب القرار الوزارى ﴾</p>
           
-          <div className="w-full flex justify-between px-12">
-            <div className="flex gap-2 font-black text-lg">
+          <div className="w-full flex justify-between px-8 print:px-4">
+            <div className="flex gap-2 font-black text-base print:text-sm">
               <span>لا تعتمد إلا بختم المحل</span>
             </div>
             <div className="flex gap-2">
-              <span className="font-black text-lg">البائع :</span>
-              <span className="w-48 border-b-2 border-dotted border-black inline-block text-center">{sellerName}</span>
+              <span className="font-black text-base print:text-sm">البائع :</span>
+              <span className="w-40 border-b-2 border-dotted border-black inline-block text-center">{sellerName}</span>
             </div>
           </div>
         </div>
@@ -204,7 +204,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
             min-height: 210mm !important;
             height: auto !important;
             margin: 0 !important;
-            padding: 8mm 10mm !important;
+            padding: 4mm 6mm !important;
             box-sizing: border-box !important;
             background-color: #dbeafe !important;
           }

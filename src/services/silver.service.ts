@@ -18,12 +18,26 @@ export const SilverService = {
     return response.data?.data || response.data;
   },
 
-  getAvailableItems: async (karat?: number, categoryId?: string): Promise<SilverItem[]> => {
+  getAvailableItems: async (karat?: number, categoryId?: string, search?: string): Promise<SilverItem[]> => {
     const params = new URLSearchParams();
     if (karat) params.append('karat', karat.toString());
+    else params.append('karat', 'all'); // 'all' bypasses backend filter but creates a unique URL
+    
     if (categoryId) params.append('categoryId', categoryId);
+    else params.append('categoryId', 'all'); // 'all' bypasses backend filter but creates a unique URL
+    
+    if (search) params.append('search', search);
 
-    const response = await apiClient.get<any>(`/silver/items?${params.toString()}`);
+    const queryString = params.toString();
+    const url = `/silver/items?${queryString}`;
+    
+    const response = await apiClient.get<any>(url, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
+    });
     return response.data?.data || response.data;
   },
 

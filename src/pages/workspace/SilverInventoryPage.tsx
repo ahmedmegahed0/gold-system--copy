@@ -14,6 +14,7 @@ export const SilverInventoryPage: React.FC = () => {
   
   const [karatFilter, setKaratFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -41,13 +42,17 @@ export const SilverInventoryPage: React.FC = () => {
 
       // Then fetch items
       try {
+        console.log(`[DEBUG] Fetching with karat=${karatFilter}, category=${categoryFilter}, search=${searchTerm}`);
         const itemsData = await SilverService.getAvailableItems(
           karatFilter ? Number(karatFilter) : undefined, 
           categoryFilter || undefined
         );
-        setItems(itemsData);
-      } catch (itemsErr) {
-        console.error('Error fetching silver items:', itemsErr);
+        console.log('[DEBUG] Fetched silver items successfully:', itemsData);
+        setItems(itemsData || []);
+      } catch (itemsErr: any) {
+        const errData = itemsErr.response?.data || itemsErr.message || itemsErr;
+        console.error('[DEBUG] Error fetching silver items:', errData);
+        alert(`خطأ في جلب البيانات:\n${JSON.stringify(errData, null, 2)}`);
         setItems([]);
       }
       
@@ -82,6 +87,10 @@ export const SilverInventoryPage: React.FC = () => {
 
   const karats = [600, 800, 900, 925, 1000];
 
+  const filteredItems = items.filter(item => 
+    item.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
@@ -104,6 +113,8 @@ export const SilverInventoryPage: React.FC = () => {
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="ابحث باسم القطعة..."
               className="w-full pl-4 pr-10 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:bg-white transition-colors"
             />
@@ -156,14 +167,14 @@ export const SilverInventoryPage: React.FC = () => {
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-amber-500" />
                   </td>
                 </tr>
-              ) : items.length === 0 ? (
+              ) : filteredItems.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
                     لا توجد قطع مطابقة للبحث
                   </td>
                 </tr>
               ) : (
-                items.map((item) => (
+                filteredItems.map((item) => (
                   <tr key={item._id || item.id} className="hover:bg-amber-50/30 transition-colors group">
                     <td className="px-6 py-4">
                       <span className="font-bold text-charcoal">{item.title}</span>
