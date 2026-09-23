@@ -14,7 +14,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { useAuth } from '../../core/context/AuthContext';
+
 import { SilverService } from '../../services/silver.service';
 import type { SilverSale } from '../../common/types/silver.types';
 
@@ -51,7 +51,7 @@ const ModalOverlay: React.FC<{
 export const SilverSalesInvoicesPage: React.FC = () => {
   const { i18n } = useTranslation();
   const isRtl = i18n.language.startsWith('ar');
-  const { user } = useAuth();
+
   
   const [invoices, setInvoices] = useState<SilverSale[]>([]);
   const [loading, setLoading] = useState(true);

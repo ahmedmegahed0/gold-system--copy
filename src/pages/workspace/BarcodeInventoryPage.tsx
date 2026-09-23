@@ -11,7 +11,7 @@ import type {
   CreateBarcodeItemDto,
   BarcodeItem
 } from '../../common/types/barcode-inventory.types';
-import logoImg from '../../assets/logo .jpeg';
+
 
 const GoldButton = ({ children, onClick, className = '', type = 'button', icon: Icon }: any) => (
   <button
