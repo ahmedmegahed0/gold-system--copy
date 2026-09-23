@@ -39,7 +39,6 @@ const THEME_COLORS: Record<string, { bg: string; text: string; activeBg: string 
   '/scrap':         { bg: 'bg-theme-scrap/10',      text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
   '/bullion-inventory': { bg: 'bg-theme-inventory/10',  text: 'text-theme-inventory',  activeBg: 'bg-theme-inventory/10' },
   '/categories':    { bg: 'bg-theme-categories/10', text: 'text-theme-categories', activeBg: 'bg-theme-categories/10' },
-  '/scrap':         { bg: 'bg-theme-scrap/10',      text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
   '/scrap-purchases':{ bg: 'bg-theme-scrap/10',     text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
   '/invoices':      { bg: 'bg-theme-sales/10',      text: 'text-theme-sales',      activeBg: 'bg-theme-sales/10' },
   '/scrap-invoices':{ bg: 'bg-theme-scrap/10',      text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
