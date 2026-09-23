@@ -51,6 +51,16 @@ export const SilverService = {
     return response.data?.data || response.data;
   },
 
+  getSalesInvoices: async (): Promise<SilverSale[]> => {
+    const response = await apiClient.get<any>('/silver/sales/invoices');
+    return response.data?.data || response.data;
+  },
+
+  getScrapInvoices: async (): Promise<SilverScrapPurchase[]> => {
+    const response = await apiClient.get<any>('/silver/scrap/invoices');
+    return response.data?.data || response.data;
+  },
+
   getSilverSafeBalance: async (): Promise<{ currentCashBalance: number }> => {
     const response = await apiClient.get<any>('/silver/safe/balance');
     return response.data?.data || response.data;

@@ -39,6 +39,8 @@ import { BarcodeInvoicesPage } from './pages/workspace/BarcodeInvoicesPage';
 import { SilverInventoryPage } from './pages/workspace/SilverInventoryPage';
 import { SilverSalesCounterPage } from './pages/workspace/SilverSalesCounterPage';
 import { SilverScrapPurchasesPage } from './pages/workspace/SilverScrapPurchasesPage';
+import { SilverSalesInvoicesPage } from './pages/workspace/SilverSalesInvoicesPage';
+import { SilverScrapInvoicesPage } from './pages/workspace/SilverScrapInvoicesPage';
 import { SilverSafePage } from './pages/workspace/SilverSafePage';
 import { SilverReportsPage } from './pages/workspace/SilverReportsPage';
 
@@ -84,7 +86,9 @@ const App: React.FC = () => {
               {/* Silver Module Routes */}
               <Route path="silver-inventory" element={<SilverInventoryPage />} />
               <Route path="silver-sales" element={<SilverSalesCounterPage />} />
+              <Route path="silver-sales-invoices" element={<SilverSalesInvoicesPage />} />
               <Route path="silver-scrap" element={<SilverScrapPurchasesPage />} />
+              <Route path="silver-scrap-invoices" element={<SilverScrapInvoicesPage />} />
               <Route path="silver-safe" element={<SilverSafePage />} />
               <Route path="silver-reports" element={<SilverReportsPage />} />
 

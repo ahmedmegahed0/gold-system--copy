@@ -57,6 +57,13 @@ const THEME_COLORS: Record<string, { bg: string; text: string; activeBg: string 
   '/barcode-invoices':{ bg: 'bg-indigo-50', text: 'text-indigo-600', activeBg: 'bg-indigo-50' },
   '/barcode-inventory':{ bg: 'bg-indigo-50', text: 'text-indigo-600', activeBg: 'bg-indigo-50' },
   '/melting':       { bg: 'bg-orange-50', text: 'text-orange-600', activeBg: 'bg-orange-50' },
+  '/silver-inventory': { bg: 'bg-slate-100', text: 'text-slate-600', activeBg: 'bg-slate-100' },
+  '/silver-sales':     { bg: 'bg-slate-100', text: 'text-slate-600', activeBg: 'bg-slate-100' },
+  '/silver-sales-invoices': { bg: 'bg-slate-100', text: 'text-slate-600', activeBg: 'bg-slate-100' },
+  '/silver-scrap':     { bg: 'bg-slate-100', text: 'text-slate-600', activeBg: 'bg-slate-100' },
+  '/silver-scrap-invoices': { bg: 'bg-slate-100', text: 'text-slate-600', activeBg: 'bg-slate-100' },
+  '/silver-safe':      { bg: 'bg-slate-100', text: 'text-slate-600', activeBg: 'bg-slate-100' },
+  '/silver-reports':   { bg: 'bg-slate-100', text: 'text-slate-600', activeBg: 'bg-slate-100' },
 };
 
 const NavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => {
@@ -178,7 +185,9 @@ export const AppLayout: React.FC = () => {
               </div>
               <NavItem to="/silver-inventory" icon={Box} label="مخزن الفضة" />
               <NavItem to="/silver-sales" icon={ShoppingCart} label="بيع الفضة (سريع)" />
+              <NavItem to="/silver-sales-invoices" icon={FileText} label="فواتير بيع الفضة" />
               <NavItem to="/silver-scrap" icon={Receipt} label="شراء كسر فضة" />
+              <NavItem to="/silver-scrap-invoices" icon={FileText} label="فواتير شراء كسر الفضة" />
               <NavItem to="/silver-safe" icon={Vault} label="خزنة الفضة" />
               <NavItem to="/silver-reports" icon={FileBarChart2} label="تقارير الفضة" />
 
@@ -239,7 +248,9 @@ export const AppLayout: React.FC = () => {
               <div className="border-t border-gray-100 my-2"></div>
               <NavItem to="/silver-inventory" icon={Box} label="مخزن الفضة" />
               <NavItem to="/silver-sales" icon={ShoppingCart} label="بيع الفضة (سريع)" />
+              <NavItem to="/silver-sales-invoices" icon={FileText} label="فواتير بيع الفضة" />
               <NavItem to="/silver-scrap" icon={Receipt} label="شراء كسر فضة" />
+              <NavItem to="/silver-scrap-invoices" icon={FileText} label="فواتير شراء كسر الفضة" />
               <NavItem to="/silver-safe" icon={Vault} label="خزنة الفضة" />
               <NavItem to="/silver-reports" icon={FileBarChart2} label="تقارير الفضة" />
               <div className="border-t border-gray-100 my-2"></div>
