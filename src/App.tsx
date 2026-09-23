@@ -14,9 +14,7 @@ import { ScrapPage } from './pages/workspace/ScrapPage';
 import { ScrapPurchasesPage } from './pages/workspace/ScrapPurchasesPage';
 import { MeltingPage } from './pages/workspace/MeltingPage';
 import { BullionInventoryPage } from './pages/workspace/BullionInventoryPage';
-import { ScrapSalesCounterPage } from './pages/workspace/ScrapSalesCounterPage';
 import { ScrapInvoicesPage } from './pages/workspace/ScrapInvoicesPage';
-import { SalesCounterPage } from './pages/workspace/SalesCounterPage';
 import { EmployeesPage } from './pages/workspace/EmployeesPage';
 import { CategoriesPage } from './pages/workspace/CategoriesPage';
 import { AuditPage } from './pages/workspace/AuditPage';
@@ -28,7 +26,6 @@ import { BullionSalesCounterPage } from './pages/workspace/BullionSalesCounterPa
 import { BullionInvoicesPage } from './pages/workspace/BullionInvoicesPage';
 import { CustomersPage } from './pages/workspace/CustomersPage';
 import { SuppliersPage } from './pages/workspace/SuppliersPage';
-import { InvoicesPage } from './pages/workspace/InvoicesPage';
 import { ProfitLedgerPage } from './pages/workspace/ProfitLedgerPage';
 import { IncomesPage } from './pages/workspace/IncomesPage';
 import { BarcodeInventoryPage } from './pages/workspace/BarcodeInventoryPage';
@@ -61,16 +58,13 @@ const App: React.FC = () => {
           <Route path="/" element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
               {/* Default redirect based on strict roles logic inside components, but here we default to sales or dashboard */}
-              <Route index element={<Navigate to="/sales" replace />} />
+              <Route index element={<Navigate to="/barcode-sales" replace />} />
               
               {/* Both Roles */}
-              <Route path="sales" element={<SalesCounterPage />} />
-              <Route path="scrap-sales" element={<ScrapSalesCounterPage />} />
               <Route path="customers" element={<CustomersPage />} />
               <Route path="suppliers" element={<SuppliersPage />} />
               <Route path="expenses" element={<ExpensesPage />} />
               <Route path="incomes" element={<IncomesPage />} />
-              <Route path="invoices" element={<InvoicesPage />} />
               <Route path="scrap-invoices" element={<ScrapInvoicesPage />} />
               <Route path="bullion-sales" element={<BullionSalesCounterPage />} />
               <Route path="bullion-invoices" element={<BullionInvoicesPage />} />

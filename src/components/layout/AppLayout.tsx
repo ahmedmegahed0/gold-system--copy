@@ -35,8 +35,8 @@ import { useNotificationsStore } from '../../store/notifications.store';
    ────────────────────────────────────────────── */
 const THEME_COLORS: Record<string, { bg: string; text: string; activeBg: string }> = {
   '/sales':         { bg: 'bg-theme-sales/10',      text: 'text-theme-sales',      activeBg: 'bg-theme-sales/10' },
-  '/scrap-sales':   { bg: 'bg-theme-scrap/10',      text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
   '/inventory':     { bg: 'bg-theme-inventory/10',  text: 'text-theme-inventory',  activeBg: 'bg-theme-inventory/10' },
+  '/scrap':         { bg: 'bg-theme-scrap/10',      text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
   '/bullion-inventory': { bg: 'bg-theme-inventory/10',  text: 'text-theme-inventory',  activeBg: 'bg-theme-inventory/10' },
   '/categories':    { bg: 'bg-theme-categories/10', text: 'text-theme-categories', activeBg: 'bg-theme-categories/10' },
   '/scrap':         { bg: 'bg-theme-scrap/10',      text: 'text-theme-scrap',      activeBg: 'bg-theme-scrap/10' },
@@ -163,8 +163,6 @@ export const AppLayout: React.FC = () => {
                 </span>
               </div>
               <NavItem to="/inventory" icon={Box} label={t('nav.inventory')} />
-              <NavItem to="/sales" icon={ShoppingCart} label={t('nav.sales')} />
-              <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
               <NavItem to="/categories" icon={Tags} label={t('nav.categories')} />
 
               {/* ── Bullion ── */}
@@ -199,7 +197,6 @@ export const AppLayout: React.FC = () => {
               </div>
               <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
               <NavItem to="/scrap-purchases" icon={Receipt} label="دفتر المشتريات" />
-              <NavItem to="/scrap-sales" icon={ShoppingCart} label={t('nav.scrapSales')} />
               <NavItem to="/scrap-invoices" icon={FileText} label={t('nav.scrapInvoices')} />
               <NavItem to="/melting" icon={Flame} label="تسييح الذهب" />
 
@@ -239,8 +236,6 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/barcode-invoices" icon={FileText} label="فواتير الباركود" />
               <div className="border-t border-gray-100 my-2"></div>
               <NavItem to="/inventory" icon={Box} label={t('nav.inventory')} />
-              <NavItem to="/sales" icon={ShoppingCart} label={t('nav.sales')} />
-              <NavItem to="/invoices" icon={FileText} label={t('nav.invoices')} />
               <div className="border-t border-gray-100 my-2"></div>
               <NavItem to="/bullion-inventory" icon={Box} label="مخزن السبايك" />
               <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
@@ -256,7 +251,6 @@ export const AppLayout: React.FC = () => {
               <div className="border-t border-gray-100 my-2"></div>
               <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
               <NavItem to="/scrap-purchases" icon={Receipt} label="دفتر المشتريات" />
-              <NavItem to="/scrap-sales" icon={ShoppingCart} label={t('nav.scrapSales')} />
               <NavItem to="/scrap-invoices" icon={FileText} label={t('nav.scrapInvoices')} />
               <NavItem to="/melting" icon={Flame} label="تسييح الذهب" />
               <NavItem to="/customers" icon={Users} label={t('nav.customers')} />
