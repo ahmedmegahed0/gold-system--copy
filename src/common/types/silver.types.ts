@@ -31,6 +31,20 @@ export interface CreateSilverItemDto {
   notes?: string;
 }
 
+export interface UpdateSilverItemDto {
+  title?: string;
+  karat?: number;
+  category?: string;
+  weight?: number;
+  notes?: string;
+}
+
+export interface SilverKaratSummary {
+  karat: number;
+  totalWeight: number;
+  totalItemsCount: number;
+}
+
 export interface SilverSale {
   _id?: string;
   id?: string;
@@ -50,6 +64,7 @@ export interface SilverSale {
 export interface QuickSilverSaleDto {
   itemId: string;
   pricePerGram: number;
+  weight?: number;
   customerName?: string;
   customerPhone?: string;
   notes?: string;

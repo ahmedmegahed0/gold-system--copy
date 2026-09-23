@@ -11,6 +11,7 @@ import type {
   CreateBarcodeItemDto,
   BarcodeItem
 } from '../../common/types/barcode-inventory.types';
+import printLogoImg from '../../assets/monochrome_logo.png';
 
 
 const GoldButton = ({ children, onClick, className = '', type = 'button', icon: Icon }: any) => (
@@ -169,6 +170,7 @@ export function BarcodeInventoryPage() {
                 width: 100%;
                 height: 12.5mm;
                 display: flex;
+                flex-direction: column;
                 justify-content: center;
                 align-items: center;
                 transform: rotate(180deg);
@@ -208,14 +210,15 @@ export function BarcodeInventoryPage() {
               <div class="printable-area left-box">
                 <!-- النصف العلوي: الباركود مقلوب للطي -->
                 <div class="top-half">
-                  <img src="${printData.imageBase64}" class="barcode-img" />
+                  <img src="${printData.imageBase64}" class="barcode-img" style="margin-bottom: 1px; max-height: 6mm;" />
+                  <div dir="ltr" style="font-size: 5.5pt; font-weight: 900; margin-top: 1px;">${itemWeight}g | ${itemKarat}K</div>
                 </div>
                 
-                <!-- النصف السفلي: التفاصيل عدل -->
-                <div class="bottom-half">
-                  <div style="font-size: 8pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px; margin-top: 3mm;">ليلة القدر</div>
-                  <div style="font-size: 4.5pt; font-weight: bold; margin-bottom: 4px;">صلاح الهوش</div>
-                  <div dir="ltr" style="font-size: 6pt; font-weight: 900;">${itemWeight}g | ${itemKarat}K</div>
+                  <div style="height: 5.8mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
+                    <img src="${window.location.origin}${printLogoImg}" style="width: 11mm; margin-top: -0.5mm; mix-blend-mode: multiply;" />
+                  </div>
+                  <div style="font-size: 8pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px;">ليلة القدر</div>
+                  <div style="font-size: 4.5pt; font-weight: bold;">صلاح الهوش</div>
                 </div>
               </div>
             </div>
@@ -259,7 +262,7 @@ export function BarcodeInventoryPage() {
     try {
       const selectedBarcodes = Array.from(selectedItems);
       const selectedData = items.filter(i => selectedBarcodes.includes(i._id));
-      
+
       const tagsData = await Promise.all(
         selectedData.map(async (item) => {
           const tag = await getPrintTag(item.barcode);
@@ -274,7 +277,7 @@ export function BarcodeInventoryPage() {
       for (let i = 0; i < tagsData.length; i += 2) {
         const tag1 = tagsData[i];
         const tag2 = tagsData[i + 1];
-        
+
         const renderPrintableArea = (tagData: any, sideClass: string) => {
           if (!tagData) return '';
           const itemWeight = tagData.item?.grossWeight || '';
@@ -282,12 +285,15 @@ export function BarcodeInventoryPage() {
           return `
             <div class="printable-area ${sideClass}">
               <div class="top-half">
-                <img src="${tagData.imageBase64}" class="barcode-img" />
+                <img src="${tagData.imageBase64}" class="barcode-img" style="margin-bottom: 1px; max-height: 6mm;" />
+                <div dir="ltr" style="font-size: 5.5pt; font-weight: 900; margin-top: 1px;">${itemWeight}g | ${itemKarat}K</div>
               </div>
               <div class="bottom-half">
-                <div style="font-size: 8pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px; margin-top: 3mm;">ليلة القدر</div>
-                <div style="font-size: 4.5pt; font-weight: bold; margin-bottom: 4px;">صلاح الهوش</div>
-                <div dir="ltr" style="font-size: 6pt; font-weight: 900;">${itemWeight}g | ${itemKarat}K</div>
+                <div style="height: 5.8mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
+                  <img src="${window.location.origin}${printLogoImg}" style="width: 11mm; margin-top: -0.5mm; mix-blend-mode: multiply;" />
+                </div>
+                <div style="font-size: 8pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px;">ليلة القدر</div>
+                <div style="font-size: 4.5pt; font-weight: bold;">صلاح الهوش</div>
               </div>
             </div>
           `;
@@ -358,23 +364,23 @@ export function BarcodeInventoryPage() {
               className="w-full pl-4 pr-12 py-3 bg-white border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent shadow-sm text-left"
               dir="ltr"
             />
-              <ScanLine className="absolute right-4 top-3.5 text-[#C9A84C]" size={20} />
-            </form>
+            <ScanLine className="absolute right-4 top-3.5 text-[#C9A84C]" size={20} />
+          </form>
 
-            {selectedItems.size > 0 && (
-              <OutlineButton 
-                icon={Printer} 
-                onClick={printSelectedTags}
-                className={isPrintingMultiple ? 'opacity-50 cursor-not-allowed' : ''}
-              >
-                {isPrintingMultiple ? 'جاري التجهيز...' : `طباعة المحدد (${selectedItems.size})`}
-              </OutlineButton>
-            )}
+          {selectedItems.size > 0 && (
+            <OutlineButton
+              icon={Printer}
+              onClick={printSelectedTags}
+              className={isPrintingMultiple ? 'opacity-50 cursor-not-allowed' : ''}
+            >
+              {isPrintingMultiple ? 'جاري التجهيز...' : `طباعة المحدد (${selectedItems.size})`}
+            </OutlineButton>
+          )}
 
-            {isOwner && (
-              <GoldButton
-                icon={Plus}
-                onClick={() => { setEditingItem(null); setIsFormModalOpen(true); }}
+          {isOwner && (
+            <GoldButton
+              icon={Plus}
+              onClick={() => { setEditingItem(null); setIsFormModalOpen(true); }}
             >
               إضافة قطعة جديدة
             </GoldButton>
@@ -439,8 +445,8 @@ export function BarcodeInventoryPage() {
               key={tab.label}
               onClick={() => setFilters({ ...filters, karat: tab.value as any })}
               className={`flex-1 md:px-8 py-2 text-sm font-medium rounded-md transition-colors ${filters.karat === tab.value
-                  ? 'bg-white text-[#C9A84C] shadow-sm ring-1 ring-gray-200/50'
-                  : 'text-gray-500 hover:text-gray-900'
+                ? 'bg-white text-[#C9A84C] shadow-sm ring-1 ring-gray-200/50'
+                : 'text-gray-500 hover:text-gray-900'
                 }`}
             >
               {tab.label}
@@ -470,8 +476,8 @@ export function BarcodeInventoryPage() {
             <button
               onClick={() => setFilters({ ...filters, isArchived: false })}
               className={`flex-1 md:px-6 py-2 text-sm font-medium rounded-md transition-colors ${!filters.isArchived
-                  ? 'bg-white text-[#1A1A1A] shadow-sm ring-1 ring-gray-200/50'
-                  : 'text-gray-500 hover:text-gray-900'
+                ? 'bg-white text-[#1A1A1A] shadow-sm ring-1 ring-gray-200/50'
+                : 'text-gray-500 hover:text-gray-900'
                 }`}
             >
               المتاحة بالمخزن (AVAILABLE)
@@ -480,8 +486,8 @@ export function BarcodeInventoryPage() {
               <button
                 onClick={() => setFilters({ ...filters, isArchived: true })}
                 className={`flex-1 md:px-6 py-2 text-sm font-medium rounded-md transition-colors ${filters.isArchived
-                    ? 'bg-white text-[#1A1A1A] shadow-sm ring-1 ring-gray-200/50'
-                    : 'text-gray-500 hover:text-gray-900'
+                  ? 'bg-white text-[#1A1A1A] shadow-sm ring-1 ring-gray-200/50'
+                  : 'text-gray-500 hover:text-gray-900'
                   }`}
               >
                 الأرشيف (ARCHIVED)
@@ -499,8 +505,8 @@ export function BarcodeInventoryPage() {
             <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 font-medium">
               <tr>
                 <th className="px-6 py-4 w-12 text-center">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="w-4 h-4 text-[#C9A84C] bg-white border-gray-300 rounded focus:ring-[#C9A84C]"
                     checked={items.length > 0 && selectedItems.size === items.length}
                     onChange={toggleAll}
@@ -536,8 +542,8 @@ export function BarcodeInventoryPage() {
                 items.map((item) => (
                   <tr key={item._id} className={`hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-none shadow-sm ${selectedItems.has(item._id) ? 'bg-[#C9A84C]/5' : ''}`}>
                     <td className="px-6 py-4 text-center">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="w-4 h-4 text-[#C9A84C] bg-white border-gray-300 rounded focus:ring-[#C9A84C]"
                         checked={selectedItems.has(item._id)}
                         onChange={() => toggleSelection(item._id)}

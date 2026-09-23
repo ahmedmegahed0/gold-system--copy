@@ -2,6 +2,8 @@ import apiClient from '../core/apiClient';
 import type {
   SilverItem,
   CreateSilverItemDto,
+  UpdateSilverItemDto,
+  SilverKaratSummary,
   SilverSale,
   QuickSilverSaleDto,
   SilverScrapPurchase,
@@ -15,6 +17,21 @@ import type {
 export const SilverService = {
   addSilverItem: async (data: CreateSilverItemDto): Promise<SilverItem> => {
     const response = await apiClient.post<any>('/silver/items', data);
+    return response.data?.data || response.data;
+  },
+
+  updateSilverItem: async (id: string, data: UpdateSilverItemDto): Promise<SilverItem> => {
+    const response = await apiClient.patch<any>(`/silver/items/${id}`, data);
+    return response.data?.data || response.data;
+  },
+
+  deleteSilverItem: async (id: string): Promise<{ message: string; id: string }> => {
+    const response = await apiClient.delete<any>(`/silver/items/${id}`);
+    return response.data?.data || response.data;
+  },
+
+  getKaratSummary: async (): Promise<SilverKaratSummary[]> => {
+    const response = await apiClient.get<any>('/silver/items/summary/karats');
     return response.data?.data || response.data;
   },
 
