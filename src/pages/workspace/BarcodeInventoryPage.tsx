@@ -221,10 +221,10 @@ export function BarcodeInventoryPage() {
                 
                 <!-- النصف السفلي: التفاصيل عدل -->
                 <div class="bottom-half">
-                  <div style="height: 5.8mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
+                  <div style="height: 6.5mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
                     <img src="${printLogoImg}" style="width: 11mm; margin-top: -0.5mm; mix-blend-mode: multiply;" />
                   </div>
-                  <div style="font-size: 8pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px; margin-top: 1mm;">ليلة القدر</div>
+                  <div style="font-size: 8pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px;">ليلة القدر</div>
                   <div style="font-size: 4.5pt; font-weight: bold;">صلاح الهوش</div>
                 </div>
               </div>
@@ -296,10 +296,10 @@ export function BarcodeInventoryPage() {
                 <div dir="ltr" style="font-size: 4.5pt; font-weight: 900; margin-top: 1px;">${itemWeight}g | ${itemKarat}K</div>
               </div>
               <div class="bottom-half">
-                <div style="height: 5mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
+                <div style="height: 6.5mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
                   <img src="${printLogoImg}" style="width: 11mm; margin-top: -0.5mm; mix-blend-mode: multiply;" />
                 </div>
-                <div style="font-size: 8pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px; margin-top: 1mm;">ليلة القدر</div>
+                <div style="font-size: 8pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px;">ليلة القدر</div>
                 <div style="font-size: 4.5pt; font-weight: bold;">صلاح الهوش</div>
               </div>
             </div>
