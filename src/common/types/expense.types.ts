@@ -6,6 +6,8 @@ export interface CreateExpenseDto {
   category: ExpenseCategory;
 }
 
+export type UpdateExpenseDto = Partial<CreateExpenseDto>;
+
 export interface Expense {
   id: string;
   title: string;

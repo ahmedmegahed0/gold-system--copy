@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { 
   Plus, AlertCircle, Loader2, Info, X, Edit2, 
-  Trash2, Receipt 
+  Trash2, Receipt, Search 
 } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
 import { useScrapPurchases } from '../../hooks/useScrapPurchases';
@@ -48,9 +48,16 @@ export const ScrapPurchasesPage: React.FC = () => {
     deletePurchase,
   } = useScrapPurchases();
 
+  const [searchTerm, setSearchTerm] = useState('');
+
   useEffect(() => {
     fetchPurchases();
   }, [fetchPurchases]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchPurchases(searchTerm);
+  };
 
   // Modal State for Create/Edit Purchase
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
@@ -138,13 +145,30 @@ export const ScrapPurchasesPage: React.FC = () => {
             تسجيل كافة مشتريات الكسر من الزبائن، يخصم مباشرة من الخزنة ويضيف لمخزون الكسر.
           </p>
         </div>
-        <button
-          onClick={openCreatePurchaseModal}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-theme-scrap hover:bg-theme-scrap/90 text-white rounded-xl font-bold transition-all shadow-sm shadow-theme-scrap/20"
-        >
-          <Plus size={18} />
-          شراء كسر جديد
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <form onSubmit={handleSearch} className="relative w-full sm:w-64">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="بحث بالاسم أو الرقم..."
+              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-theme-scrap focus:border-transparent text-charcoal font-medium"
+            />
+            <button 
+              type="submit" 
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-theme-scrap"
+            >
+              <Search size={18} />
+            </button>
+          </form>
+          <button
+            onClick={openCreatePurchaseModal}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-theme-scrap hover:bg-theme-scrap/90 text-white rounded-xl font-bold transition-all shadow-sm shadow-theme-scrap/20"
+          >
+            <Plus size={18} />
+            شراء كسر جديد
+          </button>
+        </div>
       </div>
 
       {purchasesError && (
@@ -195,7 +219,7 @@ export const ScrapPurchasesPage: React.FC = () => {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex flex-col">
-                            <span className="font-bold text-charcoal">{p.customerName}</span>
+                            <span className="font-bold text-charcoal">{p.customerName || (p as any).clientName || (p as any).sellerName || 'بدون اسم'}</span>
                             {p.customerPhone && <span className="text-xs text-gray-500" dir="ltr">{p.customerPhone}</span>}
                           </div>
                         </td>

@@ -12,6 +12,10 @@ import type {
   AdjustSilverSafeDto,
   SilverReportQueryDto,
   SilverReportData,
+  AddStockDto,
+  CancelSilverInvoiceDto,
+  UpdateSilverSafePasswordDto,
+  GetSilverSafeBalanceDto,
 } from '../common/types/silver.types';
 
 export const SilverService = {
@@ -22,6 +26,11 @@ export const SilverService = {
 
   updateSilverItem: async (id: string, data: UpdateSilverItemDto): Promise<SilverItem> => {
     const response = await apiClient.patch<any>(`/silver/items/${id}`, data);
+    return response.data?.data || response.data;
+  },
+
+  addStockToExistingItem: async (id: string, data: AddStockDto): Promise<SilverItem> => {
+    const response = await apiClient.patch<any>(`/silver/items/${id}/add-stock`, data);
     return response.data?.data || response.data;
   },
 
@@ -73,13 +82,28 @@ export const SilverService = {
     return response.data?.data || response.data;
   },
 
+  cancelSaleInvoice: async (id: string, data: CancelSilverInvoiceDto): Promise<{ message: string; sale: SilverSale }> => {
+    const response = await apiClient.patch<any>(`/silver/sales/invoices/${id}/cancel`, data);
+    return response.data?.data || response.data;
+  },
+
   getScrapInvoices: async (): Promise<SilverScrapPurchase[]> => {
     const response = await apiClient.get<any>('/silver/scrap/invoices');
     return response.data?.data || response.data;
   },
 
-  getSilverSafeBalance: async (): Promise<{ currentCashBalance: number }> => {
-    const response = await apiClient.get<any>('/silver/safe/balance');
+  getScrapInventorySummary: async (): Promise<any> => {
+    const response = await apiClient.get<any>('/silver/scrap/inventory');
+    return response.data?.data || response.data;
+  },
+
+  updateSafePassword: async (data: UpdateSilverSafePasswordDto): Promise<{ message: string }> => {
+    const response = await apiClient.patch<any>('/silver/safe/password', data);
+    return response.data?.data || response.data;
+  },
+
+  getSilverSafeBalance: async (data: GetSilverSafeBalanceDto): Promise<{ currentCashBalance: number }> => {
+    const response = await apiClient.post<any>('/silver/safe/balance', data);
     return response.data?.data || response.data;
   },
 
@@ -95,6 +119,7 @@ export const SilverService = {
 
   getSilverReport: async (query: SilverReportQueryDto): Promise<SilverReportData> => {
     const params = new URLSearchParams();
+    if (query.rangeType) params.append('rangeType', query.rangeType.toLowerCase());
     if (query.startDate) params.append('startDate', query.startDate);
     if (query.endDate) params.append('endDate', query.endDate);
 

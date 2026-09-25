@@ -11,7 +11,9 @@ import {
   ShieldAlert,
   Loader2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
 import { IncomeService } from '../../services/income.service';
@@ -31,6 +33,13 @@ export const IncomesPage: React.FC = () => {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingIncome, setEditingIncome] = useState<Income | null>(null);
+
+  // Delete Modal state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [incomeToDelete, setIncomeToDelete] = useState<Income | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [formData, setFormData] = useState<CreateIncomeDto>({
     reason: '',
     amount: '' as any
@@ -74,21 +83,68 @@ export const IncomesPage: React.FC = () => {
     try {
       setIsSubmitting(true);
       setError(null);
-      await IncomeService.createIncome({
-        ...formData,
-        amount: Number(formData.amount)
-      });
+      
+      if (editingIncome) {
+        const id = editingIncome.id || editingIncome._id;
+        if (!id) throw new Error('لا يوجد معرف للإيراد');
+        
+        await IncomeService.updateIncome(id, {
+          ...formData,
+          amount: Number(formData.amount)
+        });
+      } else {
+        await IncomeService.createIncome({
+          ...formData,
+          amount: Number(formData.amount)
+        });
+      }
       
       setIsModalOpen(false);
+      setEditingIncome(null);
       setFormData({ reason: '', amount: '' as any });
       
       if (isOwner) {
         fetchIncomes();
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'فشل في تسجيل الإيراد.');
+      setError(err?.response?.data?.message || err.message || 'فشل في العملية.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEdit = (income: Income) => {
+    setEditingIncome(income);
+    setFormData({
+      reason: income.reason,
+      amount: income.amount as any,
+    });
+    setError(null);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteClick = (income: Income) => {
+    setIncomeToDelete(income);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!incomeToDelete) return;
+    const id = incomeToDelete.id || incomeToDelete._id;
+    if (!id) return;
+    
+    try {
+      setIsDeleting(true);
+      const res = await IncomeService.deleteIncome(id);
+      if (res.success) {
+        setIsDeleteModalOpen(false);
+        setIncomeToDelete(null);
+        if (isOwner) fetchIncomes();
+      }
+    } catch (err: any) {
+      alert(err?.response?.data?.message || err.message || 'فشل في الحذف.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -118,6 +174,8 @@ export const IncomesPage: React.FC = () => {
           <button
             onClick={() => {
               setError(null);
+              setEditingIncome(null);
+              setFormData({ reason: '', amount: '' as any });
               setIsModalOpen(true);
             }}
             className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm whitespace-nowrap"
@@ -153,6 +211,7 @@ export const IncomesPage: React.FC = () => {
                     <th className="px-6 py-4 font-bold min-w-[200px]">سبب الدخل</th>
                     <th className="px-6 py-4 font-bold text-center">المبلغ المضاف (ج.م)</th>
                     <th className="px-6 py-4 font-bold">المسؤول عن الحركة</th>
+                    <th className="px-6 py-4 font-bold text-center">الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -185,6 +244,24 @@ export const IncomesPage: React.FC = () => {
                           <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg border border-blue-100/50">
                             <User size={14} />
                             <span className="font-bold text-sm">{income.actionBy?.fullName || 'غير معروف'}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleEdit(income)}
+                              className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                              title="تعديل"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(income)}
+                              className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                              title="حذف"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -279,7 +356,7 @@ export const IncomesPage: React.FC = () => {
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
               <h3 className="text-lg font-black text-charcoal flex items-center gap-2">
                 <Banknote size={20} className="text-emerald-500" />
-                تسجيل دخل جديد
+                {editingIncome ? 'تعديل الإيراد' : 'تسجيل دخل جديد'}
               </h3>
               <button 
                 onClick={() => !isSubmitting && setIsModalOpen(false)}
@@ -345,7 +422,7 @@ export const IncomesPage: React.FC = () => {
                   {isSubmitting ? (
                     <Loader2 size={18} className="animate-spin" />
                   ) : (
-                    'تأكيد وتسجيل الإيراد'
+                    editingIncome ? 'تأكيد التعديل' : 'تأكيد وتسجيل الإيراد'
                   )}
                 </button>
                 <button
@@ -358,6 +435,37 @@ export const IncomesPage: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Delete Confirmation Modal ─── */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={32} />
+            </div>
+            <h3 className="text-xl font-black text-charcoal mb-2">تأكيد الحذف</h3>
+            <p className="text-gray-500 font-medium mb-6">
+              هل أنت متأكد من حذف الإيراد "{incomeToDelete?.reason}"؟ سيتم خصم المبلغ ({incomeToDelete?.amount} ج.م) من الخزنة.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition-all disabled:opacity-70"
+              >
+                {isDeleting ? <Loader2 size={18} className="animate-spin" /> : 'نعم، احذف'}
+              </button>
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={isDeleting}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold transition-all disabled:opacity-70"
+              >
+                إلغاء
+              </button>
+            </div>
           </div>
         </div>
       )}

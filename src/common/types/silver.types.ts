@@ -114,9 +114,29 @@ export interface AdjustSilverSafeDto {
 }
 
 export interface SilverReportQueryDto {
+  rangeType?: 'TODAY' | 'YESTERDAY' | 'LAST_7_DAYS' | 'THIS_MONTH' | 'LAST_MONTH' | 'CUSTOM';
   startDate?: string;
   endDate?: string;
 }
+
+export interface AddStockDto {
+  addedWeight: number;
+  addedQuantity?: number;
+}
+
+export interface CancelSilverInvoiceDto {
+  reason?: string;
+}
+
+export interface UpdateSilverSafePasswordDto {
+  currentPassword?: string;
+  newPassword: string;
+}
+
+export interface GetSilverSafeBalanceDto {
+  securityPassword?: string;
+}
+
 
 export interface SilverReportData {
   period: {

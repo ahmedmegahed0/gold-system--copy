@@ -24,4 +24,22 @@ export class IncomeService {
     const response = await apiClient.get<{ success: boolean; data: Income[] }>('/incomes');
     return response.data;
   }
+
+  /**
+   * Updates an existing income.
+   * Requires OWNER permissions.
+   */
+  static async updateIncome(id: string, data: Partial<CreateIncomeDto>): Promise<{ success: boolean; message: string; data: Income }> {
+    const response = await apiClient.patch<{ success: boolean; message: string; data: Income }>(`/incomes/${id}`, data);
+    return response.data;
+  }
+
+  /**
+   * Deletes an income.
+   * Requires OWNER permissions.
+   */
+  static async deleteIncome(id: string): Promise<{ success: boolean; message: string; id: string }> {
+    const response = await apiClient.delete<{ success: boolean; message: string; id: string }>(`/incomes/${id}`);
+    return response.data;
+  }
 }

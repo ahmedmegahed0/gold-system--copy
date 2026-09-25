@@ -54,6 +54,7 @@ export const SilverScrapInvoicesPage: React.FC = () => {
 
   
   const [invoices, setInvoices] = useState<SilverScrapPurchase[]>([]);
+  const [scrapSummary, setScrapSummary] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,8 +68,12 @@ export const SilverScrapInvoicesPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await SilverService.getScrapInvoices();
+      const [data, summary] = await Promise.all([
+        SilverService.getScrapInvoices(),
+        SilverService.getScrapInventorySummary()
+      ]);
       setInvoices(data);
+      setScrapSummary(summary);
     } catch (err: any) {
       setError(err.response?.data?.message || 'حدث خطأ أثناء جلب فواتير شراء كسر الفضة');
     } finally {
@@ -124,6 +129,25 @@ export const SilverScrapInvoicesPage: React.FC = () => {
           <div className="flex items-center gap-3 p-4 bg-red-50 text-red-600 rounded-xl border border-red-100">
             <AlertCircle size={18} />
             <span className="text-sm font-medium">{error}</span>
+          </div>
+        )}
+
+        {/* Scrap Inventory Summary */}
+        {scrapSummary.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6 mb-6">
+            {scrapSummary.map((item) => (
+              <div key={item.karat} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm relative overflow-hidden group hover:border-theme-scrap/30 transition-all">
+                <div className="absolute top-0 left-0 w-16 h-16 bg-theme-scrap/5 rounded-br-full -ml-4 -mt-4 transition-transform group-hover:scale-110" />
+                <h3 className="text-gray-500 text-sm font-medium mb-1">عيار {item.karat}</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold text-charcoal">{item.totalScrapWeight?.toFixed(2)}</span>
+                  <span className="text-xs text-gray-500 font-medium">جرام</span>
+                </div>
+                <div className="mt-2 text-xs text-gray-400">
+                  القيمة: {item.totalPaidAmount?.toLocaleString()} ج.م
+                </div>
+              </div>
+            ))}
           </div>
         )}
 

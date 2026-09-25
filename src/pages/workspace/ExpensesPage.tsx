@@ -12,7 +12,9 @@ import {
   Loader2,
   Tag,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
 import { ExpenseService } from '../../services/expense.service';
@@ -40,6 +42,13 @@ export const ExpensesPage: React.FC = () => {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  
+  // Delete Modal state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [formData, setFormData] = useState<CreateExpenseDto>({
     title: '',
     amount: '' as any,
@@ -81,22 +90,66 @@ export const ExpensesPage: React.FC = () => {
     try {
       setIsSubmitting(true);
       setError(null);
-      const res = await ExpenseService.createExpense({
-        ...formData,
-        amount: Number(formData.amount)
-      });
-      if (res.success) {
-        setIsModalOpen(false);
-        setFormData({ title: '', amount: '' as any, category: 'SHOP_EXPENSES' });
-        // Refresh list if owner
-        if (isOwner) {
-          fetchExpenses();
+      
+      if (editingExpense) {
+        const res = await ExpenseService.updateExpense(editingExpense.id, {
+          ...formData,
+          amount: Number(formData.amount)
+        });
+        if (res.success) {
+          setIsModalOpen(false);
+          setEditingExpense(null);
+          setFormData({ title: '', amount: '' as any, category: 'SHOP_EXPENSES' });
+          if (isOwner) fetchExpenses();
+        }
+      } else {
+        const res = await ExpenseService.createExpense({
+          ...formData,
+          amount: Number(formData.amount)
+        });
+        if (res.success) {
+          setIsModalOpen(false);
+          setFormData({ title: '', amount: '' as any, category: 'SHOP_EXPENSES' });
+          if (isOwner) fetchExpenses();
         }
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'فشل في تسجيل المصروف.');
+      setError(err?.response?.data?.message || err.message || 'فشل في العملية.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEdit = (expense: Expense) => {
+    setEditingExpense(expense);
+    setFormData({
+      title: expense.title,
+      amount: expense.amount as any,
+      category: expense.category,
+    });
+    setError(null);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteClick = (expense: Expense) => {
+    setExpenseToDelete(expense);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!expenseToDelete) return;
+    try {
+      setIsDeleting(true);
+      const res = await ExpenseService.deleteExpense(expenseToDelete.id);
+      if (res.success) {
+        setIsDeleteModalOpen(false);
+        setExpenseToDelete(null);
+        if (isOwner) fetchExpenses();
+      }
+    } catch (err: any) {
+      alert(err?.response?.data?.message || err.message || 'فشل في الحذف.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -138,6 +191,8 @@ export const ExpensesPage: React.FC = () => {
           <button
             onClick={() => {
               setError(null);
+              setEditingExpense(null);
+              setFormData({ title: '', amount: '' as any, category: 'SHOP_EXPENSES' });
               setIsModalOpen(true);
             }}
             className="w-full sm:w-auto bg-gold hover:bg-gold/90 text-white px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-sm whitespace-nowrap"
@@ -174,6 +229,7 @@ export const ExpensesPage: React.FC = () => {
                     <th className="px-6 py-4 font-bold text-center">المبلغ المخصوم (ج.م)</th>
                     <th className="px-6 py-4 font-bold">تصنيف المصروف</th>
                     <th className="px-6 py-4 font-bold">المسؤول عن الحركة</th>
+                    <th className="px-6 py-4 font-bold text-center">الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -211,6 +267,24 @@ export const ExpensesPage: React.FC = () => {
                           <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg border border-blue-100/50">
                             <User size={14} />
                             <span className="font-bold text-sm">{expense.actionBy?.fullName || 'غير معروف'}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleEdit(expense)}
+                              className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                              title="تعديل"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(expense)}
+                              className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                              title="حذف"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -305,7 +379,7 @@ export const ExpensesPage: React.FC = () => {
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
               <h3 className="text-lg font-black text-charcoal flex items-center gap-2">
                 <Receipt size={20} className="text-gold" />
-                تسجيل مصروف جديد
+                {editingExpense ? 'تعديل مصروف' : 'تسجيل مصروف جديد'}
               </h3>
               <button 
                 onClick={() => !isSubmitting && setIsModalOpen(false)}
@@ -390,7 +464,7 @@ export const ExpensesPage: React.FC = () => {
                   {isSubmitting ? (
                     <Loader2 size={18} className="animate-spin" />
                   ) : (
-                    'تأكيد وتسجيل المصروف'
+                    editingExpense ? 'تأكيد التعديل' : 'تأكيد وتسجيل المصروف'
                   )}
                 </button>
                 <button
@@ -403,6 +477,37 @@ export const ExpensesPage: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Delete Confirmation Modal ─── */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={32} />
+            </div>
+            <h3 className="text-xl font-black text-charcoal mb-2">تأكيد الحذف</h3>
+            <p className="text-gray-500 font-medium mb-6">
+              هل أنت متأكد من حذف المصروف "{expenseToDelete?.title}"؟ سيتم إعادة المبلغ ({expenseToDelete?.amount} ج.م) للخزنة.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition-all disabled:opacity-70"
+              >
+                {isDeleting ? <Loader2 size={18} className="animate-spin" /> : 'نعم، احذف'}
+              </button>
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={isDeleting}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-xl font-bold transition-all disabled:opacity-70"
+              >
+                إلغاء
+              </button>
+            </div>
           </div>
         </div>
       )}

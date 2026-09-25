@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Search, Loader2, RefreshCw, Edit2, Trash2, PackagePlus } from 'lucide-react';
 // Removed useAuth
 import { SilverService } from '../../services/silver.service';
 import type { SilverItem, CreateSilverItemDto } from '../../common/types/silver.types';
@@ -17,9 +17,12 @@ export const SilverInventoryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const [isStockModalOpen, setIsStockModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<SilverItem | null>(null);
   
-  // New Item State
+  // New/Edit Item State
   const [newItem, setNewItem] = useState<CreateSilverItemDto>({
     title: '',
     karat: 925,
@@ -73,13 +76,63 @@ export const SilverInventoryPage: React.FC = () => {
     
     try {
       setSaving(true);
-      await SilverService.addSilverItem(newItem);
+      if (selectedItem) {
+        await SilverService.updateSilverItem(selectedItem._id || selectedItem.id || '', newItem);
+      } else {
+        await SilverService.addSilverItem(newItem);
+      }
       setIsAddModalOpen(false);
+      setSelectedItem(null);
       setNewItem({ title: '', karat: 925, category: '', weight: 0, notes: '' });
       fetchData();
     } catch (error) {
-      console.error('Error adding silver item:', error);
-      alert('حدث خطأ أثناء إضافة القطعة');
+      console.error('Error adding/updating silver item:', error);
+      alert('حدث خطأ أثناء الحفظ');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEditClick = (item: SilverItem) => {
+    setSelectedItem(item);
+    setNewItem({
+      title: item.title,
+      karat: item.karat,
+      category: typeof item.category === 'object' ? item.category._id || item.category.id || '' : item.category,
+      weight: item.weight,
+      notes: item.notes || ''
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const handleDeleteClick = async (item: SilverItem) => {
+    if (window.confirm(`هل أنت متأكد من حذف القطعة: ${item.title}؟`)) {
+      try {
+        await SilverService.deleteSilverItem(item._id || item.id || '');
+        fetchData();
+      } catch (error) {
+        alert('حدث خطأ أثناء الحذف');
+      }
+    }
+  };
+
+  const [stockToAdd, setStockToAdd] = useState({ weight: 0, quantity: 1 });
+  
+  const handleAddStock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedItem || stockToAdd.weight <= 0) return;
+    try {
+      setSaving(true);
+      await SilverService.addStockToExistingItem(selectedItem._id || selectedItem.id || '', {
+        addedWeight: stockToAdd.weight,
+        addedQuantity: stockToAdd.quantity,
+      });
+      setIsStockModalOpen(false);
+      setSelectedItem(null);
+      setStockToAdd({ weight: 0, quantity: 1 });
+      fetchData();
+    } catch (error) {
+      alert('حدث خطأ أثناء زيادة المخزون');
     } finally {
       setSaving(false);
     }
@@ -99,7 +152,11 @@ export const SilverInventoryPage: React.FC = () => {
           <p className="text-gray-500 mt-1">إدارة قطع الفضة المتاحة للبيع</p>
         </div>
         <button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => {
+            setSelectedItem(null);
+            setNewItem({ title: '', karat: 925, category: '', weight: 0, notes: '' });
+            setIsAddModalOpen(true);
+          }}
           className="flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium transition-all shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50"
         >
           <Plus size={20} />
@@ -156,8 +213,10 @@ export const SilverInventoryPage: React.FC = () => {
                 <th className="px-6 py-4">العيار</th>
                 <th className="px-6 py-4">التصنيف</th>
                 <th className="px-6 py-4">الوزن (جرام)</th>
+                <th className="px-6 py-4">الكمية</th>
                 <th className="px-6 py-4">الحالة</th>
                 <th className="px-6 py-4">ملاحظات</th>
+                <th className="px-6 py-4 text-center">إجراءات</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -190,6 +249,9 @@ export const SilverInventoryPage: React.FC = () => {
                     <td className="px-6 py-4 font-bold text-charcoal">
                       {item.weight} جم
                     </td>
+                    <td className="px-6 py-4 text-charcoal">
+                      {item.quantity || 1}
+                    </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-lg font-medium text-xs ${
                         item.status === 'AVAILABLE' ? 'bg-emerald-50 text-emerald-600' :
@@ -200,6 +262,35 @@ export const SilverInventoryPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-gray-500 text-xs">
                       {item.notes || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setStockToAdd({ weight: 0, quantity: 1 });
+                            setIsStockModalOpen(true);
+                          }}
+                          className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"
+                          title="إضافة للمخزون"
+                        >
+                          <PackagePlus size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleEditClick(item)}
+                          className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="تعديل"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(item)}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          title="حذف"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -213,7 +304,7 @@ export const SilverInventoryPage: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-charcoal/50 backdrop-blur-sm" onClick={() => setIsAddModalOpen(false)} />
           <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl p-6 animate-in fade-in zoom-in-95">
-            <h2 className="text-xl font-bold text-charcoal mb-6">إضافة قطعة فضة للمخزون</h2>
+            <h2 className="text-xl font-bold text-charcoal mb-6">{selectedItem ? 'تعديل بيانات قطعة الفضة' : 'إضافة قطعة فضة للمخزون'}</h2>
             
             <form onSubmit={handleAddItem} className="space-y-4">
               <div>
@@ -287,6 +378,62 @@ export const SilverInventoryPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
+                  className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-charcoal rounded-xl font-bold transition-colors"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Stock Modal */}
+      {isStockModalOpen && selectedItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-charcoal/50 backdrop-blur-sm" onClick={() => setIsStockModalOpen(false)} />
+          <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl p-6 animate-in fade-in zoom-in-95">
+            <h2 className="text-xl font-bold text-charcoal mb-6">إضافة وزن وكمية للمخزون - {selectedItem.title}</h2>
+            
+            <form onSubmit={handleAddStock} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">الوزن المضاف (جرام)</label>
+                  <input
+                    type="number"
+                    required
+                    min="0.01"
+                    step="0.01"
+                    value={stockToAdd.weight || ''}
+                    onChange={e => setStockToAdd({...stockToAdd, weight: Number(e.target.value)})}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">الكمية المضافة (عدد)</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    step="1"
+                    value={stockToAdd.quantity || ''}
+                    onChange={e => setStockToAdd({...stockToAdd, quantity: Number(e.target.value)})}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'إضافة وتحديث المخزون'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsStockModalOpen(false)}
                   className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-charcoal rounded-xl font-bold transition-colors"
                 >
                   إلغاء

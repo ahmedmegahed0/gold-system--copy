@@ -26,4 +26,22 @@ export class ExpenseService {
     const response = await apiClient.get<{ success: boolean; data: Expense[] }>('/expenses', { params });
     return response.data;
   }
+
+  /**
+   * Updates an existing expense.
+   * Requires OWNER permissions.
+   */
+  static async updateExpense(id: string, data: Partial<CreateExpenseDto>): Promise<{ success: boolean; message: string; data: Expense }> {
+    const response = await apiClient.patch<{ success: boolean; message: string; data: Expense }>(`/expenses/${id}`, data);
+    return response.data;
+  }
+
+  /**
+   * Deletes an expense.
+   * Requires OWNER permissions.
+   */
+  static async deleteExpense(id: string): Promise<{ success: boolean; message: string; id: string }> {
+    const response = await apiClient.delete<{ success: boolean; message: string; id: string }>(`/expenses/${id}`);
+    return response.data;
+  }
 }

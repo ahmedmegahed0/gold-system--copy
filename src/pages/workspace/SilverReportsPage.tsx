@@ -11,25 +11,67 @@ export const SilverReportsPage: React.FC = () => {
     startDate: new Date(new Date().setDate(1)).toISOString().split('T')[0], // First day of current month
     endDate: new Date().toISOString().split('T')[0], // Today
   });
+  const [rangeType, setRangeType] = useState<string>('TODAY');
+
+  const [error, setError] = useState<string | null>(null);
 
   const fetchReport = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      // Always calculate dates to satisfy backend validation
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const end = new Date();
+      end.setHours(23, 59, 59, 999);
+      
+      let finalStart: string = start.toISOString();
+      let finalEnd: string = end.toISOString();
+
+      if (rangeType === 'CUSTOM') {
+        finalStart = new Date(dateRange.startDate).toISOString();
+        finalEnd = new Date(new Date(dateRange.endDate).setHours(23, 59, 59, 999)).toISOString();
+      } else if (rangeType === 'YESTERDAY') {
+        start.setDate(start.getDate() - 1);
+        end.setDate(end.getDate() - 1);
+        finalStart = start.toISOString();
+        finalEnd = end.toISOString();
+      } else if (rangeType === 'LAST_7_DAYS') {
+        start.setDate(start.getDate() - 7);
+        finalStart = start.toISOString();
+        finalEnd = end.toISOString();
+      } else if (rangeType === 'THIS_MONTH') {
+        start.setDate(1);
+        finalStart = start.toISOString();
+        finalEnd = end.toISOString();
+      } else if (rangeType === 'LAST_MONTH') {
+        start.setMonth(start.getMonth() - 1);
+        start.setDate(1);
+        end.setDate(0);
+        finalStart = start.toISOString();
+        finalEnd = end.toISOString();
+      }
+
       const data = await SilverService.getSilverReport({
-        startDate: new Date(dateRange.startDate).toISOString(),
-        endDate: new Date(new Date(dateRange.endDate).setHours(23, 59, 59, 999)).toISOString()
+        rangeType: rangeType as any,
+        startDate: finalStart,
+        endDate: finalEnd,
       });
       setReportData(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching silver report:', error);
+      const respData = error.response?.data;
+      const finalMessage = respData ? (typeof respData === 'object' ? JSON.stringify(respData) : respData) : error.message;
+      setError(finalMessage || 'حدث خطأ في تحميل التقرير');
     } finally {
       setLoading(false);
     }
-  }, [dateRange]);
+  }, [dateRange, rangeType]);
 
   useEffect(() => {
     fetchReport();
-  }, [fetchReport]);
+  }, [fetchReport, rangeType]);
 
   return (
     <div className="space-y-6">
@@ -47,23 +89,43 @@ export const SilverReportsPage: React.FC = () => {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-wrap items-end gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">من تاريخ</label>
-          <input
-            type="date"
-            value={dateRange.startDate}
-            onChange={e => setDateRange({...dateRange, startDate: e.target.value})}
+          <label className="block text-sm font-medium text-gray-700 mb-1">الفترة الزمنية</label>
+          <select
+            value={rangeType}
+            onChange={e => setRangeType(e.target.value)}
             className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-          />
+          >
+            <option value="TODAY">اليوم</option>
+            <option value="YESTERDAY">الأمس</option>
+            <option value="LAST_7_DAYS">آخر 7 أيام (الأسبوع الماضي)</option>
+            <option value="THIS_MONTH">هذا الشهر</option>
+            <option value="LAST_MONTH">الشهر الماضي</option>
+            <option value="CUSTOM">فترة مخصصة</option>
+          </select>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">إلى تاريخ</label>
-          <input
-            type="date"
-            value={dateRange.endDate}
-            onChange={e => setDateRange({...dateRange, endDate: e.target.value})}
-            className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-          />
-        </div>
+
+        {rangeType === 'CUSTOM' && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">من تاريخ</label>
+              <input
+                type="date"
+                value={dateRange.startDate}
+                onChange={e => setDateRange({...dateRange, startDate: e.target.value})}
+                className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">إلى تاريخ</label>
+              <input
+                type="date"
+                value={dateRange.endDate}
+                onChange={e => setDateRange({...dateRange, endDate: e.target.value})}
+                className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+              />
+            </div>
+          </>
+        )}
         
         <button
           onClick={fetchReport}
@@ -77,6 +139,10 @@ export const SilverReportsPage: React.FC = () => {
       {loading ? (
         <div className="flex justify-center items-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
           <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+        </div>
+      ) : error ? (
+        <div className="flex justify-center items-center py-20 bg-red-50 text-red-600 rounded-2xl border border-red-100 shadow-sm font-bold">
+          {error}
         </div>
       ) : reportData ? (
         <div className="space-y-6">

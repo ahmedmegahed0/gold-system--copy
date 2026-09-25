@@ -21,7 +21,7 @@ import { AuditPage } from './pages/workspace/AuditPage';
 import { LedgerPage } from './pages/workspace/LedgerPage';
 import { PurchasesLedgerPage } from './pages/workspace/PurchasesLedgerPage';
 import { ExpensesPage } from './pages/workspace/ExpensesPage';
-import { NotificationsPage } from './pages/workspace/NotificationsPage';
+
 import { BullionSalesCounterPage } from './pages/workspace/BullionSalesCounterPage';
 import { BullionInvoicesPage } from './pages/workspace/BullionInvoicesPage';
 import { CustomersPage } from './pages/workspace/CustomersPage';
@@ -95,7 +95,7 @@ const App: React.FC = () => {
                 <Route path="ledger" element={<LedgerPage />} />
                 <Route path="purchases-ledger" element={<PurchasesLedgerPage />} />
                 <Route path="profits-ledger" element={<ProfitLedgerPage />} />
-                <Route path="notifications" element={<NotificationsPage />} />
+                {/* <Route path="notifications" element={<NotificationsPage />} /> */}
               </Route>
               
               {/* Unauthorized Fallback */}

@@ -456,7 +456,7 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
                   setIsManualTotal(true);
                   setManualTotalAmount(e.target.value === '' ? '' : parseFloat(e.target.value) || 0);
                 }}
-                className={`w-full text-3xl font-black text-center py-4 rounded-xl border-2 focus:outline-none transition-colors ${
+                className={`w-full text-5xl sm:text-6xl font-black text-center py-6 rounded-xl border-2 focus:outline-none transition-colors ${
                   isManualTotal
                     ? 'border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C] focus:border-[#D4AF37]'
                     : 'border-transparent bg-transparent text-[#C9A84C] focus:border-transparent'
@@ -464,7 +464,7 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
                 dir="ltr"
                 placeholder="0"
               />
-              <span className="absolute bottom-4 left-4 text-xl text-[#C9A84C] font-black pointer-events-none">ج.م</span>
+              <span className="absolute bottom-6 left-4 text-2xl text-[#C9A84C] font-black pointer-events-none">ج.م</span>
             </div>
             {isManualTotal && autoGrandTotal > 0 && Number(manualTotalAmount) > 0 && (
               <div className="mt-2 p-2 bg-[#C9A84C]/10 border border-[#C9A84C]/30 rounded-lg text-xs font-bold text-[#C9A84C] flex justify-between">

@@ -10,7 +10,7 @@ interface UseScrapPurchasesReturn {
   purchases: ScrapPurchase[];
   isLoading: boolean;
   error: string | null;
-  fetchPurchases: () => Promise<void>;
+  fetchPurchases: (search?: string) => Promise<void>;
   createPurchase: (data: CreateScrapPurchaseDto) => Promise<ScrapPurchase>;
   updatePurchase: (id: string, data: UpdateScrapPurchaseDto) => Promise<ScrapPurchase>;
   deletePurchase: (id: string) => Promise<void>;
@@ -21,11 +21,11 @@ export const useScrapPurchases = (): UseScrapPurchasesReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPurchases = useCallback(async () => {
+  const fetchPurchases = useCallback(async (search?: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await ScrapPurchasesService.getAllPurchases();
+      const data = await ScrapPurchasesService.getAllPurchases(search);
       setPurchases(data);
     } catch (err: any) {
       const msg = err.response?.data?.message || 'حدث خطأ أثناء تحميل سجل المشتريات';

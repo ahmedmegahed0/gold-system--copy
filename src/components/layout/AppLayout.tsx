@@ -21,7 +21,6 @@ import {
   X,
   Banknote,
   Barcode,
-  Flame,
   Truck,
   Gem,
   Vault,
@@ -174,19 +173,7 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
               <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
 
-              {/* ── Silver (Silver Gray) ── */}
-              <div className="pt-4 pb-1">
-                <span className="text-[10px] font-bold text-slate-500/60 uppercase tracking-wider px-3">
-                  الفضة
-                </span>
-              </div>
-              <NavItem to="/silver-inventory" icon={Box} label="مخزن الفضة" />
-              <NavItem to="/silver-sales" icon={ShoppingCart} label="بيع الفضة (سريع)" />
-              <NavItem to="/silver-sales-invoices" icon={FileText} label="فواتير بيع الفضة" />
-              <NavItem to="/silver-scrap" icon={Receipt} label="شراء كسر فضة" />
-              <NavItem to="/silver-scrap-invoices" icon={FileText} label="فواتير شراء كسر الفضة" />
-              <NavItem to="/silver-safe" icon={Vault} label="خزنة الفضة" />
-              <NavItem to="/silver-reports" icon={FileBarChart2} label="تقارير الفضة" />
+
 
               {/* ── Scrap Gold (Emerald Green) ── */}
               <div className="pt-4 pb-1">
@@ -196,8 +183,6 @@ export const AppLayout: React.FC = () => {
               </div>
               <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
               <NavItem to="/scrap-purchases" icon={Receipt} label="دفتر المشتريات" />
-              <NavItem to="/scrap-invoices" icon={FileText} label={t('nav.scrapInvoices')} />
-              <NavItem to="/melting" icon={Flame} label="تسييح الذهب" />
 
               {/* ── Customers (Gold) ── */}
               <div className="pt-4 pb-1">
@@ -216,6 +201,7 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/purchases-ledger" icon={FileSpreadsheet} label="دفتر المشتريات والخوارج" />
               <NavItem to="/incomes" icon={Banknote} label="الدخل والإيرادات" />
               <NavItem to="/expenses" icon={Receipt} label="المصاريف النثرية" />
+              <NavItem to="/ledger" icon={Activity} label="الخزنة وجرد الأرصدة" />
 
               {/* ── System & Audit (Iron Gray) ── */}
               <div className="pt-4 pb-1">
@@ -225,8 +211,20 @@ export const AppLayout: React.FC = () => {
               </div>
               <NavItem to="/employees" icon={UserCog} label={t('nav.employees')} />
               <NavItem to="/audit" icon={History} label={t('nav.audit')} />
-              <NavItem to="/ledger" icon={Activity} label="الخزنة وجرد الأرصدة" />
-              <NavItem to="/notifications" icon={Bell} label="مركز التنبيهات" />
+
+              {/* ── Silver (Silver Gray) ── */}
+              <div className="pt-4 pb-1">
+                <span className="text-[10px] font-bold text-slate-500/60 uppercase tracking-wider px-3">
+                  الفضة
+                </span>
+              </div>
+              <NavItem to="/silver-inventory" icon={Box} label="مخزن الفضة" />
+              <NavItem to="/silver-sales" icon={ShoppingCart} label="بيع الفضة (سريع)" />
+              <NavItem to="/silver-sales-invoices" icon={FileText} label="فواتير بيع الفضة" />
+              <NavItem to="/silver-scrap" icon={Receipt} label="شراء كسر فضة" />
+              <NavItem to="/silver-scrap-invoices" icon={FileText} label="فواتير شراء كسر الفضة" />
+              <NavItem to="/silver-safe" icon={Vault} label="خزنة الفضة" />
+              <NavItem to="/silver-reports" icon={FileBarChart2} label="تقارير الفضة" />
             </>
           ) : (
             <>
@@ -240,6 +238,13 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/bullion-sales" icon={ShoppingCart} label="بيع سبايك/جنيهات" />
               <NavItem to="/bullion-invoices" icon={FileText} label="فواتير السبايك" />
               <div className="border-t border-gray-100 my-2"></div>
+              <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
+              <NavItem to="/scrap-purchases" icon={Receipt} label="دفتر المشتريات" />
+              <NavItem to="/customers" icon={Users} label={t('nav.customers')} />
+              <NavItem to="/suppliers" icon={Truck} label="حسابات الموردين" />
+              <NavItem to="/incomes" icon={Banknote} label="الدخل والإيرادات" />
+              <NavItem to="/expenses" icon={Receipt} label="المصاريف النثرية" />
+              <div className="border-t border-gray-100 my-2"></div>
               <NavItem to="/silver-inventory" icon={Box} label="مخزن الفضة" />
               <NavItem to="/silver-sales" icon={ShoppingCart} label="بيع الفضة (سريع)" />
               <NavItem to="/silver-sales-invoices" icon={FileText} label="فواتير بيع الفضة" />
@@ -247,15 +252,6 @@ export const AppLayout: React.FC = () => {
               <NavItem to="/silver-scrap-invoices" icon={FileText} label="فواتير شراء كسر الفضة" />
               <NavItem to="/silver-safe" icon={Vault} label="خزنة الفضة" />
               <NavItem to="/silver-reports" icon={FileBarChart2} label="تقارير الفضة" />
-              <div className="border-t border-gray-100 my-2"></div>
-              <NavItem to="/scrap" icon={CircleDollarSign} label={t('nav.scrap')} />
-              <NavItem to="/scrap-purchases" icon={Receipt} label="دفتر المشتريات" />
-              <NavItem to="/scrap-invoices" icon={FileText} label={t('nav.scrapInvoices')} />
-              <NavItem to="/melting" icon={Flame} label="تسييح الذهب" />
-              <NavItem to="/customers" icon={Users} label={t('nav.customers')} />
-              <NavItem to="/suppliers" icon={Truck} label="حسابات الموردين" />
-              <NavItem to="/incomes" icon={Banknote} label="الدخل والإيرادات" />
-              <NavItem to="/expenses" icon={Receipt} label="المصاريف النثرية" />
             </>
           )}
         </nav>

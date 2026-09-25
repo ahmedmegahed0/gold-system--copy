@@ -3,6 +3,8 @@ export interface CreateIncomeDto {
   reason: string;
 }
 
+export type UpdateIncomeDto = Partial<CreateIncomeDto>;
+
 export interface Income {
   id: string; // or _id depending on backend response, but typically mongoose id returned as id or _id
   _id?: string;

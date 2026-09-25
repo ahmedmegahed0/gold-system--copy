@@ -80,8 +80,8 @@ export const LedgerPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 2. Dual Reporting Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 2. Single Reporting Column for Sales */}
+        <div className="grid grid-cols-1 gap-6">
           
           {/* Column A: New Gold Sales */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
@@ -147,58 +147,6 @@ export const LedgerPage: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/* Column B: Scrap Gold Purchases */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-              <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
-                <TrendingUp size={24} />
-              </div>
-              <h3 className="text-xl font-black text-charcoal">مبيعات الذهب الكسر</h3>
-            </div>
-            
-            <div className="flex-1 flex flex-col gap-6">
-              <div>
-                <span className="block text-sm font-bold text-gray-400 mb-1">إجمالي المقبوضات النقدية</span>
-                <div className="text-3xl font-black text-charcoal" dir="ltr">
-                  {data.financials.scrapGoldSalesCash.toLocaleString()} <span className="text-base text-emerald-600">ج.م</span>
-                </div>
-              </div>
-
-              <div className="h-px w-full bg-gray-50"></div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <span className="block text-xs font-bold text-gray-400 mb-1 flex items-center gap-1">
-                    <Scale size={12} />
-                    عيار 24
-                  </span>
-                  <span className="text-xl font-black text-charcoal" dir="ltr">
-                    {data.goldWeights.scrapGoldPurchasesGrams.karat24.toFixed(2)}<span className="text-sm text-gray-400 ml-1">g</span>
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-xs font-bold text-gray-400 mb-1 flex items-center gap-1">
-                    <Scale size={12} />
-                    عيار 21
-                  </span>
-                  <span className="text-xl font-black text-charcoal" dir="ltr">
-                    {data.goldWeights.scrapGoldPurchasesGrams.karat21.toFixed(2)}<span className="text-sm text-gray-400 ml-1">g</span>
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-xs font-bold text-gray-400 mb-1 flex items-center gap-1">
-                    <Scale size={12} />
-                    عيار 18
-                  </span>
-                  <span className="text-xl font-black text-charcoal" dir="ltr">
-                    {data.goldWeights.scrapGoldPurchasesGrams.karat18.toFixed(2)}<span className="text-sm text-gray-400 ml-1">g</span>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
         
         {/* 3. Extra Incomes & Expenses Summary */}

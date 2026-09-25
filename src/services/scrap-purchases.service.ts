@@ -11,8 +11,9 @@ export const ScrapPurchasesService = {
     return response.data?.data || response.data;
   },
 
-  getAllPurchases: async (): Promise<ScrapPurchase[]> => {
-    const response = await apiClient.get<any>('/scrap-purchases');
+  getAllPurchases: async (search?: string): Promise<ScrapPurchase[]> => {
+    const params = search ? { search } : {};
+    const response = await apiClient.get<any>('/scrap-purchases', { params });
     return response.data?.data || response.data;
   },
 

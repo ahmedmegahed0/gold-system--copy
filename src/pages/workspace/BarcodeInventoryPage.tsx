@@ -790,10 +790,10 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
                 <input
                   type="text"
                   name="barcode"
-                  value={formData.barcode}
+                  value={formData.barcode || ''}
                   onChange={handleChange}
-                  className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg outline-none text-gray-500 font-mono font-bold"
-                  disabled={true}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-[#C9A84C] focus:border-transparent transition-all outline-none font-mono"
+                  placeholder="الباركود الحالي..."
                 />
               </div>
             )}
