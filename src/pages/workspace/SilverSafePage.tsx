@@ -9,7 +9,7 @@ export const SilverSafePage: React.FC = () => {
   const isOwner = user?.role === 'OWNER';
 
   const [balance, setBalance] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   
   const [isPasswordValidated, setIsPasswordValidated] = useState(false);
   const [authPassword, setAuthPassword] = useState('');
@@ -31,15 +31,11 @@ export const SilverSafePage: React.FC = () => {
       setIsPasswordValidated(true);
     } catch (error) {
       console.error('Error fetching silver safe balance:', error);
+      alert('كلمة المرور غير صحيحة أو حدث خطأ');
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  // Don't auto-fetch, require password first
-  // useEffect(() => {
-  //   fetchBalance();
-  // }, [fetchBalance]);
+  }, [authPassword]);
 
   const handleAuthenticate = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -126,4 +126,9 @@ export const SilverService = {
     const response = await apiClient.get<any>(`/silver/reports?${params.toString()}`);
     return response.data?.data || response.data;
   },
+
+  cancelSaleInvoice: async (id: string, reason: string): Promise<SilverSale> => {
+    const response = await apiClient.patch<any>(`/silver/sales/invoices/${id}/cancel`, { reason });
+    return response.data?.data || response.data;
+  },
 };

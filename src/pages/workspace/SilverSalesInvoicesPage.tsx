@@ -12,7 +12,8 @@ import {
   User,
   Printer,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Ban
 } from 'lucide-react';
 
 import { SilverService } from '../../services/silver.service';
@@ -59,6 +60,11 @@ export const SilverSalesInvoicesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewingInvoice, setViewingInvoice] = useState<SilverSale | null>(null);
 
+  // Cancellation State
+  const [cancelingInvoice, setCancelingInvoice] = useState<SilverSale | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [isCanceling, setIsCanceling] = useState(false);
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 8;
@@ -101,6 +107,24 @@ export const SilverSalesInvoicesPage: React.FC = () => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredInvoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [filteredInvoices, currentPage]);
+
+  const handleCancelInvoice = async () => {
+    if (!cancelingInvoice || !cancelReason.trim()) return;
+    
+    setIsCanceling(true);
+    try {
+      const invoiceId = cancelingInvoice._id || cancelingInvoice.id || '';
+      await SilverService.cancelSaleInvoice(invoiceId, cancelReason);
+      setCancelingInvoice(null);
+      setCancelReason('');
+      fetchInvoices();
+      alert('تم إلغاء الفاتورة بنجاح!');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'حدث خطأ أثناء إلغاء الفاتورة');
+    } finally {
+      setIsCanceling(false);
+    }
+  };
 
   return (
     <div className="space-y-6 relative">
@@ -228,6 +252,20 @@ export const SilverSalesInvoicesPage: React.FC = () => {
                             <Eye size={14} />
                             عرض
                           </button>
+                          {(inv as any).status !== 'CANCELED' && (
+                            <button
+                              onClick={() => setCancelingInvoice(inv)}
+                              className="px-3 py-1.5 text-red-500 hover:text-white border border-red-500 hover:bg-red-500 rounded-lg transition-colors font-bold text-xs flex items-center gap-1.5 mr-2"
+                              title="إلغاء الفاتورة"
+                            >
+                              <Ban size={14} />
+                            </button>
+                          )}
+                          {(inv as any).status === 'CANCELED' && (
+                            <span className="px-3 py-1.5 text-red-700 bg-red-50 rounded-lg font-bold text-xs flex items-center gap-1.5 mr-2">
+                              ملغاة
+                            </span>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -339,6 +377,67 @@ export const SilverSalesInvoicesPage: React.FC = () => {
             </div>
           );
         })()}
+      </ModalOverlay>
+      {/* Cancel Invoice Modal */}
+      <ModalOverlay
+        isOpen={!!cancelingInvoice}
+        onClose={() => {
+          if (!isCanceling) {
+            setCancelingInvoice(null);
+            setCancelReason('');
+          }
+        }}
+        title="إلغاء الفاتورة"
+      >
+        {cancelingInvoice && (
+          <div className="space-y-6">
+            <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex gap-3 text-red-700">
+              <AlertCircle className="shrink-0 mt-0.5" size={20} />
+              <div>
+                <h4 className="font-bold">تحذير هام!</h4>
+                <p className="text-sm mt-1">
+                  أنت على وشك إلغاء الفاتورة رقم <span className="font-bold font-mono">#{(cancelingInvoice._id || cancelingInvoice.id)?.substring(0,8).toUpperCase()}</span>.
+                  <br/>
+                  سيتم إرجاع القطعة إلى المخزون، وسيتم خصم قيمتها ({cancelingInvoice.totalPrice} ج.م) من خزنة الفضة.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-charcoal mb-2">
+                سبب الإلغاء / الارتجاع <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="مثال: طلب العميل الارتجاع، خطأ في الإدخال..."
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none resize-none"
+                rows={3}
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4 border-t border-gray-100">
+              <button
+                onClick={handleCancelInvoice}
+                disabled={isCanceling || !cancelReason.trim()}
+                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isCanceling ? <Loader2 className="w-5 h-5 animate-spin" /> : <Ban size={18} />}
+                تأكيد الإلغاء
+              </button>
+              <button
+                onClick={() => {
+                  setCancelingInvoice(null);
+                  setCancelReason('');
+                }}
+                disabled={isCanceling}
+                className="px-6 py-3 border border-gray-200 text-gray-500 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                تراجع
+              </button>
+            </div>
+          </div>
+        )}
       </ModalOverlay>
     </div>
   );
