@@ -530,6 +530,7 @@ export function BarcodeInventoryPage() {
                 <th className="px-6 py-4">الوزن الصافي</th>
                 <th className="px-6 py-4">المصنعية/جرام</th>
                 <th className="px-6 py-4">الشركة</th>
+                <th className="px-6 py-4">المخزون الرئيسي</th>
                 <th className="px-6 py-4 text-center">الإجراءات</th>
               </tr>
             </thead>
@@ -584,6 +585,16 @@ export function BarcodeInventoryPage() {
                     <td className="px-6 py-4 font-black text-lg text-emerald-700 bg-emerald-50/40" dir="ltr">{item.netWeight}g</td>
                     <td className="px-6 py-4 font-bold text-purple-700 bg-purple-50/30">{item.makingChargePerGram || 0}</td>
                     <td className="px-6 py-4 text-gray-600 font-bold">{item.companyName || '-'}</td>
+                    <td className="px-6 py-4 text-xs font-bold text-gray-500 bg-gray-50">
+                      {item.inventoryRef ? (
+                        <span className="text-indigo-600 flex items-center justify-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 block"></span>
+                          {(item.inventoryRef as any).title || 'مرتبط'}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">تلقائي</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
@@ -712,8 +723,15 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
   const { categories } = useCategories();
   const { inventory } = useInventory({ status: 'ACTIVE' });
 
-  const [formData, setFormData] = useState<Partial<CreateBarcodeItemDto>>(
-    initialData || {
+  const [formData, setFormData] = useState<Partial<CreateBarcodeItemDto>>(() => {
+    if (initialData) {
+      return {
+        ...initialData,
+        category: initialData.category?._id || initialData.category || '',
+        inventoryId: initialData.inventoryRef?._id || initialData.inventoryRef || '',
+      };
+    }
+    return {
       barcode: '',
       title: '',
       karat: 21,
@@ -723,8 +741,8 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
       category: '',
       inventoryId: '',
       companyName: '',
-    }
-  );
+    };
+  });
 
   const [loading, setLoading] = useState(false);
 
