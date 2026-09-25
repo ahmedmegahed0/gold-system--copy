@@ -752,20 +752,25 @@ function ItemFormModal({ isOpen, onClose, initialData, onSubmit }: any) {
     e.preventDefault();
     setLoading(true);
     try {
-      const submitData = {
-        ...formData,
+      const submitData: any = {
+        barcode: formData.barcode,
+        title: formData.title,
+        karat: Number(formData.karat) || 21,
         grossWeight: Number(formData.grossWeight) || 0,
         tagWeight: formData.tagWeight ? Number(formData.tagWeight) : undefined,
         makingChargePerGram: Number(formData.makingChargePerGram) || 0,
-        karat: Number(formData.karat) || 21,
+        category: formData.category,
+        companyName: formData.companyName,
+        inventoryId: formData.inventoryId,
+        file: formData.file,
       };
       // If inventoryId is empty string, remove it so it's not sent
       if (!submitData.inventoryId) {
         delete submitData.inventoryId;
       }
       await onSubmit(submitData);
-    } catch (error) {
-      alert('حدث خطأ أثناء حفظ البيانات');
+    } catch (error: any) {
+      alert(error?.response?.data?.message || error?.message || 'حدث خطأ أثناء حفظ البيانات');
     } finally {
       setLoading(false);
     }
