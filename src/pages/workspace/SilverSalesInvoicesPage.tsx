@@ -114,7 +114,7 @@ export const SilverSalesInvoicesPage: React.FC = () => {
     setIsCanceling(true);
     try {
       const invoiceId = cancelingInvoice._id || cancelingInvoice.id || '';
-      await SilverService.cancelSaleInvoice(invoiceId, cancelReason);
+      await SilverService.cancelSaleInvoice(invoiceId, { reason: cancelReason });
       setCancelingInvoice(null);
       setCancelReason('');
       fetchInvoices();

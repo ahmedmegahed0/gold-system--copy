@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Vault, Loader2, ArrowUpCircle, ArrowDownCircle, AlertCircle, Lock } from 'lucide-react';
+import { Vault, Loader2, ArrowUpCircle, ArrowDownCircle, AlertCircle, Lock, X } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
 import { SilverService } from '../../services/silver.service';
 import type { AdjustSilverSafeDto } from '../../common/types/silver.types';
@@ -39,7 +39,6 @@ export const SilverSafePage: React.FC = () => {
 
   const handleAuthenticate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!authPassword) return;
     await fetchBalance();
   };
 
@@ -76,7 +75,11 @@ export const SilverSafePage: React.FC = () => {
       setActionType('NONE');
       setAdjustData({ amount: '', password: '', reason: '' });
       setPasswordData({ current: '', new: '' });
-      fetchBalance();
+      
+      // If we are logged in, fetch balance again. If not, don't.
+      if (isPasswordValidated || actionType !== 'PASSWORD') {
+        fetchBalance();
+      }
     } catch (error: any) {
       console.error('Error modifying safe:', error);
       alert(error.response?.data?.message || 'كلمة المرور غير صحيحة أو حدث خطأ');
@@ -101,30 +104,77 @@ export const SilverSafePage: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-6">
         {!isPasswordValidated ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center max-w-md mx-auto">
-            <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock className="text-amber-500 w-8 h-8" />
-            </div>
-            <h2 className="text-xl font-bold text-charcoal mb-2">تسجيل الدخول لخزنة الفضة</h2>
-            <p className="text-gray-500 text-sm mb-6">يرجى إدخال كلمة المرور الخاصة بالخزنة لعرض الرصيد</p>
-            <form onSubmit={handleAuthenticate} className="space-y-4">
-              <input
-                type="password"
-                required
-                value={authPassword}
-                onChange={e => setAuthPassword(e.target.value)}
-                placeholder="كلمة مرور الخزنة"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 outline-none text-center tracking-widest"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold transition-all flex justify-center items-center gap-2"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'فتح الخزنة'}
-              </button>
-            </form>
-          </div>
+          <>
+            {actionType === 'PASSWORD' ? (
+              <form onSubmit={handleAction} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-right max-w-md mx-auto animate-in fade-in">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-charcoal">تعيين / تغيير كلمة المرور</h2>
+                  <button type="button" onClick={() => setActionType('NONE')} className="text-gray-400 hover:text-charcoal"><X size={20}/></button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور الحالية (إن وجدت)</label>
+                    <input
+                      type="password"
+                      value={passwordData.current}
+                      onChange={e => setPasswordData({...passwordData, current: e.target.value})}
+                      placeholder="اتركها فارغة إذا لم تقم بتعيين واحدة بعد"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور الجديدة <span className="text-red-500">*</span></label>
+                    <input
+                      type="password"
+                      required
+                      value={passwordData.new}
+                      onChange={e => setPasswordData({...passwordData, new: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={saving || !passwordData.new}
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all flex justify-center items-center gap-2 mt-2"
+                  >
+                    {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'حفظ كلمة المرور'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center max-w-md mx-auto">
+                <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Lock className="text-amber-500 w-8 h-8" />
+                </div>
+                <h2 className="text-xl font-bold text-charcoal mb-2">تسجيل الدخول لخزنة الفضة</h2>
+                <p className="text-gray-500 text-sm mb-6">يرجى إدخال كلمة المرور الخاصة بالخزنة لعرض الرصيد</p>
+                <form onSubmit={handleAuthenticate} className="space-y-4">
+                  <input
+                    type="password"
+                    value={authPassword}
+                    onChange={e => setAuthPassword(e.target.value)}
+                    placeholder="كلمة مرور الخزنة (اتركها فارغة للفتح إن لم تعين واحدة)"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 outline-none text-center tracking-widest text-sm"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold transition-all flex justify-center items-center gap-2"
+                  >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'فتح الخزنة'}
+                  </button>
+                </form>
+                {isOwner && (
+                  <button
+                    onClick={() => setActionType('PASSWORD')}
+                    className="mt-4 text-sm font-bold text-blue-600 hover:text-blue-700 underline transition-colors"
+                  >
+                    تعيين أو تغيير كلمة المرور (للمدير)
+                  </button>
+                )}
+              </div>
+            )}
+          </>
         ) : (
           <>
             <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 text-white shadow-xl relative overflow-hidden">
@@ -203,30 +253,7 @@ export const SilverSafePage: React.FC = () => {
                           إلغاء
                         </button>
                       </div>
-                      
-                      {actionType === 'PASSWORD' ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور الحالية (إن وجدت)</label>
-                            <input
-                              type="password"
-                              value={passwordData.current}
-                              onChange={e => setPasswordData({...passwordData, current: e.target.value})}
-                              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور الجديدة</label>
-                            <input
-                              type="password"
-                              required
-                              value={passwordData.new}
-                              onChange={e => setPasswordData({...passwordData, new: e.target.value})}
-                              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-                            />
-                          </div>
-                        </div>
-                      ) : (
+                      {actionType === 'PASSWORD' ? null : (
                         <>
                           {actionType === 'RESET' && (
                             <div className="p-4 bg-red-50 text-red-700 rounded-lg text-sm flex items-start gap-2">
