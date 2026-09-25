@@ -80,9 +80,6 @@ const InventoryFormModal: React.FC<{
     companyName: '',
     category: '',
     karat: 21,
-    initialCount: '' as any,
-    totalGrossWeight: '' as any,
-    tagDetails: [],
   });
 
   const [saving, setSaving] = useState(false);
@@ -96,9 +93,6 @@ const InventoryFormModal: React.FC<{
           companyName: initialData.companyName || '',
           category: typeof initialData.category === 'object' ? (initialData.category._id || initialData.category.id || '') : initialData.category,
           karat: initialData.karat,
-          initialCount: initialData.initialCount,
-          totalGrossWeight: initialData.totalGrossWeight,
-          tagDetails: initialData.tagDetails || [],
         });
       } else {
         setFormData({
@@ -106,21 +100,15 @@ const InventoryFormModal: React.FC<{
           companyName: '',
           category: '',
           karat: 21,
-          initialCount: '' as any,
-          totalGrossWeight: '' as any,
-          tagDetails: [],
         });
       }
       setFormError('');
     }
   }, [isOpen, initialData]);
 
-  const totalTagsWeight = (formData.tagDetails || []).reduce((acc, tag) => acc + (tag.count * tag.weight), 0);
-  const calculatedNetWeight = Math.max(0, Number(formData.totalGrossWeight || 0) - totalTagsWeight);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.category || Number(formData.totalGrossWeight || 0) <= 0 || Number(formData.initialCount || 0) <= 0) {
+    if (!formData.title.trim() || !formData.category) {
       setFormError(t('inventory.validation.required'));
       return;
     }
@@ -131,13 +119,6 @@ const InventoryFormModal: React.FC<{
       await onSubmit({ 
         ...formData, 
         title: formData.title.trim(),
-        totalGrossWeight: Number(formData.totalGrossWeight || 0),
-        initialCount: Number(formData.initialCount || 0),
-        tagDetails: (formData.tagDetails || []).map(tag => ({
-          ...tag,
-          count: Number(tag.count) || 0,
-          weight: Number(tag.weight) || 0
-        }))
       });
       onClose();
     } catch (err: any) {
@@ -232,120 +213,7 @@ const InventoryFormModal: React.FC<{
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          {/* Initial Count */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-charcoal mb-2">
-              <Hash size={16} className="text-gray-400" />
-              {t('inventory.fields.initialCount')}
-              <span className="text-red-400 text-xs">*</span>
-            </label>
-            <input
-              type="number"
-              min="1"
-              value={formData.initialCount ?? ''}
-              onChange={(e) => setFormData({ ...formData, initialCount: e.target.value as any })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal"
-            />
-          </div>
 
-          {/* Total Gross Weight */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-charcoal mb-2">
-              <Scale size={16} className="text-gray-400" />
-              {t('inventory.fields.totalGrossWeight')}
-              <span className="text-red-400 text-xs">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.totalGrossWeight ?? ''}
-                onChange={(e) => setFormData({ ...formData, totalGrossWeight: e.target.value as any })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal pr-12"
-              />
-              <span className="absolute left-4 top-3.5 text-gray-400 text-sm">{t('inventory.grams')}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-4 border-t border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-semibold text-charcoal flex items-center gap-2">
-              <Tag size={16} className="text-gray-400" />
-              تفاصيل أوزان التيكت (اختياري)
-            </label>
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, tagDetails: [...(formData.tagDetails || []), { count: 1, weight: 0.04 }] })}
-              className="text-xs font-bold text-theme-inventory bg-theme-inventory/10 hover:bg-theme-inventory/20 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
-            >
-              <Plus size={14} /> إضافة تيكت
-            </button>
-          </div>
-          
-          {(formData.tagDetails || []).length === 0 ? (
-            <div className="text-center py-4 bg-gray-50 rounded-xl border border-gray-100 text-sm text-gray-400">
-              لا يوجد تيكت مسجل لهذه البضاعة
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {(formData.tagDetails || []).map((tag, idx) => (
-                <div key={idx} className="flex gap-3 items-end">
-                  <div className="flex-1">
-                    <label className="text-xs text-gray-500 mb-1 block">عدد القطع</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={tag.count ?? ''}
-                      onChange={(e) => {
-                        const newTags = [...(formData.tagDetails || [])];
-                        newTags[idx].count = e.target.value as any;
-                        setFormData({ ...formData, tagDetails: newTags });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="text-xs text-gray-500 mb-1 block">الوزن (جم)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.001"
-                      value={tag.weight ?? ''}
-                      onChange={(e) => {
-                        const newTags = [...(formData.tagDetails || [])];
-                        newTags[idx].weight = e.target.value as any;
-                        setFormData({ ...formData, tagDetails: newTags });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newTags = [...(formData.tagDetails || [])];
-                      newTags.splice(idx, 1);
-                      setFormData({ ...formData, tagDetails: newTags });
-                    }}
-                    className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 mb-0.5 transition-colors"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Calculated Net Weight Preview */}
-        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-500">{t('inventory.previewNetWeight')}</span>
-          <span className="text-lg font-bold text-charcoal">
-            {calculatedNetWeight.toFixed(2)} {t('inventory.grams')}
-          </span>
-        </div>
 
         <div className="flex gap-3 pt-4 border-t border-gray-100">
           <button

@@ -8,9 +8,6 @@ export interface CreateInventoryDto {
   companyName?: string;
   category: string; // The backend usually expects an ID string for refs
   karat: 18 | 21 | 24;
-  initialCount: number;
-  totalGrossWeight: number;
-  tagDetails?: TagDetailDto[];
 }
 
 export interface AddStockDto {
