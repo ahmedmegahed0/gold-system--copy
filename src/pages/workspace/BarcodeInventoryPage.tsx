@@ -218,7 +218,7 @@ export function BarcodeInventoryPage() {
                 <!-- النصف العلوي: الباركود مقلوب للطي -->
                 <div class="top-half">
                   <img src="${printData.imageBase64}" class="barcode-img" style="margin-bottom: 1px; max-height: 6mm;" />
-                  <div dir="ltr" style="font-size: 6pt; font-weight: 900; margin-top: 1px;">${itemWeight}g | ${itemKarat}K</div>
+                  <div dir="ltr" style="font-size: 7.5pt; font-weight: 900; margin-top: 1px;">${itemWeight}g | ${itemKarat}K</div>
                 </div>
                 
                 <!-- النصف السفلي: التفاصيل عدل -->
@@ -295,7 +295,7 @@ export function BarcodeInventoryPage() {
             <div class="printable-area ${sideClass}">
               <div class="top-half">
                 <img src="${tagData.imageBase64}" class="barcode-img" style="margin-bottom: 1px; max-height: 6mm;" />
-                <div dir="ltr" style="font-size: 6pt; font-weight: 900; margin-top: 1px;">${itemWeight}g | ${itemKarat}K</div>
+                <div dir="ltr" style="font-size: 7.5pt; font-weight: 900; margin-top: 1px;">${itemWeight}g | ${itemKarat}K</div>
               </div>
               <div class="bottom-half">
                 <div style="height: 6.5mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
