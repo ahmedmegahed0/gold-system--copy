@@ -66,8 +66,8 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
           
           <p className="text-3xl print:text-2xl font-black mb-1 mt-1">مصوغات ومجوهرات</p>
           
-          <div className="flex justify-center items-center mb-2 mt-1">
-            <h1 className="text-[60px] print:text-[45px] leading-none font-black tracking-widest whitespace-nowrap text-[#D4AF37]" style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 3px 3px 0 #222' }}>
+          <div className="flex justify-center items-center mb-2 mt-1 py-1 overflow-visible">
+            <h1 className="text-[70px] print:text-[55px] leading-none font-black tracking-widest whitespace-nowrap text-[#D4AF37]" style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 3px 3px 0 #222', transform: 'scaleX(1.4)' }}>
               ليلة القدر
             </h1>
           </div>
