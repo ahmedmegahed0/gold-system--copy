@@ -176,8 +176,8 @@ export function BarcodeInventoryPage() {
                 align-items: center;
                 transform: rotate(180deg);
                 overflow: hidden;
-                padding-top: 1.5mm;
-                padding-bottom: 1mm;
+                padding-top: 0mm;
+                padding-bottom: 3.5mm;
                 box-sizing: border-box;
               }
           
@@ -330,7 +330,7 @@ export function BarcodeInventoryPage() {
               .printable-area { width: 20mm; height: 25mm; position: absolute; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; box-sizing: border-box; }
               .left-box { left: 0; bottom: 0; }
               .right-box { right: 0; top: 0; }
-              .top-half { width: 100%; height: 12.5mm; display: flex; flex-direction: column; justify-content: center; align-items: center; transform: rotate(180deg); overflow: hidden; padding-top: 1.5mm; padding-bottom: 1mm; box-sizing: border-box; }
+              .top-half { width: 100%; height: 12.5mm; display: flex; flex-direction: column; justify-content: center; align-items: center; transform: rotate(180deg); overflow: hidden; padding-top: 0mm; padding-bottom: 3.5mm; box-sizing: border-box; }
               .bottom-half { width: 100%; height: 12.5mm; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; padding-top: 1mm; padding-bottom: 1.5mm; box-sizing: border-box; font-size: 5.5pt; font-weight: bold; line-height: 1.2; }
               .barcode-img { max-height: 7mm; width: 18mm; margin-bottom: 2mm; }
               @media screen { body { border: 1px dashed #ccc; margin: 20px auto; zoom: 1.5; } }
