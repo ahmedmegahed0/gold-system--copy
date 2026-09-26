@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Plus, Edit, Archive, Printer,
-  ShoppingCart, ScanLine, X, AlertCircle
+  ShoppingCart, ScanLine, X, AlertCircle,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
 import { useBarcodeInventory } from '../../hooks/useBarcodeInventory';
@@ -57,6 +58,19 @@ export function BarcodeInventoryPage() {
   const [quickScan, setQuickScan] = useState('');
   const [scannedResult, setScannedResult] = useState<BarcodeItem | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
+
+  const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
+  const currentItems = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return items.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [items, currentPage]);
 
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [isPrintingMultiple, setIsPrintingMultiple] = useState(false);
@@ -550,7 +564,7 @@ export function BarcodeInventoryPage() {
                   </td>
                 </tr>
               ) : (
-                items.map((item) => (
+                currentItems.map((item) => (
                   <tr key={item._id} className={`hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-none shadow-sm ${selectedItems.has(item._id) ? 'bg-[#C9A84C]/5' : ''}`}>
                     <td className="px-6 py-4 text-center">
                       <input
@@ -638,6 +652,63 @@ export function BarcodeInventoryPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {items.length > 0 && !isLoading && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/30" dir="rtl">
+            <span className="text-sm text-gray-500 font-medium">
+              عرض <span className="font-bold text-gray-900">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> إلى <span className="font-bold text-gray-900">{Math.min(currentPage * ITEMS_PER_PAGE, items.length)}</span> من <span className="font-bold text-gray-900">{items.length}</span> أصناف
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-white hover:text-gray-900 disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+              >
+                <ChevronRight size={18} />
+              </button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }).map((_, idx) => {
+                  const pageNumber = idx + 1;
+                  if (
+                    totalPages > 5 &&
+                    pageNumber !== 1 &&
+                    pageNumber !== totalPages &&
+                    (pageNumber < currentPage - 1 || pageNumber > currentPage + 1)
+                  ) {
+                    if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
+                      return <span key={idx} className="px-2 text-gray-400">...</span>;
+                    }
+                    return null;
+                  }
+
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentPage(pageNumber)}
+                      className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${
+                        currentPage === pageNumber
+                          ? 'bg-[#C9A84C] text-white shadow-sm'
+                          : 'text-gray-500 hover:bg-white hover:text-gray-900 border border-transparent hover:border-gray-200'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-white hover:text-gray-900 disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+              >
+                <ChevronLeft size={18} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Image Preview Modal */}
