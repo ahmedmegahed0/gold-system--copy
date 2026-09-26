@@ -90,15 +90,15 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
 
         {/* Invoice Meta */}
         <div className="flex justify-between text-sm print:text-xs font-bold mb-2">
-          <div className="flex gap-2 items-end">
+          <div className="flex gap-2 items-end whitespace-nowrap shrink-0">
             <span>تحريراً في :</span>
             <span dir="ltr">{toArabicNumerals(date)}</span>
           </div>
-          <div className="flex gap-2 items-end text-sm print:text-xs">
-            <span>المطلوب من السيد :</span>
-            <span className="w-40 border-b-2 border-dotted border-black inline-block text-center text-base print:text-sm pb-0.5">{customerName}</span>
-            <span className="mr-1">البلد /</span>
-            <span className="w-24 border-b-2 border-dotted border-black inline-block"></span>
+          <div className="flex gap-2 items-end text-sm print:text-xs flex-1 justify-end mr-4">
+            <span className="whitespace-nowrap shrink-0">المطلوب من السيد :</span>
+            <span className="flex-1 max-w-[140px] border-b-2 border-dotted border-black inline-block text-center text-base print:text-sm pb-0.5">{customerName}</span>
+            <span className="mr-1 whitespace-nowrap shrink-0">البلد /</span>
+            <span className="w-20 shrink-0 border-b-2 border-dotted border-black inline-block"></span>
           </div>
         </div>
 
