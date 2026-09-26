@@ -114,7 +114,7 @@ export function BarcodeInventoryPage() {
     if (!printData) return;
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      const itemWeight = printData.item?.grossWeight || '';
+      const itemWeight = printData.item?.netWeight || '';
       const itemKarat = printData.item?.karat || '';
 
       printWindow.document.write(`
@@ -287,7 +287,7 @@ export function BarcodeInventoryPage() {
 
         const renderPrintableArea = (tagData: any, sideClass: string) => {
           if (!tagData) return '';
-          const itemWeight = tagData.item?.grossWeight || '';
+          const itemWeight = tagData.item?.netWeight || '';
           const itemKarat = tagData.item?.karat || '';
           return `
             <div class="printable-area ${sideClass}">
