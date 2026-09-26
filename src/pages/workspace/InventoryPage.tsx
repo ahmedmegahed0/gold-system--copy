@@ -24,7 +24,7 @@ import { SearchableSelect } from '../../components/common/SearchableSelect';
 import { useAuth } from '../../core/context/AuthContext';
 import { useInventory } from '../../hooks/useInventory';
 import { useCategories } from '../../hooks/useCategories';
-import type { CreateInventoryDto, InventoryItem, AddStockDto } from '../../common/types/inventory.types';
+import type { InventoryItem, AddStockDto, UpdateInventoryDto } from '../../common/types/inventory.types';
 
 /* ──────────────────────────────────────────────
    MODAL OVERLAY
@@ -75,7 +75,7 @@ const InventoryFormModal: React.FC<{
 
   const isEditing = !!initialData;
 
-  const [formData, setFormData] = useState<CreateInventoryDto>({
+  const [formData, setFormData] = useState<UpdateInventoryDto>({
     title: '',
     companyName: '',
     category: '',
@@ -93,6 +93,8 @@ const InventoryFormModal: React.FC<{
           companyName: initialData.companyName || '',
           category: typeof initialData.category === 'object' ? (initialData.category._id || initialData.category.id || '') : initialData.category,
           karat: initialData.karat,
+          initialCount: initialData.initialCount,
+          initialGrossWeight: initialData.initialGrossWeight ?? initialData.totalGrossWeight,
         });
       } else {
         setFormData({
@@ -108,7 +110,7 @@ const InventoryFormModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.category) {
+    if (!(formData.title || '').trim() || !formData.category) {
       setFormError(t('inventory.validation.required'));
       return;
     }
@@ -118,7 +120,7 @@ const InventoryFormModal: React.FC<{
     try {
       await onSubmit({ 
         ...formData, 
-        title: formData.title.trim(),
+        title: (formData.title || '').trim(),
       });
       onClose();
     } catch (err: any) {
@@ -213,7 +215,42 @@ const InventoryFormModal: React.FC<{
           </div>
         </div>
 
-
+        {isEditing && (
+          <div className="grid grid-cols-2 gap-4 border-t border-gray-100 pt-4">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-charcoal mb-2">
+                <Hash size={16} className="text-gray-400" />
+                العدد الأولي للمجموعة
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.initialCount ?? ''}
+                onChange={(e) => setFormData({ ...formData, initialCount: e.target.value ? Number(e.target.value) : undefined })}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal"
+                placeholder="مثال: 42"
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-charcoal mb-2">
+                <Scale size={16} className="text-gray-400" />
+                الوزن الأولي للمجموعة
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.initialGrossWeight ?? ''}
+                  onChange={(e) => setFormData({ ...formData, initialGrossWeight: e.target.value ? Number(e.target.value) : undefined })}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal pr-12"
+                  placeholder="مثال: 150.5"
+                />
+                <span className="absolute left-4 top-3.5 text-gray-400 text-sm">جم</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex gap-3 pt-4 border-t border-gray-100">
           <button

@@ -37,12 +37,11 @@ apiClient.interceptors.response.use(
       const isSupplierTx = url.includes('/suppliers/transaction');
       
       if (!isAuthEndpoint && !isSupplierTx) {
-        // TEMPORARILY DISABLED LOGOUT FOR DEBUGGING
-        // localStorage.removeItem('accessToken');
-        // localStorage.removeItem('gms_user_session');
-        // sessionStorage.removeItem('accessToken');
-        // window.location.href = '/login';
-        console.error('API 401/404 ERROR CAUGHT:', error.response.data);
+        // Automatically logout on auth/user error
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('gms_user_session');
+        sessionStorage.removeItem('accessToken');
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);

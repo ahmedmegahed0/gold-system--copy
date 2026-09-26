@@ -16,7 +16,10 @@ export interface AddStockDto {
   tagDetails?: TagDetailDto[];
 }
 
-export type UpdateInventoryDto = Partial<CreateInventoryDto>;
+export interface UpdateInventoryDto extends Partial<CreateInventoryDto> {
+  initialCount?: number;
+  initialGrossWeight?: number;
+}
 
 export interface InventoryItem {
   _id?: string;
