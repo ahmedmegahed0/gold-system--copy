@@ -9,6 +9,8 @@ import type {
 interface UseScrapPurchasesReturn {
   purchases: ScrapPurchase[];
   todayTotalWeight: number;
+  todayWeight18: number;
+  todayWeight21: number;
   isLoading: boolean;
   error: string | null;
   fetchPurchases: (search?: string) => Promise<void>;
@@ -20,6 +22,8 @@ interface UseScrapPurchasesReturn {
 export const useScrapPurchases = (): UseScrapPurchasesReturn => {
   const [purchases, setPurchases] = useState<ScrapPurchase[]>([]);
   const [todayTotalWeight, setTodayTotalWeight] = useState<number>(0);
+  const [todayWeight18, setTodayWeight18] = useState<number>(0);
+  const [todayWeight21, setTodayWeight21] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,10 +37,15 @@ export const useScrapPurchases = (): UseScrapPurchasesReturn => {
       if (!search) {
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
-        const todayWeight = data
-          .filter(p => new Date(p.createdAt) >= todayStart)
-          .reduce((sum, p) => sum + (p.weight || 0), 0);
+        const todayPurchases = data.filter(p => new Date(p.createdAt) >= todayStart);
+        
+        const todayWeight = todayPurchases.reduce((sum, p) => sum + (p.weight || 0), 0);
+        const weight18 = todayPurchases.filter(p => p.karat === 18).reduce((sum, p) => sum + (p.weight || 0), 0);
+        const weight21 = todayPurchases.filter(p => p.karat === 21).reduce((sum, p) => sum + (p.weight || 0), 0);
+        
         setTodayTotalWeight(todayWeight);
+        setTodayWeight18(weight18);
+        setTodayWeight21(weight21);
       }
     } catch (err: any) {
       const msg = err.response?.data?.message || 'حدث خطأ أثناء تحميل سجل المشتريات';
@@ -87,6 +96,8 @@ export const useScrapPurchases = (): UseScrapPurchasesReturn => {
   return {
     purchases,
     todayTotalWeight,
+    todayWeight18,
+    todayWeight21,
     isLoading,
     error,
     fetchPurchases,

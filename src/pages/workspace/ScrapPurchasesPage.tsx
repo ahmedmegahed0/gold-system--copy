@@ -41,6 +41,8 @@ export const ScrapPurchasesPage: React.FC = () => {
   const {
     purchases,
     todayTotalWeight,
+    todayWeight18,
+    todayWeight21,
     isLoading: loadingPurchases,
     error: purchasesError,
     fetchPurchases,
@@ -147,15 +149,31 @@ export const ScrapPurchasesPage: React.FC = () => {
           </p>
         </div>
         
-        <div className="bg-white/50 border border-theme-scrap/20 rounded-xl px-6 py-4 flex items-center justify-between gap-6 shadow-sm">
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-gray-500 mb-1">مشتريات اليوم من الكسر</span>
-            <div className="flex items-baseline gap-1" dir="ltr">
-              <span className="text-3xl font-black text-theme-scrap">{todayTotalWeight.toFixed(2)}</span>
-              <span className="text-sm font-bold text-gray-400">g</span>
+        <div className="bg-white/50 border border-theme-scrap/20 rounded-xl px-6 py-4 flex flex-1 items-center justify-between gap-6 shadow-sm overflow-x-auto">
+          <div className="flex gap-6 sm:gap-8 min-w-max">
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-gray-500 mb-1">إجمالي مشتريات اليوم</span>
+              <div className="flex items-baseline gap-1" dir="ltr">
+                <span className="text-2xl sm:text-3xl font-black text-theme-scrap">{todayTotalWeight.toFixed(2)}</span>
+                <span className="text-sm font-bold text-gray-400">g</span>
+              </div>
+            </div>
+            <div className="flex flex-col border-r border-gray-200 pr-6 sm:pr-8">
+              <span className="text-sm font-bold text-gray-500 mb-1">عيار 21</span>
+              <div className="flex items-baseline gap-1" dir="ltr">
+                <span className="text-2xl sm:text-3xl font-black text-gold">{todayWeight21.toFixed(2)}</span>
+                <span className="text-sm font-bold text-gray-400">g</span>
+              </div>
+            </div>
+            <div className="flex flex-col border-r border-gray-200 pr-6 sm:pr-8">
+              <span className="text-sm font-bold text-gray-500 mb-1">عيار 18</span>
+              <div className="flex items-baseline gap-1" dir="ltr">
+                <span className="text-2xl sm:text-3xl font-black text-gold">{todayWeight18.toFixed(2)}</span>
+                <span className="text-sm font-bold text-gray-400">g</span>
+              </div>
             </div>
           </div>
-          <div className="w-12 h-12 bg-theme-scrap/10 rounded-full flex items-center justify-center text-theme-scrap shrink-0">
+          <div className="w-12 h-12 bg-theme-scrap/10 rounded-full flex items-center justify-center text-theme-scrap shrink-0 hidden lg:flex">
             <Receipt size={24} />
           </div>
         </div>
