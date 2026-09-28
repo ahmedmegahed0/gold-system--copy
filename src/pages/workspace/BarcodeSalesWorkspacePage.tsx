@@ -75,7 +75,7 @@ export function BarcodeSalesWorkspacePage() {
                 date={new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}
                 customerName={customerName}
                 customerPhone={typeof viewingInvoice.customer === 'object' ? (viewingInvoice.customer.phoneNumber || (viewingInvoice.customer as any).phone || '') : ''}
-                customerAddress={viewingInvoice.customerCountry || (typeof viewingInvoice.customer === 'object' ? viewingInvoice.customer.country || viewingInvoice.customer.address : '')}
+                customerAddress={viewingInvoice.customerCountry || (typeof viewingInvoice.customer === 'object' ? viewingInvoice.customer.country || (viewingInvoice.customer as any).address : '')}
                 sellerName={sellerName}
                 totalAmount={viewingInvoice.totalAmount || 0}
                 items={viewingInvoice.items?.map((item) => {
@@ -242,7 +242,7 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
         if (selectedCustomerObj) {
           payload.customerName = selectedCustomerObj.fullName;
           if (selectedCustomerObj.phoneNumber) payload.phoneNumber = selectedCustomerObj.phoneNumber;
-          if ((selectedCustomerObj as any).country) payload.country = (selectedCustomerObj as any).country;
+          if ((selectedCustomerObj as any).address) payload.country = (selectedCustomerObj as any).address;
         } else {
           payload.customerName = 'عميل مسجل';
         }

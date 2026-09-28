@@ -607,6 +607,7 @@ export const InvoicesPage: React.FC = () => {
                 date={dateStr}
                 customerName={customerName}
                 customerPhone={(viewingInvoice.customer as any)?.phoneNumber || (viewingInvoice.customer as any)?.phone || ''}
+                customerAddress={(typeof viewingInvoice.customer === 'object' ? (viewingInvoice.customer as any).address : '') || ''}
                 sellerName={sellerName}
                 totalAmount={viewingInvoice.totalPrice || 0}
                 items={viewingInvoice.items?.map((item: any) => ({
@@ -614,7 +615,7 @@ export const InvoicesPage: React.FC = () => {
                   karat: (item.inventoryItem && typeof item.inventoryItem === 'object') ? item.inventoryItem.karat : '---',
                   weight: item.soldNetWeight || 0,
                   price: item.itemTotalPrice || 0,
-                  pricePerGram: (item.goldPriceToday || 0) + (item.makingChargesPerGram || 0),
+                  pricePerGram: item.goldPriceToday || 0,
                 })) || []}
               />
             </div>

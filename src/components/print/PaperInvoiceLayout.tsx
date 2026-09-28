@@ -94,28 +94,36 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
         </div>
 
         {/* Invoice Meta */}
-        <div className="flex justify-between text-sm print:text-xs font-bold mb-2">
-          <div className="flex gap-2 items-end whitespace-nowrap shrink-0">
-            <span>تحريراً في :</span>
-            <span dir="ltr">{toArabicNumerals(date)}</span>
+        <div className="flex flex-col gap-1.5 mb-2">
+          {/* Row 1: Date & Customer Name & Phone */}
+          <div className="flex justify-between text-sm print:text-xs font-bold">
+            <div className="flex gap-2 items-end whitespace-nowrap shrink-0">
+              <span>تحريراً في :</span>
+              <span dir="ltr">{toArabicNumerals(date)}</span>
+            </div>
+            <div className="flex gap-2 items-end text-sm print:text-xs flex-1 justify-end mr-2">
+              <span className="whitespace-nowrap shrink-0">المطلوب من السيد :</span>
+              <span className="flex-1 border-b-2 border-dotted border-black inline-block text-center text-sm print:text-xs pb-0.5 whitespace-nowrap overflow-hidden text-ellipsis min-w-[80px]">{customerName}</span>
+              {customerPhone && (
+                <>
+                  <span className="whitespace-nowrap shrink-0 ml-1">ت :</span>
+                  <span className="w-24 shrink-0 border-b-2 border-dotted border-black inline-block text-center text-sm print:text-xs pb-0.5 whitespace-nowrap overflow-hidden text-ellipsis" dir="ltr">{toArabicNumerals(customerPhone)}</span>
+                </>
+              )}
+            </div>
           </div>
-          <div className="flex gap-2 items-end text-sm print:text-xs flex-1 justify-end mr-2">
-            <span className="whitespace-nowrap shrink-0">المطلوب من السيد :</span>
-            <span className="flex-1 border-b-2 border-dotted border-black inline-block text-center text-sm print:text-xs pb-0.5 whitespace-nowrap overflow-hidden text-ellipsis min-w-[80px]">{customerName}</span>
-            {customerPhone && (
-              <>
-                <span className="whitespace-nowrap shrink-0 ml-1">ت :</span>
-                <span className="w-20 shrink-0 border-b-2 border-dotted border-black inline-block text-center text-sm print:text-xs pb-0.5 whitespace-nowrap overflow-hidden text-ellipsis" dir="ltr">{toArabicNumerals(customerPhone)}</span>
-              </>
-            )}
-            <span className="mr-1 whitespace-nowrap shrink-0">البلد /</span>
-            <span className="w-16 shrink-0 border-b-2 border-dotted border-black inline-block text-center text-sm print:text-xs pb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{customerAddress || ''}</span>
-          </div>
-        </div>
 
-        <div className="flex gap-2 text-sm print:text-xs font-bold mb-1">
-          <span>رقم الفاتورة :</span>
-          <span dir="ltr">#{toArabicNumerals(invoiceNumber)}</span>
+          {/* Row 2: Invoice Number & Country */}
+          <div className="flex justify-between text-sm print:text-xs font-bold">
+            <div className="flex gap-2 items-end whitespace-nowrap shrink-0">
+              <span>رقم الفاتورة :</span>
+              <span dir="ltr">#{toArabicNumerals(invoiceNumber)}</span>
+            </div>
+            <div className="flex gap-2 items-end text-sm print:text-xs flex-1 justify-end mr-2">
+              <span className="whitespace-nowrap shrink-0">البلد /</span>
+              <span className="flex-1 border-b-2 border-dotted border-black inline-block text-center text-sm print:text-xs pb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{customerAddress || ''}</span>
+            </div>
+          </div>
         </div>
 
         {/* Main Table */}
