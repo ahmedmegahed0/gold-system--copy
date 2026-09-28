@@ -434,6 +434,15 @@ export function BarcodeInventoryPage() {
             </div>
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto">
+            {isOwner && (
+              <button
+                title="تعديل القطعة"
+                onClick={() => { setEditingItem(scannedResult); setIsFormModalOpen(true); }}
+                className="p-2.5 text-blue-600 hover:text-white hover:bg-blue-600 rounded-lg transition-colors border border-blue-200 shadow-sm bg-white"
+              >
+                <Edit size={20} />
+              </button>
+            )}
             <OutlineButton icon={Printer} onClick={() => openPrintTag(scannedResult)}>
               طباعة التاج
             </OutlineButton>
@@ -735,7 +744,10 @@ export function BarcodeInventoryPage() {
           initialData={editingItem}
           onSubmit={async (data: Partial<CreateBarcodeItemDto>) => {
             if (editingItem) {
-              await updateItem(editingItem._id, data);
+              const updatedItem = await updateItem(editingItem._id, data);
+              if (scannedResult && scannedResult._id === editingItem._id) {
+                setScannedResult(updatedItem);
+              }
             } else {
               await createItem(data as CreateBarcodeItemDto);
             }
