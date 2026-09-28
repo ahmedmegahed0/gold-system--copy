@@ -320,7 +320,7 @@ export const SalesCounterPage: React.FC = () => {
           date={dateStr}
           customerName={customerName}
           customerPhone={typeof successInvoice.customer === 'object' ? ((successInvoice.customer as any).phoneNumber || (successInvoice.customer as any).phone || '') : ''}
-          customerAddress={typeof successInvoice.customer === 'object' ? successInvoice.customer.address : ''}
+          customerAddress={typeof successInvoice.customer === 'object' ? (successInvoice.customer as any).address || selectedCustomer?.address || '' : selectedCustomer?.address || ''}
           sellerName={sellerName}
           totalAmount={successInvoice.totalPrice || 0}
           items={cart.map((cartItem) => {
@@ -335,7 +335,7 @@ export const SalesCounterPage: React.FC = () => {
               karat: item.karat,
               weight: netWeight,
               price: itemTotal,
-              pricePerGram: (cartItem.goldPriceToday || 0) + (cartItem.makingChargesPerGram || 0),
+              pricePerGram: cartItem.goldPriceToday || 0,
               images: [] // Assuming images are not heavily used in basic pos cart items here, but can be added if available
             };
           })}

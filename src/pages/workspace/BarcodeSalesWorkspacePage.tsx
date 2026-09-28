@@ -75,13 +75,13 @@ export function BarcodeSalesWorkspacePage() {
                 date={new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}
                 customerName={customerName}
                 customerPhone={typeof viewingInvoice.customer === 'object' ? (viewingInvoice.customer.phoneNumber || (viewingInvoice.customer as any).phone || '') : ''}
-                customerAddress={viewingInvoice.customerCountry || (typeof viewingInvoice.customer === 'object' ? viewingInvoice.customer.country : '')}
+                customerAddress={viewingInvoice.customerCountry || (typeof viewingInvoice.customer === 'object' ? viewingInvoice.customer.country || viewingInvoice.customer.address : '')}
                 sellerName={sellerName}
                 totalAmount={viewingInvoice.totalAmount || 0}
                 items={viewingInvoice.items?.map((item) => {
                   const gp = (item as any).goldPricePerGram || 0;
                   const mp = item.makingChargePerGram || 0;
-                  const pricePerGram = gp + mp > 0 ? gp + mp : (item.weight && item.itemTotal ? item.itemTotal / item.weight : 0);
+                  const pricePerGram = gp > 0 ? gp : ((item.weight && item.itemTotal ? (item.itemTotal / item.weight) : 0) - mp);
                   return {
                     name: item.title + (item.barcode ? ` (${item.barcode})` : ''),
                     karat: item.karat || '---',

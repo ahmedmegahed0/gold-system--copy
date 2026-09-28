@@ -251,6 +251,7 @@ export const BullionSalesCounterPage: React.FC = () => {
           date={dateStr}
           customerName={customerName}
           customerPhone={typeof successInvoice.customer === 'object' ? ((successInvoice.customer as any).phoneNumber || (successInvoice.customer as any).phone || '') : ''}
+          customerAddress={typeof successInvoice.customer === 'object' ? (successInvoice.customer as any).address || selectedCustomer?.address || '' : selectedCustomer?.address || ''}
           sellerName={sellerName}
           totalAmount={successInvoice.grandTotal || 0}
           items={successInvoice.items.map((item) => ({
