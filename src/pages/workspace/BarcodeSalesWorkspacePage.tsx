@@ -239,6 +239,14 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
 
       if (customerMode === 'SELECT' && selectedCustomerId) {
         payload.customerId = selectedCustomerId;
+        const selectedCustomerObj = customers.find(c => c._id === selectedCustomerId || (c as any).id === selectedCustomerId);
+        if (selectedCustomerObj) {
+          payload.customerName = selectedCustomerObj.fullName;
+          if (selectedCustomerObj.phoneNumber) payload.phoneNumber = selectedCustomerObj.phoneNumber;
+          if ((selectedCustomerObj as any).country) payload.country = (selectedCustomerObj as any).country;
+        } else {
+          payload.customerName = 'عميل مسجل';
+        }
       } else if (customerMode === 'NEW' && newCustomerName.trim()) {
         payload.customerName = newCustomerName;
         payload.phoneNumber = newCustomerPhone;
