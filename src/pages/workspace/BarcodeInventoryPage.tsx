@@ -237,7 +237,7 @@ export function BarcodeInventoryPage() {
                 <!-- النصف السفلي: التفاصيل عدل -->
                 <div class="bottom-half">
                   <div style="font-size: 11pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 4px; margin-top: 2mm;">ليلة القدر</div>
-                  <div style="font-size: 6.5pt; font-weight: bold;">صلاح الهوش</div>
+                  <div style="font-size: 8.5pt; font-weight: 900;">صلاح الهوش</div>
                 </div>
               </div>
             </div>
@@ -309,7 +309,7 @@ export function BarcodeInventoryPage() {
               </div>
               <div class="bottom-half">
                 <div style="font-size: 11pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 4px; margin-top: 2mm;">ليلة القدر</div>
-                <div style="font-size: 6.5pt; font-weight: bold;">صلاح الهوش</div>
+                <div style="font-size: 8.5pt; font-weight: 900;">صلاح الهوش</div>
               </div>
             </div>
           `;
