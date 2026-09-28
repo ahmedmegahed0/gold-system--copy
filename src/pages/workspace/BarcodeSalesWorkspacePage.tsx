@@ -219,7 +219,6 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
           }
           return {
             barcode: c.barcode,
-            weight: c.netWeight, // Send the updated weight to backend if supported, or at least keep it locally
             goldPricePerGram: (c as any).goldPricePerGram || 0,
             makingChargePerGram: parseFloat(finalMakingCharge.toFixed(2)),
           };
