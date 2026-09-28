@@ -73,7 +73,7 @@ export const LedgerPage: React.FC = () => {
             <h2 className="text-xl font-bold text-gray-500 mb-2">صافي التدفق النقدي بالخزنة</h2>
             <div className="flex items-baseline justify-center gap-2" dir="ltr">
               <span className="text-5xl sm:text-6xl font-black text-charcoal tracking-tight">
-                {data.financials.netCashflow.toLocaleString()}
+                {data.financials.netCashflow.toLocaleString('en-US', { maximumFractionDigits: 0 })}
               </span>
               <span className="text-xl sm:text-2xl font-bold text-gold">ج.م</span>
             </div>
@@ -97,19 +97,19 @@ export const LedgerPage: React.FC = () => {
                 <div>
                   <span className="block text-xs font-bold text-gray-400 mb-1">نقدي المشغولات</span>
                   <div className="text-2xl lg:text-3xl font-black text-charcoal" dir="ltr">
-                    {(data.financials.newGoldSalesCash || 0).toLocaleString()} <span className="text-sm text-blue-600">ج.م</span>
+                    {(data.financials.newGoldSalesCash || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-sm text-blue-600">ج.م</span>
                   </div>
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-gray-400 mb-1">نقدي السبايك</span>
                   <div className="text-2xl lg:text-3xl font-black text-charcoal" dir="ltr">
-                    {(data.financials.bullionGoldSalesCash || 0).toLocaleString()} <span className="text-sm text-blue-600">ج.م</span>
+                    {(data.financials.bullionGoldSalesCash || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-sm text-blue-600">ج.م</span>
                   </div>
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-gray-400 mb-1">نقدي الباركود</span>
                   <div className="text-2xl lg:text-3xl font-black text-charcoal" dir="ltr">
-                    {(data.financials.barcodeGoldSalesCash || 0).toLocaleString()} <span className="text-sm text-blue-600">ج.م</span>
+                    {(data.financials.barcodeGoldSalesCash || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-sm text-blue-600">ج.م</span>
                   </div>
                 </div>
               </div>
@@ -154,27 +154,27 @@ export const LedgerPage: React.FC = () => {
           <div className="bg-emerald-50 rounded-2xl shadow-sm border border-emerald-100 p-6 flex flex-col justify-center text-center relative overflow-hidden">
             <span className="block text-sm font-bold text-emerald-600 mb-2">إجمالي الإيرادات الإضافية والسيولة المودعة</span>
             <div className="text-3xl font-black text-emerald-700" dir="ltr">
-              + {data.financials.extraIncomesCash.toLocaleString()} <span className="text-base">ج.م</span>
+              + {data.financials.extraIncomesCash.toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-base">ج.م</span>
             </div>
           </div>
           <div className="bg-red-50 rounded-2xl shadow-sm border border-red-100 p-6 flex flex-col relative overflow-hidden">
             <span className="block text-sm font-bold text-red-600 mb-4 text-center">إجمالي المصروفات والمدفوعات</span>
             <div className="text-3xl font-black text-red-700 text-center mb-6" dir="ltr">
-              - {data.financials.expensesOutflow.toLocaleString()} <span className="text-base">ج.م</span>
+              - {data.financials.expensesOutflow.toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-base">ج.م</span>
             </div>
             
             <div className="flex flex-col gap-2 mt-auto border-t border-red-200/50 pt-4">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-red-700 font-medium">نثريات ورواتب ومصاريف</span>
-                <span className="font-bold text-red-800" dir="ltr">{(data.financials.expensesOutflow - data.financials.scrapPurchasesOutflow - data.financials.supplierPaymentsOutflow).toLocaleString()} ج.م</span>
+                <span className="font-bold text-red-800" dir="ltr">{(data.financials.expensesOutflow - data.financials.scrapPurchasesOutflow - data.financials.supplierPaymentsOutflow).toLocaleString('en-US', { maximumFractionDigits: 0 })} ج.م</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-red-700 font-medium">شراء ذهب كسر</span>
-                <span className="font-bold text-red-800" dir="ltr">{data.financials.scrapPurchasesOutflow.toLocaleString()} ج.م</span>
+                <span className="font-bold text-red-800" dir="ltr">{data.financials.scrapPurchasesOutflow.toLocaleString('en-US', { maximumFractionDigits: 0 })} ج.م</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-red-700 font-medium">سداد للموردين (نقدي+مصنعية)</span>
-                <span className="font-bold text-red-800" dir="ltr">{data.financials.supplierPaymentsOutflow.toLocaleString()} ج.م</span>
+                <span className="font-bold text-red-800" dir="ltr">{data.financials.supplierPaymentsOutflow.toLocaleString('en-US', { maximumFractionDigits: 0 })} ج.م</span>
               </div>
             </div>
           </div>

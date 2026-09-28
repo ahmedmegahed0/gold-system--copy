@@ -185,7 +185,7 @@ export const ProfitLedgerPage: React.FC = () => {
               <h2 className="text-xl font-bold text-gray-500 mb-2">صافي النقدية المتبقي بالخزنة (الربح الفعلي)</h2>
               <div className="flex items-baseline justify-center gap-2" dir="ltr">
                 <span className={`text-5xl sm:text-6xl font-black tracking-tight ${report.finalNetProfit >= 0 ? 'text-charcoal' : 'text-red-600'}`}>
-                  {report.finalNetProfit.toLocaleString()}
+                  {report.finalNetProfit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </span>
                 <span className={`text-xl sm:text-2xl font-bold ${report.finalNetProfit >= 0 ? 'text-purple-600' : 'text-red-500'}`}>ج.م</span>
               </div>
@@ -211,7 +211,7 @@ export const ProfitLedgerPage: React.FC = () => {
               </div>
               <span className="block text-sm font-bold text-gray-400 mb-1">إجمالي النقدية الداخلة (مبيعات + كسر)</span>
               <div className="text-3xl font-black text-charcoal" dir="ltr">
-                {report.cashflowHighlights.totalCashInflow.toLocaleString()} <span className="text-base text-blue-600">ج.م</span>
+                {report.cashflowHighlights.totalCashInflow.toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-base text-blue-600">ج.م</span>
               </div>
             </div>
 
@@ -222,16 +222,16 @@ export const ProfitLedgerPage: React.FC = () => {
               </div>
               <span className="block text-sm font-bold text-gold/80 mb-1">صافي أرباح المصنعيات (الإجمالي)</span>
               <div className="text-3xl font-black text-charcoal mb-4" dir="ltr">
-                {report.advancedAnalyticalBreakdown.totalCombinedMakingProfit?.toLocaleString()} <span className="text-base text-gold">ج.م</span>
+                {report.advancedAnalyticalBreakdown.totalCombinedMakingProfit?.toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-base text-gold">ج.م</span>
               </div>
               <div className="w-full flex justify-between text-xs font-bold text-gold/70 border-t border-gold/10 pt-3">
                 <div className="flex flex-col">
                   <span>جديد</span>
-                  <span className="text-charcoal text-sm" dir="ltr">{report.advancedAnalyticalBreakdown.newGoldMakingChargesProfit?.toLocaleString()} ج</span>
+                  <span className="text-charcoal text-sm" dir="ltr">{report.advancedAnalyticalBreakdown.newGoldMakingChargesProfit?.toLocaleString('en-US', { maximumFractionDigits: 0 })} ج</span>
                 </div>
                 <div className="flex flex-col text-left">
                   <span>كسر</span>
-                  <span className="text-charcoal text-sm" dir="ltr">{report.advancedAnalyticalBreakdown.scrapGoldMakingChargesProfit?.toLocaleString()} ج</span>
+                  <span className="text-charcoal text-sm" dir="ltr">{report.advancedAnalyticalBreakdown.scrapGoldMakingChargesProfit?.toLocaleString('en-US', { maximumFractionDigits: 0 })} ج</span>
                 </div>
               </div>
             </div>
@@ -243,7 +243,7 @@ export const ProfitLedgerPage: React.FC = () => {
               </div>
               <span className="block text-sm font-bold text-gray-400 mb-1">إجمالي النقدية الخارجة (شراء + مصاريف)</span>
               <div className="text-3xl font-black text-charcoal" dir="ltr">
-                {report.cashflowHighlights.totalCashOutflow.toLocaleString()} <span className="text-base text-red-500">ج.م</span>
+                {report.cashflowHighlights.totalCashOutflow.toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-base text-red-500">ج.م</span>
               </div>
             </div>
 
@@ -262,28 +262,28 @@ export const ProfitLedgerPage: React.FC = () => {
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-bold text-gray-500">مشتريات كسر الذهب</span>
                 <span className="text-xl font-black text-charcoal" dir="ltr">
-                  {report.outflowsDetailedBreakdown.goldPurchasesCash.toLocaleString()} <span className="text-sm text-gray-400">ج.م</span>
+                  {report.outflowsDetailedBreakdown.goldPurchasesCash.toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-sm text-gray-400">ج.م</span>
                 </span>
               </div>
 
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-bold text-gray-500">رواتب وسلف عاملين</span>
                 <span className="text-xl font-black text-charcoal" dir="ltr">
-                  {report.outflowsDetailedBreakdown.salariesCash.toLocaleString()} <span className="text-sm text-gray-400">ج.م</span>
+                  {report.outflowsDetailedBreakdown.salariesCash.toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-sm text-gray-400">ج.م</span>
                 </span>
               </div>
 
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-bold text-gray-500">مصاريف محل ونثريات</span>
                 <span className="text-xl font-black text-charcoal" dir="ltr">
-                  {report.outflowsDetailedBreakdown.pettyExpensesCash.toLocaleString()} <span className="text-sm text-gray-400">ج.م</span>
+                  {report.outflowsDetailedBreakdown.pettyExpensesCash.toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-sm text-gray-400">ج.م</span>
                 </span>
               </div>
 
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-bold text-gray-500">مصروفات أخرى</span>
                 <span className="text-xl font-black text-charcoal" dir="ltr">
-                  {report.outflowsDetailedBreakdown.otherExpensesCash.toLocaleString()} <span className="text-sm text-gray-400">ج.م</span>
+                  {report.outflowsDetailedBreakdown.otherExpensesCash.toLocaleString('en-US', { maximumFractionDigits: 0 })} <span className="text-sm text-gray-400">ج.م</span>
                 </span>
               </div>
 

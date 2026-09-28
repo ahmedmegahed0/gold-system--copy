@@ -454,7 +454,7 @@ export const InvoicesPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-block bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-100/50 font-black text-sm" dir="ltr">
-                        {inv.totalPrice?.toLocaleString() || 0} {t('customers.currency')}
+                        {Math.floor(inv.totalPrice || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })} {t('customers.currency')}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -606,6 +606,7 @@ export const InvoicesPage: React.FC = () => {
                 invoiceNumber={invoiceNumber}
                 date={dateStr}
                 customerName={customerName}
+                customerPhone={(viewingInvoice.customer as any)?.phoneNumber || (viewingInvoice.customer as any)?.phone || ''}
                 sellerName={sellerName}
                 totalAmount={viewingInvoice.totalPrice || 0}
                 items={viewingInvoice.items?.map((item: any) => ({
@@ -613,6 +614,7 @@ export const InvoicesPage: React.FC = () => {
                   karat: (item.inventoryItem && typeof item.inventoryItem === 'object') ? item.inventoryItem.karat : '---',
                   weight: item.soldNetWeight || 0,
                   price: item.itemTotalPrice || 0,
+                  pricePerGram: (item.goldPriceToday || 0) + (item.makingChargesPerGram || 0),
                 })) || []}
               />
             </div>

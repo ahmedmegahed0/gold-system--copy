@@ -8,6 +8,7 @@ import type {
 
 interface UseScrapPurchasesReturn {
   purchases: ScrapPurchase[];
+  todayTotalWeight: number;
   isLoading: boolean;
   error: string | null;
   fetchPurchases: (search?: string) => Promise<void>;
@@ -18,6 +19,7 @@ interface UseScrapPurchasesReturn {
 
 export const useScrapPurchases = (): UseScrapPurchasesReturn => {
   const [purchases, setPurchases] = useState<ScrapPurchase[]>([]);
+  const [todayTotalWeight, setTodayTotalWeight] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,6 +29,15 @@ export const useScrapPurchases = (): UseScrapPurchasesReturn => {
     try {
       const data = await ScrapPurchasesService.getAllPurchases(search);
       setPurchases(data);
+
+      if (!search) {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayWeight = data
+          .filter(p => new Date(p.createdAt) >= todayStart)
+          .reduce((sum, p) => sum + (p.weight || 0), 0);
+        setTodayTotalWeight(todayWeight);
+      }
     } catch (err: any) {
       const msg = err.response?.data?.message || 'حدث خطأ أثناء تحميل سجل المشتريات';
       setError(msg);
@@ -75,6 +86,7 @@ export const useScrapPurchases = (): UseScrapPurchasesReturn => {
 
   return {
     purchases,
+    todayTotalWeight,
     isLoading,
     error,
     fetchPurchases,

@@ -40,6 +40,7 @@ export const ScrapPurchasesPage: React.FC = () => {
 
   const {
     purchases,
+    todayTotalWeight,
     isLoading: loadingPurchases,
     error: purchasesError,
     fetchPurchases,
@@ -145,6 +146,20 @@ export const ScrapPurchasesPage: React.FC = () => {
             تسجيل كافة مشتريات الكسر من الزبائن، يخصم مباشرة من الخزنة ويضيف لمخزون الكسر.
           </p>
         </div>
+        
+        <div className="bg-white/50 border border-theme-scrap/20 rounded-xl px-6 py-4 flex items-center justify-between gap-6 shadow-sm">
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-gray-500 mb-1">مشتريات اليوم من الكسر</span>
+            <div className="flex items-baseline gap-1" dir="ltr">
+              <span className="text-3xl font-black text-theme-scrap">{todayTotalWeight.toFixed(2)}</span>
+              <span className="text-sm font-bold text-gray-400">g</span>
+            </div>
+          </div>
+          <div className="w-12 h-12 bg-theme-scrap/10 rounded-full flex items-center justify-center text-theme-scrap shrink-0">
+            <Receipt size={24} />
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <form onSubmit={handleSearch} className="relative w-full sm:w-64">
             <input
@@ -232,7 +247,7 @@ export const ScrapPurchasesPage: React.FC = () => {
                           <span className="font-bold text-charcoal" dir="ltr">{p.weight}g</span>
                         </td>
                         <td className="px-6 py-4 font-bold text-charcoal">
-                          {p.totalPrice.toLocaleString('ar-EG')} ج.م
+                          {Math.floor(p.totalPrice).toLocaleString('en-US', { maximumFractionDigits: 0 })} ج.م
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">
                           {empName}

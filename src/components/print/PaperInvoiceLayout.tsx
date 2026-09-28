@@ -6,6 +6,7 @@ export interface PaperInvoiceItem {
   karat: number | string;
   weight: number; 
   price: number;
+  pricePerGram?: number;
   images?: string[];
 }
 
@@ -13,6 +14,8 @@ interface PaperInvoiceLayoutProps {
   invoiceNumber: string;
   date: string;
   customerName: string;
+  customerPhone?: string;
+  customerAddress?: string;
   sellerName: string;
   items: PaperInvoiceItem[];
   totalAmount: number;
@@ -22,6 +25,8 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
   invoiceNumber,
   date,
   customerName,
+  customerPhone,
+  customerAddress,
   sellerName,
   items,
   totalAmount
@@ -33,7 +38,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
   // Ensure we always have at least 6 rows to make it look like a physical receipt
   const displayItems = [...items];
   while (displayItems.length < 6) {
-    displayItems.push({ name: '', karat: '', weight: 0, price: 0 });
+    displayItems.push({ name: '', karat: '', weight: 0, price: 0, pricePerGram: 0 });
   }
 
   return (
@@ -94,11 +99,17 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
             <span>تحريراً في :</span>
             <span dir="ltr">{toArabicNumerals(date)}</span>
           </div>
-          <div className="flex gap-2 items-end text-sm print:text-xs flex-1 justify-end mr-4">
+          <div className="flex gap-2 items-end text-sm print:text-xs flex-1 justify-end mr-2">
             <span className="whitespace-nowrap shrink-0">المطلوب من السيد :</span>
-            <span className="flex-1 max-w-[140px] border-b-2 border-dotted border-black inline-block text-center text-base print:text-sm pb-0.5">{customerName}</span>
+            <span className="flex-1 border-b-2 border-dotted border-black inline-block text-center text-sm print:text-xs pb-0.5 whitespace-nowrap overflow-hidden text-ellipsis min-w-[80px]">{customerName}</span>
+            {customerPhone && (
+              <>
+                <span className="whitespace-nowrap shrink-0 ml-1">ت :</span>
+                <span className="w-20 shrink-0 border-b-2 border-dotted border-black inline-block text-center text-sm print:text-xs pb-0.5 whitespace-nowrap overflow-hidden text-ellipsis" dir="ltr">{toArabicNumerals(customerPhone)}</span>
+              </>
+            )}
             <span className="mr-1 whitespace-nowrap shrink-0">البلد /</span>
-            <span className="w-20 shrink-0 border-b-2 border-dotted border-black inline-block"></span>
+            <span className="w-16 shrink-0 border-b-2 border-dotted border-black inline-block text-center text-sm print:text-xs pb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{customerAddress || ''}</span>
           </div>
         </div>
 
@@ -121,6 +132,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
                 <th className="border-2 border-black py-1 px-1 w-12 print:w-10 font-black">مللى</th>
                 <th className="border-2 border-black py-1 px-1 w-12 print:w-10 font-black">جرام</th>
                 <th className="border-2 border-black py-1 px-1 w-12 print:w-10 font-black">عيار</th>
+                <th className="border-2 border-black py-1 px-1 w-16 print:w-14 font-black">سعر الجرام</th>
                 <th className="border-2 border-black py-1 px-1 font-black">الصنـــــــــــــــــــف</th>
               </tr>
             </thead>
@@ -128,6 +140,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
               {displayItems.map((item, idx) => {
                 const wholeGrams = item.weight ? Math.floor(item.weight) : '';
                 const milliGrams = item.weight ? Math.round((item.weight - Math.floor(item.weight)) * 100) : ''; // 2 decimal digits as milli
+                const pG = item.pricePerGram ? Math.round(item.pricePerGram) : '';
                 
                 return (
                   <tr key={idx} className="h-7 print:h-6">
@@ -135,6 +148,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
                     <td className="border border-black px-1">{milliGrams !== '' ? toArabicNumerals(milliGrams) : ''}</td>
                     <td className="border border-black px-1">{wholeGrams !== '' ? toArabicNumerals(wholeGrams) : ''}</td>
                     <td className="border border-black px-1" dir="ltr">{item.karat ? `${toArabicNumerals(item.karat)}K` : ''}</td>
+                    <td className="border border-black px-1">{pG !== '' ? toArabicNumerals(pG.toLocaleString()) : ''}</td>
                     <td className="border border-black px-1 text-right">
                       {item.name}
                     </td>
@@ -145,13 +159,15 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
               {/* Footer Rows inside Table */}
               <tr className="h-7 print:h-6">
                 <td className="border border-black px-1 font-black bg-gray-50">{toArabicNumerals(totalAmount.toLocaleString())}</td>
-                <td className="border border-black px-1 text-right" colSpan={4}>
+                <td className="border border-black px-1 text-right" colSpan={5}>
                   الإجمالي
                 </td>
               </tr>
               <tr className="h-7 print:h-6">
-                <td className="border border-black px-1" colSpan={2}></td>
-                <td className="border border-black px-1 text-right bg-gray-50 font-black" colSpan={3}>
+                <td className="border border-black px-1 font-black" colSpan={2}>
+                  {items.find(i => (i.pricePerGram || 0) > 0)?.pricePerGram ? toArabicNumerals(Math.round(items.find(i => (i.pricePerGram || 0) > 0)!.pricePerGram!).toLocaleString()) : ''}
+                </td>
+                <td className="border border-black px-1 text-right bg-gray-50 font-black" colSpan={4}>
                   سعر الجرام خلاف المصنعية والضريبة
                 </td>
               </tr>

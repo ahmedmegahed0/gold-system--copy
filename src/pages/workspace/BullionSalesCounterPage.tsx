@@ -250,6 +250,7 @@ export const BullionSalesCounterPage: React.FC = () => {
           invoiceNumber={invoiceNumber}
           date={dateStr}
           customerName={customerName}
+          customerPhone={typeof successInvoice.customer === 'object' ? ((successInvoice.customer as any).phoneNumber || (successInvoice.customer as any).phone || '') : ''}
           sellerName={sellerName}
           totalAmount={successInvoice.grandTotal || 0}
           items={successInvoice.items.map((item) => ({
@@ -257,6 +258,7 @@ export const BullionSalesCounterPage: React.FC = () => {
             karat: '24', // Default for bullion unless specified otherwise
             weight: (item.weightPerUnit * item.quantity),
             price: item.itemTotalPrice,
+            pricePerGram: item.goldPricePerGram || 0,
             images: []
           }))}
         />

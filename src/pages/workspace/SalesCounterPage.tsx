@@ -319,6 +319,8 @@ export const SalesCounterPage: React.FC = () => {
           invoiceNumber={invoiceNumber || ''}
           date={dateStr}
           customerName={customerName}
+          customerPhone={typeof successInvoice.customer === 'object' ? ((successInvoice.customer as any).phoneNumber || (successInvoice.customer as any).phone || '') : ''}
+          customerAddress={typeof successInvoice.customer === 'object' ? successInvoice.customer.address : ''}
           sellerName={sellerName}
           totalAmount={successInvoice.totalPrice || 0}
           items={cart.map((cartItem) => {
@@ -333,6 +335,7 @@ export const SalesCounterPage: React.FC = () => {
               karat: item.karat,
               weight: netWeight,
               price: itemTotal,
+              pricePerGram: (cartItem.goldPriceToday || 0) + (cartItem.makingChargesPerGram || 0),
               images: [] // Assuming images are not heavily used in basic pos cart items here, but can be added if available
             };
           })}
@@ -577,7 +580,7 @@ export const SalesCounterPage: React.FC = () => {
                           min="0"
                           value={cartItem.goldPriceToday || ''}
                           onChange={(e) => updateItemGoldPrice(cartItem.cartItemId, parseFloat(e.target.value) || 0)}
-                          className="w-full py-4 px-1 border-2 border-amber-200 rounded-xl text-xl font-black text-center text-amber-700 focus:outline-none focus:ring-4 focus:ring-amber-100 focus:border-amber-500 bg-amber-50 shadow-inner"
+                          className="w-full py-4 px-1 border-2 border-amber-200 rounded-xl text-3xl font-black text-center text-amber-700 focus:outline-none focus:ring-4 focus:ring-amber-100 focus:border-amber-500 bg-amber-50 shadow-inner"
                           placeholder="سعر الجرام"
                           dir="ltr"
                         />
@@ -602,7 +605,7 @@ export const SalesCounterPage: React.FC = () => {
                           })()}
                           onChange={(e) => updateItemMakingCharge(cartItem.cartItemId, parseFloat(e.target.value) || 0)}
                           readOnly={cartItem.isManualItem || isManualTotal}
-                          className={`w-full py-4 px-1 border-2 rounded-xl text-xl font-black text-center focus:outline-none focus:ring-4 shadow-inner ${
+                          className={`w-full py-4 px-1 border-2 rounded-xl text-3xl font-black text-center focus:outline-none focus:ring-4 shadow-inner ${
                             (cartItem.isManualItem || isManualTotal)
                               ? 'border-amber-300 bg-amber-50 text-amber-700 focus:ring-amber-100 focus:border-amber-400 cursor-default'
                               : 'border-teal-200 bg-teal-50 text-teal-700 focus:ring-teal-100 focus:border-teal-500'

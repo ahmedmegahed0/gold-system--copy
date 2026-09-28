@@ -134,7 +134,7 @@ export const SafeControlPanel: React.FC = () => {
           <h2 className="text-2xl font-black text-charcoal mb-2">رصيد الخزنة الفعلي الحالي</h2>
           <div className="flex items-baseline justify-center gap-2 mb-4" dir="ltr">
             <span className="text-5xl sm:text-7xl font-black text-gold tracking-tight">
-              {safeStatus?.balance?.toLocaleString() || 0}
+              {safeStatus?.balance?.toLocaleString('en-US', { maximumFractionDigits: 0 }) || 0}
             </span>
             <span className="text-xl sm:text-2xl font-bold text-gray-500">ج.م</span>
           </div>

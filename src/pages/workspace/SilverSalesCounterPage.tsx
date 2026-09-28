@@ -299,13 +299,15 @@ export const SilverSalesCounterPage: React.FC = () => {
                 invoiceNumber={invoiceNumber}
                 date={dateStr}
                 customerName={customerName}
+                customerPhone={saleInvoice.customerPhone || ''}
                 sellerName={sellerName}
                 totalAmount={saleInvoice.totalPrice}
                 items={[{
                   name: saleInvoice.itemTitle || 'قطعة فضة',
                   karat: saleInvoice.karat.toString(),
                   weight: saleInvoice.weight,
-                  price: saleInvoice.totalPrice
+                  price: saleInvoice.totalPrice,
+                  pricePerGram: saleInvoice.pricePerGram || 0
                 }]}
               />
             </div>

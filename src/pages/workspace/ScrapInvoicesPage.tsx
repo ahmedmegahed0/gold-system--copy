@@ -442,12 +442,12 @@ export const ScrapInvoicesPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className="inline-block bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg border border-purple-100/50 font-bold text-sm" dir="ltr">
-                        {(inv.makingChargesPerGram || 0).toLocaleString()} ج.م
+                        {(inv.makingChargesPerGram || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })} ج.م
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-block bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-100/50 font-black text-sm" dir="ltr">
-                        {inv.totalPrice?.toLocaleString()} ج.م
+                        {inv.totalPrice?.toLocaleString('en-US', { maximumFractionDigits: 0 })} ج.م
                       </span>
                     </td>
                     <td className="px-6 py-4">

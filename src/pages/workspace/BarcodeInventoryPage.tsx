@@ -12,7 +12,6 @@ import type {
   CreateBarcodeItemDto,
   BarcodeItem
 } from '../../common/types/barcode-inventory.types';
-import printLogoImg from '../../assets/monochrome_logo.png';
 
 
 const GoldButton = ({ children, onClick, className = '', type = 'button', icon: Icon }: any) => (
@@ -237,11 +236,8 @@ export function BarcodeInventoryPage() {
                 
                 <!-- النصف السفلي: التفاصيل عدل -->
                 <div class="bottom-half">
-                  <div style="height: 6.5mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
-                    <img src="${printLogoImg}" style="width: 11mm; margin-top: -0.5mm; mix-blend-mode: multiply;" />
-                  </div>
-                  <div style="font-size: 10pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px;">ليلة القدر</div>
-                  <div style="font-size: 4.5pt; font-weight: bold;">صلاح الهوش</div>
+                  <div style="font-size: 11pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 4px; margin-top: 2mm;">ليلة القدر</div>
+                  <div style="font-size: 6.5pt; font-weight: bold;">صلاح الهوش</div>
                 </div>
               </div>
             </div>
@@ -312,11 +308,8 @@ export function BarcodeInventoryPage() {
                 <div dir="ltr" style="font-size: 7.5pt; font-weight: 900; margin-top: 1px;">${itemWeight}g | ${itemKarat}K</div>
               </div>
               <div class="bottom-half">
-                <div style="height: 6.5mm; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; margin-top: 1mm; margin-bottom: 2px;">
-                  <img src="${printLogoImg}" style="width: 11mm; margin-top: -0.5mm; mix-blend-mode: multiply;" />
-                </div>
-                <div style="font-size: 10pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 1px;">ليلة القدر</div>
-                <div style="font-size: 4.5pt; font-weight: bold;">صلاح الهوش</div>
+                <div style="font-size: 11pt; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 4px; margin-top: 2mm;">ليلة القدر</div>
+                <div style="font-size: 6.5pt; font-weight: bold;">صلاح الهوش</div>
               </div>
             </div>
           `;

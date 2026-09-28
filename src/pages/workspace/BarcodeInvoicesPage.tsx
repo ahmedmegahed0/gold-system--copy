@@ -151,7 +151,7 @@ export const BarcodeInvoicesPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4"><span className="inline-block bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg border border-amber-100/50 font-bold text-sm" dir="ltr">{totalGoldWeight.toFixed(2)}g</span></td>
-                      <td className="px-6 py-4"><span className="inline-block bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-100/50 font-black text-sm" dir="ltr">{(inv.totalAmount || 0).toLocaleString()} ج.م</span></td>
+                      <td className="px-6 py-4"><span className="inline-block bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-100/50 font-black text-sm" dir="ltr">{(inv.totalAmount || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })} ج.م</span></td>
                       <td className="px-6 py-4">{inv.status === 'ACTIVE' ? <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-md text-sm font-bold"><CheckCircle2 size={14} /> مكتملة</span> : <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-theme-returns/10 text-theme-returns rounded-md text-sm font-bold"><XCircle size={14} /> ملغاة</span>}</td>
                       <td className="px-6 py-4"><div className="flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><button onClick={() => setViewingInvoice(inv)} className="px-3 py-1.5 text-gold hover:text-white border border-gold hover:bg-gold rounded-lg transition-colors font-bold text-xs flex items-center gap-1.5"><Eye size={14} /> عرض</button></div></td>
                     </tr>
@@ -200,15 +200,22 @@ export const BarcodeInvoicesPage: React.FC = () => {
                 invoiceNumber={viewingInvoice.invoiceNumber}
                 date={new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}
                 customerName={customerName}
+                customerPhone={(viewingInvoice.customer as any)?.phone || (viewingInvoice.customer as any)?.phoneNumber || ''}
                 sellerName={sellerName}
                 totalAmount={viewingInvoice.totalAmount || 0}
-                items={viewingInvoice.items?.map((item) => ({
-                  name: item.title + (item.barcode ? ` (${item.barcode})` : ''),
-                  karat: item.karat || '---',
-                  weight: item.weight || 0,
-                  price: item.itemTotal || 0,
-                  images: item.images
-                })) || []}
+                items={viewingInvoice.items?.map((item) => {
+                  const gp = (item as any).goldPricePerGram || 0;
+                  const mp = item.makingChargePerGram || 0;
+                  const pricePerGram = gp + mp > 0 ? gp + mp : (item.weight && item.itemTotal ? item.itemTotal / item.weight : 0);
+                  return {
+                    name: item.title + (item.barcode ? ` (${item.barcode})` : ''),
+                    karat: item.karat || '---',
+                    weight: item.weight || 0,
+                    price: item.itemTotal || 0,
+                    pricePerGram: pricePerGram,
+                    images: item.images
+                  };
+                }) || []}
               />
             </div>
           );

@@ -74,15 +74,23 @@ export function BarcodeSalesWorkspacePage() {
                 invoiceNumber={viewingInvoice.invoiceNumber}
                 date={new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}
                 customerName={customerName}
+                customerPhone={typeof viewingInvoice.customer === 'object' ? ((viewingInvoice.customer as any).phone || (viewingInvoice.customer as any).phoneNumber || '') : ''}
+                customerAddress={typeof viewingInvoice.customer === 'object' ? (viewingInvoice.customer as any).address : ''}
                 sellerName={sellerName}
                 totalAmount={viewingInvoice.totalAmount || 0}
-                items={viewingInvoice.items?.map((item) => ({
-                  name: item.title + (item.barcode ? ` (${item.barcode})` : ''),
-                  karat: item.karat || '---',
-                  weight: item.weight || 0,
-                  price: item.itemTotal || 0,
-                  images: item.images
-                })) || []}
+                items={viewingInvoice.items?.map((item) => {
+                  const gp = (item as any).goldPricePerGram || 0;
+                  const mp = item.makingChargePerGram || 0;
+                  const pricePerGram = gp + mp > 0 ? gp + mp : (item.weight && item.itemTotal ? item.itemTotal / item.weight : 0);
+                  return {
+                    name: item.title + (item.barcode ? ` (${item.barcode})` : ''),
+                    karat: item.karat || '---',
+                    weight: item.weight || 0,
+                    price: item.itemTotal || 0,
+                    pricePerGram: pricePerGram,
+                    images: item.images
+                  };
+                }) || []}
               />
             </div>
           );
@@ -111,6 +119,7 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [newCustomerName, setNewCustomerName] = useState('');
   const [newCustomerPhone, setNewCustomerPhone] = useState('');
+  const [newCustomerAddress, setNewCustomerAddress] = useState('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -155,7 +164,7 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
     setCart(prev => prev.filter(c => c.barcode !== barcode));
   };
 
-  const updateCartItem = (barcode: string, field: 'goldPricePerGram' | 'makingChargePerGram' | 'itemTotal', value: number) => {
+  const updateCartItem = (barcode: string, field: 'goldPricePerGram' | 'makingChargePerGram' | 'itemTotal' | 'netWeight', value: number) => {
     setCart(prev => prev.map(c => {
       if (c.barcode === barcode) {
         const updatedItem = { ...c, [field]: value };
@@ -164,9 +173,13 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
           // User edited the item total directly
           // Recalculate making charge: makingCharge = (total / weight) - goldPrice
           const gp = (c as any).goldPricePerGram || 0;
-          updatedItem.makingChargePerGram = parseFloat(((value / c.netWeight) - gp).toFixed(2));
+          updatedItem.makingChargePerGram = c.netWeight > 0 ? parseFloat(((value / c.netWeight) - gp).toFixed(2)) : 0;
           updatedItem.itemTotal = value;
           (updatedItem as any).goldPricePerGram = gp;
+        } else if (field === 'netWeight') {
+          const gp = (c as any).goldPricePerGram || 0;
+          const mp = c.makingChargePerGram || 0;
+          updatedItem.itemTotal = parseFloat(((value * gp) + (value * mp)).toFixed(2));
         } else {
           // User edited gold price or making charge
           const gp = field === 'goldPricePerGram' ? value : (c as any).goldPricePerGram || 0;
@@ -206,6 +219,7 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
           }
           return {
             barcode: c.barcode,
+            weight: c.netWeight, // Send the updated weight to backend if supported, or at least keep it locally
             goldPricePerGram: (c as any).goldPricePerGram || 0,
             makingChargePerGram: parseFloat(finalMakingCharge.toFixed(2)),
           };
@@ -228,6 +242,7 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
       } else if (customerMode === 'NEW' && newCustomerName.trim()) {
         payload.customerName = newCustomerName;
         payload.phoneNumber = newCustomerPhone;
+        payload.address = newCustomerAddress;
       }
 
       const invoice = await checkoutBarcodeSale(payload);
@@ -241,6 +256,7 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
       setSelectedCustomerId('');
       setNewCustomerName('');
       setNewCustomerPhone('');
+      setNewCustomerAddress('');
       setCustomerMode('SELECT');
       setIsManualTotal(false);
       setManualTotalAmount('');
@@ -311,7 +327,20 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
                     <tr key={item.barcode} className="hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-none shadow-sm">
                       <td className="px-4 py-4 font-mono text-sm font-bold text-amber-700 bg-amber-50/40">{item.barcode}</td>
                       <td className="px-4 py-4 font-bold text-base text-gray-800">{item.title}</td>
-                      <td className="px-4 py-4 font-black text-lg text-gray-700 bg-gray-100/50" dir="ltr">{item.netWeight}g</td>
+                      <td className="px-4 py-4">
+                        <input 
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          className="w-24 p-2 border-2 border-gray-200 bg-white text-gray-800 rounded-lg text-center font-black text-lg focus:ring-2 focus:ring-[#C9A84C] focus:border-[#C9A84C] outline-none transition-all shadow-inner"
+                          value={item.netWeight === 0 ? '' : item.netWeight}
+                          onChange={(e) => {
+                            setIsManualTotal(false);
+                            updateCartItem(item.barcode, 'netWeight', parseFloat(e.target.value) || 0);
+                          }}
+                          dir="ltr"
+                        />
+                      </td>
                       <td className="px-4 py-4">
                         <input 
                           type="number"
@@ -418,6 +447,13 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
                 onChange={e => setNewCustomerPhone(e.target.value)}
                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#C9A84C] text-left"
                 dir="ltr"
+              />
+              <input
+                type="text"
+                placeholder="البلد / العنوان (اختياري)"
+                value={newCustomerAddress}
+                onChange={e => setNewCustomerAddress(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#C9A84C]"
               />
             </div>
           )}

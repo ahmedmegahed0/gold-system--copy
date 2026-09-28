@@ -266,13 +266,15 @@ export const BullionInvoicesPage: React.FC = () => {
                 invoiceNumber={viewingInvoice.invoiceNumber}
                 date={new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}
                 customerName={customerName}
+                customerPhone={(viewingInvoice.customer as any)?.phoneNumber || (viewingInvoice.customer as any)?.phone || ''}
                 sellerName={sellerName}
                 totalAmount={viewingInvoice.grandTotal || 0}
                 items={viewingInvoice.items.map((item) => ({
                   name: item.title + (item.quantity > 1 ? ` (عدد ${item.quantity})` : ''),
                   karat: 24, // Most bullion is 24K, can be hardcoded or extracted if available
                   weight: item.weightPerUnit * item.quantity,
-                  price: item.itemTotalPrice
+                  price: item.itemTotalPrice,
+                  pricePerGram: item.goldPricePerGram || 0
                 }))}
               />
             </div>

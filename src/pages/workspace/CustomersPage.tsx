@@ -241,14 +241,14 @@ const CustomerFormModal: React.FC<{
         <div>
           <label className="flex items-center gap-2 text-sm font-semibold text-charcoal mb-2">
             <MapPin size={16} className="text-gray-400" />
-            {t('customers.fields.address')}
+            {t('customers.fields.address')} / البلد
           </label>
           <input
             type="text"
             value={formData.address || ''}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition-all bg-gray-50/50 focus:bg-white text-charcoal"
-            placeholder={t('customers.placeholders.address')}
+            placeholder={t('customers.placeholders.address') + ' / البلد'}
           />
         </div>
 

@@ -365,6 +365,7 @@ export const SilverSalesInvoicesPage: React.FC = () => {
                 invoiceNumber={invoiceNumber.toUpperCase()}
                 date={dateStr}
                 customerName={customerName}
+                customerPhone={viewingInvoice.customerPhone || ''}
                 sellerName={sellerName}
                 totalAmount={viewingInvoice.totalPrice || 0}
                 items={[{
@@ -372,6 +373,7 @@ export const SilverSalesInvoicesPage: React.FC = () => {
                   karat: viewingInvoice.karat || '---',
                   weight: viewingInvoice.weight || 0,
                   price: viewingInvoice.totalPrice || 0,
+                  pricePerGram: viewingInvoice.pricePerGram || 0,
                 }]}
               />
             </div>

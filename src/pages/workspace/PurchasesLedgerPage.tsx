@@ -183,7 +183,7 @@ export const PurchasesLedgerPage: React.FC = () => {
               <h2 className="text-xl font-bold text-gray-500 mb-2">إجمالي الخارج المالي الفعلي (التكلفة الكلية)</h2>
               <div className="flex items-baseline justify-center gap-2" dir="ltr">
                 <span className="text-5xl sm:text-6xl font-black text-charcoal tracking-tight">
-                  {report.totalOutflowsPrice.toLocaleString()}
+                  {report.totalOutflowsPrice.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </span>
                 <span className="text-xl sm:text-2xl font-bold text-gold">ج.م</span>
               </div>
@@ -207,7 +207,7 @@ export const PurchasesLedgerPage: React.FC = () => {
               <p className="text-xs text-gray-400 mb-4 h-8">تكلفة شراء الذهب الجديد (زبون أو جملة)</p>
               <div className="h-px w-full bg-gray-50 mb-4"></div>
               <div className="mt-auto" dir="ltr">
-                <span className="text-3xl font-black text-charcoal tracking-tight">{(report.outflowsBreakdown.goldPurchasesCash - report.outflowsBreakdown.scrapGoldPurchasesCash).toLocaleString()}</span>
+                <span className="text-3xl font-black text-charcoal tracking-tight">{(report.outflowsBreakdown.goldPurchasesCash - report.outflowsBreakdown.scrapGoldPurchasesCash).toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
                 <span className="text-sm font-bold text-gold ml-1">ج.م</span>
               </div>
             </div>
@@ -223,7 +223,7 @@ export const PurchasesLedgerPage: React.FC = () => {
               <p className="text-xs text-gray-400 mb-4 h-8">إجمالي شراء الكسر (وزن: {report.scrapPurchasedGrams?.karat21}g عيار 21)</p>
               <div className="h-px w-full bg-gray-50 mb-4"></div>
               <div className="mt-auto" dir="ltr">
-                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.scrapGoldPurchasesCash.toLocaleString()}</span>
+                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.scrapGoldPurchasesCash.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
                 <span className="text-sm font-bold text-gold ml-1">ج.م</span>
               </div>
             </div>
@@ -239,7 +239,7 @@ export const PurchasesLedgerPage: React.FC = () => {
               <p className="text-xs text-gray-400 mb-4 h-8">إجمالي السداد النقدي والمصنعيات للموردين</p>
               <div className="h-px w-full bg-gray-50 mb-4"></div>
               <div className="mt-auto" dir="ltr">
-                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.supplierPaymentsCash.toLocaleString()}</span>
+                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.supplierPaymentsCash.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
                 <span className="text-sm font-bold text-gold ml-1">ج.م</span>
               </div>
             </div>
@@ -255,7 +255,7 @@ export const PurchasesLedgerPage: React.FC = () => {
               <p className="text-xs text-gray-400 mb-4 h-8">مصروفات التشغيل اليومية الاعتيادية</p>
               <div className="h-px w-full bg-gray-50 mb-4"></div>
               <div className="mt-auto" dir="ltr">
-                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.pettyExpensesCash.toLocaleString()}</span>
+                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.pettyExpensesCash.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
                 <span className="text-sm font-bold text-gold ml-1">ج.م</span>
               </div>
             </div>
@@ -271,7 +271,7 @@ export const PurchasesLedgerPage: React.FC = () => {
               <p className="text-xs text-gray-400 mb-4 h-8">مدفوعات أجور ورواتب الموظفين</p>
               <div className="h-px w-full bg-gray-50 mb-4"></div>
               <div className="mt-auto" dir="ltr">
-                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.salariesCash.toLocaleString()}</span>
+                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.salariesCash.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
                 <span className="text-sm font-bold text-gold ml-1">ج.م</span>
               </div>
             </div>
@@ -287,7 +287,7 @@ export const PurchasesLedgerPage: React.FC = () => {
               <p className="text-xs text-gray-400 mb-4 h-8">تكاليف متنوعة أخرى خارج التصنيفات</p>
               <div className="h-px w-full bg-gray-50 mb-4"></div>
               <div className="mt-auto" dir="ltr">
-                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.othersCash.toLocaleString()}</span>
+                <span className="text-3xl font-black text-charcoal tracking-tight">{report.outflowsBreakdown.othersCash.toLocaleString('en-US', { maximumFractionDigits: 0 })}</span>
                 <span className="text-sm font-bold text-gold ml-1">ج.م</span>
               </div>
             </div>
