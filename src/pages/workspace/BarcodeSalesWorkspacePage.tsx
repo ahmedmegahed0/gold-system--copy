@@ -74,8 +74,8 @@ export function BarcodeSalesWorkspacePage() {
                 invoiceNumber={viewingInvoice.invoiceNumber}
                 date={new Date(viewingInvoice.createdAt).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' })}
                 customerName={customerName}
-                customerPhone={typeof viewingInvoice.customer === 'object' ? ((viewingInvoice.customer as any).phone || (viewingInvoice.customer as any).phoneNumber || '') : ''}
-                customerAddress={viewingInvoice.customerCountry || (typeof viewingInvoice.customer === 'object' ? (viewingInvoice.customer as any).address : '')}
+                customerPhone={typeof viewingInvoice.customer === 'object' ? (viewingInvoice.customer.phoneNumber || (viewingInvoice.customer as any).phone || '') : ''}
+                customerAddress={viewingInvoice.customerCountry || (typeof viewingInvoice.customer === 'object' ? viewingInvoice.customer.country : '')}
                 sellerName={sellerName}
                 totalAmount={viewingInvoice.totalAmount || 0}
                 items={viewingInvoice.items?.map((item) => {
@@ -120,7 +120,6 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
   const [newCustomerName, setNewCustomerName] = useState('');
   const [newCustomerPhone, setNewCustomerPhone] = useState('');
   const [newCustomerAddress, setNewCustomerAddress] = useState('');
-  const [newCustomerCountry, setNewCustomerCountry] = useState('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -243,9 +242,8 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
       } else if (customerMode === 'NEW' && newCustomerName.trim()) {
         payload.customerName = newCustomerName;
         payload.phoneNumber = newCustomerPhone;
-        payload.address = newCustomerAddress;
-        if (newCustomerCountry.trim()) {
-          payload.country = newCustomerCountry;
+        if (newCustomerAddress.trim()) {
+          payload.country = newCustomerAddress;
         }
       }
 
@@ -261,7 +259,6 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
       setNewCustomerName('');
       setNewCustomerPhone('');
       setNewCustomerAddress('');
-      setNewCustomerCountry('');
       setCustomerMode('SELECT');
       setIsManualTotal(false);
       setManualTotalAmount('');
@@ -458,13 +455,6 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
                 placeholder="العنوان (اختياري)"
                 value={newCustomerAddress}
                 onChange={e => setNewCustomerAddress(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#C9A84C]"
-              />
-              <input
-                type="text"
-                placeholder="بلد / جنسية العميل (اختياري)"
-                value={newCustomerCountry}
-                onChange={e => setNewCustomerCountry(e.target.value)}
                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#C9A84C]"
               />
             </div>

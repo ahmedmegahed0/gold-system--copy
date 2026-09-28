@@ -9,7 +9,6 @@ export interface BarcodeCheckoutDto {
   customerId?: string;
   customerName?: string;
   phoneNumber?: string;
-  address?: string;
   country?: string;
 }
 
@@ -18,7 +17,7 @@ export type UpdateBarcodeInvoiceDto = Partial<BarcodeCheckoutDto>;
 export interface BarcodeInvoice {
   _id: string;
   invoiceNumber: string;
-  customer: { _id: string; fullName: string; phone?: string; } | string;
+  customer: { _id: string; fullName: string; phoneNumber?: string; country?: string; } | string;
   customerCountry?: string;
   items: Array<{
     barcode: string;
