@@ -61,6 +61,11 @@ export function BarcodeSalesWorkspacePage() {
           const customerName = (viewingInvoice.customer as any)?.fullName || '---';
           const sellerName = (viewingInvoice.createdBy as any)?.fullName || (viewingInvoice.cashier as any)?.fullName || (viewingInvoice.seller as any)?.fullName || (viewingInvoice as any).soldBy?.fullName || (viewingInvoice as any).actionBy?.fullName || user?.fullName || '---';
 
+          const fixRounding = (num: number) => {
+            const rounded = Math.round(num);
+            return Math.abs(num - rounded) < 0.05 ? rounded : num;
+          };
+
           return (
             <div className="flex flex-col items-center justify-center p-6 print:p-0 text-[#1A1A1A]" dir="rtl">
               <div className="flex justify-between items-center w-full max-w-3xl mb-6 print:hidden gap-4">
@@ -77,7 +82,7 @@ export function BarcodeSalesWorkspacePage() {
                 customerPhone={typeof viewingInvoice.customer === 'object' ? (viewingInvoice.customer.phoneNumber || (viewingInvoice.customer as any).phone || '') : ''}
                 customerAddress={viewingInvoice.customerCountry || (typeof viewingInvoice.customer === 'object' ? viewingInvoice.customer.country || (viewingInvoice.customer as any).address : '')}
                 sellerName={sellerName}
-                totalAmount={viewingInvoice.totalAmount || 0}
+                totalAmount={fixRounding(viewingInvoice.totalAmount || 0)}
                 items={viewingInvoice.items?.map((item) => {
                   const gp = (item as any).goldPricePerGram || 0;
                   const mp = item.makingChargePerGram || 0;
@@ -86,7 +91,7 @@ export function BarcodeSalesWorkspacePage() {
                     name: item.title + (item.barcode ? ` (${item.barcode})` : ''),
                     karat: item.karat || '---',
                     weight: item.weight || 0,
-                    price: item.itemTotal || 0,
+                    price: fixRounding(item.itemTotal || 0),
                     pricePerGram: pricePerGram,
                     images: item.images
                   };
@@ -173,7 +178,7 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
           // User edited the item total directly
           // Recalculate making charge: makingCharge = (total / weight) - goldPrice
           const gp = (c as any).goldPricePerGram || 0;
-          updatedItem.makingChargePerGram = c.netWeight > 0 ? ((value / c.netWeight) - gp) : 0;
+          updatedItem.makingChargePerGram = c.netWeight > 0 ? parseFloat(((value / c.netWeight) - gp).toFixed(2)) : 0;
           updatedItem.itemTotal = value;
           (updatedItem as any).goldPricePerGram = gp;
         } else if (field === 'netWeight') {
@@ -219,8 +224,8 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
           }
           return {
             barcode: c.barcode,
-            goldPricePerGram: (c as any).goldPricePerGram || 0,
-            makingChargePerGram: finalMakingCharge,
+            goldPricePerGram: parseFloat(((c as any).goldPricePerGram || 0).toFixed(2)),
+            makingChargePerGram: parseFloat(finalMakingCharge.toFixed(2)),
           };
         })
       };
@@ -497,15 +502,20 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
             </div>
             <div className="relative mt-2">
               <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={isManualTotal ? manualTotalAmount : (autoGrandTotal > 0 ? parseFloat(autoGrandTotal.toFixed(2)) : '')}
+                type="text"
+                value={isManualTotal 
+                  ? (manualTotalAmount !== '' ? Number(manualTotalAmount).toLocaleString('en-US') : '') 
+                  : (autoGrandTotal > 0 ? autoGrandTotal.toLocaleString('en-US') : '')}
                 onChange={(e) => {
                   setIsManualTotal(true);
-                  setManualTotalAmount(e.target.value === '' ? '' : parseFloat(e.target.value) || 0);
+                  const val = e.target.value.replace(/,/g, '');
+                  if (val === '') {
+                    setManualTotalAmount('');
+                  } else if (!isNaN(Number(val))) {
+                    setManualTotalAmount(Number(val));
+                  }
                 }}
-                className={`w-full text-5xl sm:text-6xl font-black text-center py-6 rounded-xl border-2 focus:outline-none transition-colors ${
+                className={`w-full text-6xl sm:text-7xl tracking-widest font-black text-center py-6 rounded-xl border-2 focus:outline-none transition-colors ${
                   isManualTotal
                     ? 'border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C] focus:border-[#D4AF37]'
                     : 'border-transparent bg-transparent text-[#C9A84C] focus:border-transparent'
