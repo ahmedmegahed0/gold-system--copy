@@ -229,13 +229,14 @@ export const ScrapPurchasesPage: React.FC = () => {
                   <th className="px-6 py-4 font-bold text-sm">المدفوع للزبون</th>
                   <th className="px-6 py-4 font-bold text-sm">الموظف</th>
                   <th className="px-6 py-4 font-bold text-sm">التاريخ</th>
+                  <th className="px-6 py-4 font-bold text-sm">ملاحظات</th>
                   <th className="px-6 py-4 font-bold text-sm text-center">إجراءات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {purchases.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>
+                    <td colSpan={9}>
                       <div className="p-10 text-center text-gray-400 flex flex-col items-center justify-center">
                         <Receipt size={40} className="mb-3 opacity-20" />
                         <span className="text-base font-medium">لا توجد فواتير شراء كسر مسجلة</span>
@@ -272,6 +273,9 @@ export const ScrapPurchasesPage: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500" dir="ltr">
                           {new Date(p.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500 max-w-[150px] truncate" title={p.notes}>
+                          {p.notes || '-'}
                         </td>
                         <td className="px-6 py-4 text-center">
                           {isOwner ? (

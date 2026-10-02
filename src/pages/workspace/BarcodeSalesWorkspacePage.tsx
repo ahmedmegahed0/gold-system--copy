@@ -173,7 +173,7 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
           // User edited the item total directly
           // Recalculate making charge: makingCharge = (total / weight) - goldPrice
           const gp = (c as any).goldPricePerGram || 0;
-          updatedItem.makingChargePerGram = c.netWeight > 0 ? parseFloat(((value / c.netWeight) - gp).toFixed(2)) : 0;
+          updatedItem.makingChargePerGram = c.netWeight > 0 ? ((value / c.netWeight) - gp) : 0;
           updatedItem.itemTotal = value;
           (updatedItem as any).goldPricePerGram = gp;
         } else if (field === 'netWeight') {
@@ -220,10 +220,14 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
           return {
             barcode: c.barcode,
             goldPricePerGram: (c as any).goldPricePerGram || 0,
-            makingChargePerGram: parseFloat(finalMakingCharge.toFixed(2)),
+            makingChargePerGram: finalMakingCharge,
           };
         })
       };
+
+      if (isManualTotal && manualTotalAmount !== '') {
+          payload.totalAmount = Number(manualTotalAmount);
+      }
 
       if (customerMode === 'SELECT' && !selectedCustomerId) {
         alert('برجاء اختيار العميل أولاً');

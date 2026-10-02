@@ -10,6 +10,7 @@ export interface BarcodeCheckoutDto {
   customerName?: string;
   phoneNumber?: string;
   country?: string;
+  totalAmount?: number;
 }
 
 export type UpdateBarcodeInvoiceDto = Partial<BarcodeCheckoutDto>;

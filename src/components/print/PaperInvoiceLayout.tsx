@@ -147,7 +147,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
             <tbody>
               {displayItems.map((item, idx) => {
                 const wholeGrams = item.weight ? Math.floor(item.weight) : '';
-                const milliGrams = item.weight ? Math.round((item.weight - Math.floor(item.weight)) * 100) : ''; // 2 decimal digits as milli
+                const milliGrams = item.weight ? Math.round((item.weight - Math.floor(item.weight)) * 100).toString().padStart(2, '0') : ''; // 2 decimal digits as milli
                 const pG = item.pricePerGram ? Math.round(item.pricePerGram) : '';
                 
                 return (
