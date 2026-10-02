@@ -216,23 +216,21 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
       const payload: BarcodeCheckoutDto = {
         items: cart.map(c => {
           let finalMakingCharge = c.makingChargePerGram || 0;
+          let finalItemPrice = c.itemTotal;
           if (isManualTotal && manualTotalAmount !== '' && autoGrandTotal > 0 && c.netWeight > 0) {
              const ratio = Number(manualTotalAmount) / autoGrandTotal;
-             const newItemTotal = c.itemTotal * ratio;
+             finalItemPrice = c.itemTotal * ratio;
              const gp = (c as any).goldPricePerGram || 0;
-             finalMakingCharge = (newItemTotal / c.netWeight) - gp;
+             finalMakingCharge = (finalItemPrice / c.netWeight) - gp;
           }
           return {
             barcode: c.barcode,
             goldPricePerGram: parseFloat(((c as any).goldPricePerGram || 0).toFixed(2)),
             makingChargePerGram: parseFloat(finalMakingCharge.toFixed(2)),
+            finalPrice: parseFloat(finalItemPrice.toFixed(2))
           };
         })
       };
-
-      if (isManualTotal && manualTotalAmount !== '') {
-          payload.totalAmount = Number(manualTotalAmount);
-      }
 
       if (customerMode === 'SELECT' && !selectedCustomerId) {
         alert('برجاء اختيار العميل أولاً');

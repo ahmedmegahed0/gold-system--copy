@@ -2,6 +2,7 @@ export interface BarcodeSaleItemDto {
   barcode: string;
   goldPricePerGram: number;
   makingChargePerGram: number;
+  finalPrice?: number;
 }
 
 export interface BarcodeCheckoutDto {
@@ -10,7 +11,6 @@ export interface BarcodeCheckoutDto {
   customerName?: string;
   phoneNumber?: string;
   country?: string;
-  totalAmount?: number;
 }
 
 export type UpdateBarcodeInvoiceDto = Partial<BarcodeCheckoutDto>;
