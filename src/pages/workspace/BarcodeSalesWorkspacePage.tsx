@@ -257,7 +257,9 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
         }
       } else if (customerMode === 'NEW' && newCustomerName.trim()) {
         payload.customerName = newCustomerName;
-        payload.phoneNumber = newCustomerPhone;
+        if (newCustomerPhone.trim()) {
+          payload.phoneNumber = newCustomerPhone;
+        }
         if (newCustomerAddress.trim()) {
           payload.country = newCustomerAddress;
         }
@@ -281,7 +283,14 @@ function CashierTab({ setViewingInvoice }: { setViewingInvoice: any }) {
       scanInputRef.current?.focus();
     } catch (err: any) {
       console.error('Checkout error:', err);
-      alert(err.response?.data?.message || 'خطأ في إتمام البيع');
+      const msg = err.response?.data?.message;
+      let errorText = 'خطأ في إتمام البيع';
+      if (Array.isArray(msg)) {
+        errorText = msg.join('\\n');
+      } else if (typeof msg === 'string') {
+        errorText = msg;
+      }
+      alert('تفاصيل الخطأ:\\n' + errorText);
     } finally {
       setIsSubmitting(false);
     }
