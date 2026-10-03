@@ -14,6 +14,7 @@ export const useBarcodeInventory = (initialArchived = false) => {
   const [filters, setFilters] = useState({
     karat: undefined as 18 | 21 | 24 | undefined,
     category: undefined as string | undefined,
+    netWeight: '' as string,
     isArchived: initialArchived,
     search: '',
   });
@@ -44,6 +45,13 @@ export const useBarcodeInventory = (initialArchived = false) => {
             item.barcode.toLowerCase().includes(query) ||
             (item.companyName && item.companyName.toLowerCase().includes(query))
         );
+      }
+      
+      if (filters.netWeight) {
+        const weightTarget = parseFloat(filters.netWeight);
+        if (!isNaN(weightTarget)) {
+          data = data.filter(item => item.netWeight === weightTarget);
+        }
       }
       
       setItems(data);

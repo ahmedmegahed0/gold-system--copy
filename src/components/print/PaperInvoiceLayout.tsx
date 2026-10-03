@@ -152,7 +152,7 @@ export const PaperInvoiceLayout: React.FC<PaperInvoiceLayoutProps> = ({
                 
                 return (
                   <tr key={idx} className="h-7 print:h-6">
-                    <td className="border border-black px-1">{item.price ? toArabicNumerals(item.price.toLocaleString()) : ''}</td>
+                    <td className="border border-black px-1"></td>
                     <td className="border border-black px-1">{milliGrams !== '' ? toArabicNumerals(milliGrams) : ''}</td>
                     <td className="border border-black px-1">{wholeGrams !== '' ? toArabicNumerals(wholeGrams) : ''}</td>
                     <td className="border border-black px-1" dir="ltr">{item.karat ? `${toArabicNumerals(item.karat)}K` : ''}</td>

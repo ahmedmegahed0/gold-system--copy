@@ -480,8 +480,16 @@ export function BarcodeInventoryPage() {
           ))}
         </div>
 
-        {/* Category Filter */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
+        {/* Category & Weight Filters */}
+        <div className="flex items-center gap-2 w-full md:w-auto flex-1 md:flex-none">
+          <input
+            type="number"
+            step="0.01"
+            placeholder="الوزن الصافي..."
+            value={filters.netWeight || ''}
+            onChange={(e) => setFilters({ ...filters, netWeight: e.target.value })}
+            className="w-full md:w-36 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-1 focus:ring-[#C9A84C] focus:border-[#C9A84C] transition-all outline-none text-sm text-gray-700 font-medium"
+          />
           <select
             value={filters.category || ''}
             onChange={(e) => setFilters({ ...filters, category: e.target.value || undefined })}
